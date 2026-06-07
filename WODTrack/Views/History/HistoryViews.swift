@@ -1,0 +1,164 @@
+import SwiftData
+import SwiftUI
+import UIKit
+
+struct HistoryListView: View {
+    @Query(sort: \WODRecord.createdAt, order: .reverse) private var records: [WODRecord]
+
+    var body: some View {
+        ScrollView {
+            LazyVStack(spacing: WTSpacing.md) {
+                ForEach(records) { record in
+                    NavigationLink {
+                        HistoryDetailView(record: record)
+                    } label: {
+                        HistoryRecordCard(record: record)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(WTSpacing.lg)
+        }
+        .background(Color.wtBackground)
+        .navigationTitle("历史记录")
+    }
+}
+
+struct HistoryDetailView: View {
+    let record: WODRecord
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: WTSpacing.md) {
+                HistoryHero(record: record)
+                    .frame(height: 420)
+                    .clipShape(RoundedRectangle(cornerRadius: WTRadius.lg))
+
+                VStack(alignment: .leading, spacing: WTSpacing.sm) {
+                    Text(record.wodDate.formatted(.dateTime.year().month().day().weekday(.wide)))
+                        .font(WTFont.title)
+
+                    HStack(spacing: WTSpacing.sm) {
+                        HistoryMetaBadge(title: record.completionStatus.label, isPrimary: record.completionStatus == .completed)
+                        if let difficultyRating = record.difficultyRating {
+                            HistoryMetaBadge(title: "难度 \(difficultyRating)/5")
+                        }
+                    }
+                }
+
+                if !record.checkinPhotoURLs.isEmpty {
+                    VStack(alignment: .leading, spacing: WTSpacing.sm) {
+                        Text("训练照片")
+                            .font(WTFont.caption)
+                            .foregroundStyle(Color.wtTextSecondary)
+
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: WTSpacing.sm) {
+                                ForEach(record.checkinPhotoURLs, id: \.self) { path in
+                                    if let image = UIImage(contentsOfFile: path) {
+                                        Image(uiImage: image)
+                                            .resizable()
+                                            .scaledToFill()
+                                            .frame(width: 120, height: 120)
+                                            .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                VStack(alignment: .leading, spacing: WTSpacing.sm) {
+                    Text("WOD 内容")
+                        .font(WTFont.caption)
+                        .foregroundStyle(Color.wtTextSecondary)
+
+                    VStack(alignment: .leading, spacing: WTSpacing.xs) {
+                        ForEach(record.wodContent, id: \.self) { line in
+                            Text(line)
+                                .font(WTFont.body)
+                                .foregroundStyle(Color.wtTextPrimary)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                    }
+                    .padding(WTSpacing.md)
+                    .background(Color.wtSurface)
+                    .clipShape(RoundedRectangle(cornerRadius: WTRadius.lg))
+                }
+            }
+            .padding(WTSpacing.lg)
+        }
+        .background(Color.wtBackground)
+        .navigationTitle("记录详情")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+private struct HistoryRecordCard: View {
+    let record: WODRecord
+
+    var body: some View {
+        HStack(alignment: .top, spacing: WTSpacing.md) {
+            HistoryThumbnail(record: record)
+                .frame(width: 88, height: 88)
+                .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
+
+            VStack(alignment: .leading, spacing: WTSpacing.sm) {
+                Text(record.wodDate.formatted(.dateTime.year().month().day().weekday(.wide)))
+                    .font(WTFont.bodyBold)
+                    .foregroundStyle(Color.wtTextPrimary)
+
+                Text(record.wodContent.prefix(3).joined(separator: " · "))
+                    .font(WTFont.caption)
+                    .foregroundStyle(Color.wtTextSecondary)
+                    .lineLimit(3)
+
+                HStack(spacing: WTSpacing.sm) {
+                    HistoryMetaBadge(title: record.completionStatus.label, isPrimary: record.completionStatus == .completed)
+                    if let difficultyRating = record.difficultyRating {
+                        HistoryMetaBadge(title: "难度 \(difficultyRating)/5")
+                    }
+                }
+            }
+
+            Spacer(minLength: 0)
+        }
+        .padding(WTSpacing.md)
+        .background(Color.wtSurface)
+        .clipShape(RoundedRectangle(cornerRadius: WTRadius.lg))
+    }
+}
+
+private struct HistoryHero: View {
+    let record: WODRecord
+
+    var body: some View {
+        if let cardImage = cardImage {
+            Image(uiImage: cardImage)
+                .resizable()
+                .scaledToFill()
+        } else {
+            CardView(record: record, style: CardStyleConfig.style(for: record.cardStyleId), isPro: false)
+        }
+    }
+
+    private var cardImage: UIImage? {
+        guard let path = record.cardImagePath else { return nil }
+        return UIImage(contentsOfFile: path)
+    }
+}
+
+private struct HistoryMetaBadge: View {
+    let title: String
+    var isPrimary = false
+
+    var body: some View {
+        Text(title)
+            .font(WTFont.micro)
+            .foregroundStyle(isPrimary ? Color.black : Color.wtTextPrimary)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 5)
+            .background(isPrimary ? Color.wtPrimary : Color.wtSurface2)
+            .clipShape(Capsule())
+    }
+}
