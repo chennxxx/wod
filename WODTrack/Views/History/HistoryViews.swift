@@ -4,6 +4,8 @@ import UIKit
 
 struct HistoryListView: View {
     @Query(sort: \WODRecord.createdAt, order: .reverse) private var records: [WODRecord]
+    var scrollToDate: Date? = nil
+    @State private var scrollPosition: UUID?
 
     var body: some View {
         ScrollView {
@@ -15,12 +17,21 @@ struct HistoryListView: View {
                         HistoryRecordCard(record: record)
                     }
                     .buttonStyle(.plain)
+                    .id(record.id)
                 }
             }
             .padding(WTSpacing.lg)
         }
+        .scrollPosition(id: $scrollPosition)
         .background(Color.wtBackground)
         .navigationTitle("历史记录")
+        .onAppear {
+            guard let targetDate = scrollToDate else { return }
+            let calendar = Calendar.current
+            let target = calendar.startOfDay(for: targetDate)
+            let match = records.first { calendar.startOfDay(for: $0.wodDate) <= target }
+            scrollPosition = match?.id
+        }
     }
 }
 

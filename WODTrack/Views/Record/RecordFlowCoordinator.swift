@@ -33,12 +33,14 @@ struct RecordFlowCoordinator: View {
                 CheckinPhotosStep(viewModel: viewModel)
             case .cardEditor:
                 CardPreviewStep(viewModel: viewModel, appState: appState, onSaved: {
-                    onSaved(viewModel.finalizeRecord())
-                    appState.triggerLoginPromptAfterSave()
-                    dismiss()
+                    viewModel.goToSaveSuccess()
                 })
             case .cardPreview:
                 CardPreviewStep(viewModel: viewModel, appState: appState, onSaved: {
+                    viewModel.goToSaveSuccess()
+                })
+            case .saveSuccess:
+                SaveSuccessStep(viewModel: viewModel, onDone: {
                     onSaved(viewModel.finalizeRecord())
                     appState.triggerLoginPromptAfterSave()
                     dismiss()
@@ -915,6 +917,92 @@ private struct WhiteboardActionCard: View {
                 }
             }
     }
+}
+
+// MARK: - Save Success
+
+private struct SaveSuccessStep: View {
+    let viewModel: RecordFlowViewModel
+    let onDone: () -> Void
+    @State private var showShareSheet = false
+
+    var body: some View {
+        ZStack {
+            Color.wtBackground.ignoresSafeArea()
+
+            VStack(spacing: 0) {
+                // 顶部标题栏
+                HStack {
+                    Spacer()
+                    Text("保存成功")
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundStyle(Color.wtTextPrimary)
+                    Spacer()
+                }
+                .frame(height: 56)
+                .padding(.horizontal, WTSpacing.lg)
+                .background(Color.wtBackground)
+
+                Divider().background(Color.wtSurface2)
+
+                // 卡片预览
+                Spacer()
+
+                if let cardImage = viewModel.renderedCardImage {
+                    Image(uiImage: cardImage)
+                        .resizable()
+                        .scaledToFit()
+                        .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
+                        .shadow(color: .black.opacity(0.4), radius: 20, x: 0, y: 8)
+                        .padding(.horizontal, WTSpacing.xl)
+                } else {
+                    RoundedRectangle(cornerRadius: WTRadius.md)
+                        .fill(Color.wtSurface)
+                        .aspectRatio(3 / 4, contentMode: .fit)
+                        .padding(.horizontal, WTSpacing.xl)
+                }
+
+                Spacer()
+
+                // 提示文字
+                VStack(spacing: WTSpacing.xs) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 22))
+                        .foregroundStyle(Color.wtSuccess)
+                    Text("训练记录已保存到相册")
+                        .font(WTFont.caption)
+                        .foregroundStyle(Color.wtTextSecondary)
+                }
+                .padding(.bottom, WTSpacing.md)
+
+                // 底部按钮
+                VStack(spacing: WTSpacing.sm) {
+                    WTButton(title: "分享到社交媒体") {
+                        showShareSheet = true
+                    }
+                    WTButton(title: "完成", style: .secondary, action: onDone)
+                }
+                .padding(.horizontal, WTSpacing.lg)
+                .padding(.bottom, WTSpacing.lg)
+            }
+        }
+        .sheet(isPresented: $showShareSheet) {
+            if let cardImage = viewModel.renderedCardImage {
+                ShareSheet(items: [cardImage])
+                    .ignoresSafeArea()
+            }
+        }
+    }
+}
+
+private struct ShareSheet: UIViewControllerRepresentable {
+    let items: [Any]
+
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        UIActivityViewController(activityItems: items, applicationActivities: nil)
+    }
+
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }
 
 // MARK: - Camera Picker

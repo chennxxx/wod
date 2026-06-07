@@ -46,6 +46,7 @@ struct ContentView: View {
 private struct RecordHomeView: View {
     let records: [WODRecord]
     let openRecordFlow: () -> Void
+    @State private var historyScrollDate: Date?
 
     var body: some View {
         ZStack {
@@ -58,7 +59,8 @@ private struct RecordHomeView: View {
                     OverviewCard(
                         records: records,
                         streakDays: streakDays,
-                        checkinDaysCount: checkinDaysCount
+                        checkinDaysCount: checkinDaysCount,
+                        onDayTapped: { date in historyScrollDate = date }
                     )
 
                     if records.isEmpty {
@@ -71,6 +73,9 @@ private struct RecordHomeView: View {
             }
         }
         .navigationTitle("WODTrack")
+        .navigationDestination(item: $historyScrollDate) { date in
+            HistoryListView(scrollToDate: date)
+        }
     }
 
     private var streakDays: Int {
@@ -101,6 +106,7 @@ private struct OverviewCard: View {
     let records: [WODRecord]
     let streakDays: Int
     let checkinDaysCount: Int
+    var onDayTapped: ((Date) -> Void)? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: WTSpacing.md) {
@@ -118,7 +124,7 @@ private struct OverviewCard: View {
                 RecordStatBlock(value: "\(checkinDaysCount)", label: "累计打卡天数")
             }
 
-            HeatmapGrid(records: records)
+            HeatmapGrid(records: records, onDayTapped: onDayTapped)
         }
         .padding(WTSpacing.md)
         .background(Color.wtSurface)
@@ -128,6 +134,7 @@ private struct OverviewCard: View {
 
 private struct HeatmapGrid: View {
     let records: [WODRecord]
+    var onDayTapped: ((Date) -> Void)? = nil
     private let spacing: CGFloat = 6
 
     var body: some View {
@@ -135,7 +142,7 @@ private struct HeatmapGrid: View {
             monthLabels
 
             GeometryReader { proxy in
-            let columns = heatmapWeeks.count
+                let columns = heatmapWeeks.count
                 let cellSize = max(10, (proxy.size.width - CGFloat(max(columns - 1, 0)) * spacing) / CGFloat(max(columns, 1)))
 
                 HStack(alignment: .top, spacing: spacing) {
@@ -150,6 +157,9 @@ private struct HeatmapGrid: View {
                                             RoundedRectangle(cornerRadius: 4)
                                                 .stroke(Color.white.opacity(0.75), lineWidth: 1)
                                         }
+                                    }
+                                    .onTapGesture {
+                                        onDayTapped?(day.date)
                                     }
                             }
                         }
@@ -184,8 +194,10 @@ private struct HeatmapGrid: View {
             ForEach(Array(heatmapWeeks.enumerated()), id: \.offset) { index, week in
                 let label = monthLabel(for: week, weekIndex: index)
                 Text(label)
-                    .font(WTFont.micro)
+                    .font(.system(size: 9, weight: .medium))
                     .foregroundStyle(Color.wtTextSecondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
         }

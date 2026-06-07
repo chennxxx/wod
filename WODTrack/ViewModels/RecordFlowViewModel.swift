@@ -17,6 +17,7 @@ final class RecordFlowViewModel {
         case scoreInput
         case cardEditor
         case cardPreview
+        case saveSuccess
     }
 
     enum OCRState: Equatable {
@@ -100,6 +101,10 @@ final class RecordFlowViewModel {
         step = .cardPreview
     }
 
+    func goToSaveSuccess() {
+        step = .saveSuccess
+    }
+
     func goBack() {
         switch step {
         case .whiteboard:
@@ -110,6 +115,8 @@ final class RecordFlowViewModel {
             step = .ocrResult
         case .cardEditor, .cardPreview:
             step = .checkinPhotos
+        case .saveSuccess:
+            step = .cardPreview
         }
     }
 
