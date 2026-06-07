@@ -9,7 +9,7 @@ enum AppConfig {
 
     // Doubao LLM
     static let doubaoAPIURL = URL(string: "https://ark.cn-beijing.volces.com/api/v3/chat/completions")!
-    static let doubaoAPIKey = "YOUR_ARK_API_KEY"
+    static let doubaoAPIKey = "191e3914-44e1-4f95-b6b4-d33126e7f4fd"
     static let doubaoModel = "doubao-seed-2-0-mini-260428"
 
     static let useMockOCR = false
