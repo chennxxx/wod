@@ -57,12 +57,14 @@ struct WTButton: View {
                 .font(WTFont.bodyBold)
                 .frame(maxWidth: maxWidth)
                 .frame(height: 50)
+                .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .foregroundStyle(foreground)
         .background(background)
         .overlay(border)
         .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
+        .contentShape(RoundedRectangle(cornerRadius: WTRadius.md))
         .opacity(isEnabled ? 1 : 0.4)
         .disabled(!isEnabled)
     }
