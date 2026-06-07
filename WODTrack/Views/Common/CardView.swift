@@ -23,9 +23,7 @@ struct CardView: View {
                     rightOverlayMonoLayout(proxy: proxy)
                 }
 
-                if !isPro {
-                    watermark
-                }
+
             }
             .frame(width: proxy.size.width, height: proxy.size.height)
             .clipped()

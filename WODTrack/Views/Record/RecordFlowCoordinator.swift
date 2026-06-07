@@ -585,7 +585,6 @@ private struct CardPreviewStep: View {
         switch selectedTab {
         case .template: templatePanel
         case .text:     textPanel
-        case .image:    imagePanel
         case .position: positionPanel
         }
     }
@@ -642,7 +641,7 @@ private struct CardPreviewStep: View {
                             showPaywall = true
                         }
                     } label: {
-                        VStack(alignment: .leading, spacing: WTSpacing.xs) {
+                        VStack(alignment: .center, spacing: WTSpacing.xs) {
                             ZStack {
                                 RoundedRectangle(cornerRadius: WTRadius.sm)
                                     .fill(style.id == viewModel.selectedStyleId ? Color.wtPrimary.opacity(0.9) : Color.wtSurface2)
@@ -664,7 +663,7 @@ private struct CardPreviewStep: View {
                             }
                         }
                         .foregroundStyle(style.id == viewModel.selectedStyleId ? Color.wtPrimary : Color.wtTextPrimary)
-                        .frame(width: 78, height: 98, alignment: .topLeading)
+                        .frame(width: 78, height: 98, alignment: .top)
                         .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
@@ -708,6 +707,18 @@ private struct CardPreviewStep: View {
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(Color.wtTextPrimary)
                     .frame(width: 28, alignment: .trailing)
+            }
+            .padding(.horizontal, WTSpacing.lg)
+
+            HStack(spacing: WTSpacing.sm) {
+                Image(systemName: "circle.lefthalf.filled")
+                    .foregroundStyle(Color.wtTextSecondary)
+                Slider(value: $viewModel.textLayout.textOpacity, in: 0.3 ... 1.0, step: 0.05)
+                    .tint(.wtPrimary)
+                Text("\(Int(viewModel.textLayout.textOpacity * 100))")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(Color.wtTextPrimary)
+                    .frame(width: 32, alignment: .trailing)
             }
             .padding(.horizontal, WTSpacing.lg)
         }
@@ -756,43 +767,33 @@ private struct CardPreviewStep: View {
         VStack(spacing: WTSpacing.sm) {
             HStack(spacing: WTSpacing.sm) {
                 ForEach(TextLayout.VerticalPosition.allCases) { position in
-                    Button {
-                        viewModel.textLayout.verticalPosition = position
-                    } label: {
-                        VStack(spacing: 6) {
+                    VStack(spacing: 6) {
+                        Button {
+                            viewModel.textLayout.verticalPosition = position
+                        } label: {
                             Image(systemName: positionIcon(for: position))
                                 .font(.system(size: 20, weight: .medium))
-                            Text(position.label)
-                                .font(.system(size: 12, weight: .semibold))
+                                .frame(maxWidth: .infinity, minHeight: 48)
+                                .background(
+                                    viewModel.textLayout.verticalPosition == position
+                                        ? Color.wtPrimary
+                                        : Color.wtSurface2
+                                )
+                                .foregroundStyle(
+                                    viewModel.textLayout.verticalPosition == position
+                                        ? Color.black
+                                        : Color.wtTextPrimary
+                                )
+                                .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
+                                .contentShape(RoundedRectangle(cornerRadius: WTRadius.md))
                         }
-                        .frame(maxWidth: .infinity, minHeight: 48)
-                        .background(
-                            viewModel.textLayout.verticalPosition == position
-                                ? Color.wtPrimary
-                                : Color.wtSurface2
-                        )
-                        .foregroundStyle(
-                            viewModel.textLayout.verticalPosition == position
-                                ? Color.black
-                                : Color.wtTextPrimary
-                        )
-                        .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
-                        .contentShape(RoundedRectangle(cornerRadius: WTRadius.md))
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-            .padding(.horizontal, WTSpacing.lg)
+                        .buttonStyle(.plain)
 
-            HStack(spacing: WTSpacing.sm) {
-                Image(systemName: "circle.lefthalf.filled")
-                    .foregroundStyle(Color.wtTextSecondary)
-                Slider(value: $viewModel.textLayout.textOpacity, in: 0.3 ... 1.0, step: 0.05)
-                    .tint(.wtPrimary)
-                Text("\(Int(viewModel.textLayout.textOpacity * 100))")
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(Color.wtTextPrimary)
-                    .frame(width: 32, alignment: .trailing)
+                        Text(position.label)
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundStyle(Color.wtTextSecondary)
+                    }
+                }
             }
             .padding(.horizontal, WTSpacing.lg)
         }
@@ -876,7 +877,6 @@ private struct CardPreviewStep: View {
     private enum EditorTab: String, CaseIterable, Identifiable {
         case template
         case text
-        case image
         case position
 
         var id: String { rawValue }
@@ -885,7 +885,6 @@ private struct CardPreviewStep: View {
             switch self {
             case .template: "模板"
             case .text:     "文字"
-            case .image:    "图片"
             case .position: "位置"
             }
         }
@@ -894,7 +893,6 @@ private struct CardPreviewStep: View {
             switch self {
             case .template: "square.grid.2x2.fill"
             case .text:     "textformat.size"
-            case .image:    "photo.fill"
             case .position: "slider.horizontal.3"
             }
         }
@@ -928,6 +926,7 @@ private struct SaveSuccessStep: View {
     let viewModel: RecordFlowViewModel
     let onDone: () -> Void
     @State private var showShareSheet = false
+    @State private var showConfetti = false
 
     var body: some View {
         ZStack {
@@ -937,12 +936,22 @@ private struct SaveSuccessStep: View {
                 // 顶部标题栏
                 HStack {
                     Spacer()
-                    Text("保存成功")
-                        .font(.system(size: 17, weight: .semibold))
-                        .foregroundStyle(Color.wtTextPrimary)
+                    VStack(spacing: 4) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.system(size: 18, weight: .semibold))
+                                .foregroundStyle(Color.wtSuccess)
+                            Text("保存成功")
+                                .font(.system(size: 17, weight: .semibold))
+                                .foregroundStyle(Color.wtTextPrimary)
+                        }
+                        Text("已保存到相册")
+                            .font(WTFont.caption)
+                            .foregroundStyle(Color.wtTextSecondary)
+                    }
                     Spacer()
                 }
-                .frame(height: 56)
+                .frame(height: 68)
                 .padding(.horizontal, WTSpacing.lg)
                 .background(Color.wtBackground)
 
@@ -967,17 +976,6 @@ private struct SaveSuccessStep: View {
 
                 Spacer()
 
-                // 提示文字
-                VStack(spacing: WTSpacing.xs) {
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 22))
-                        .foregroundStyle(Color.wtSuccess)
-                    Text("训练记录已保存到相册")
-                        .font(WTFont.caption)
-                        .foregroundStyle(Color.wtTextSecondary)
-                }
-                .padding(.bottom, WTSpacing.md)
-
                 // 底部按钮
                 VStack(spacing: WTSpacing.sm) {
                     WTButton(title: "分享到社交媒体") {
@@ -988,6 +986,15 @@ private struct SaveSuccessStep: View {
                 .padding(.horizontal, WTSpacing.lg)
                 .padding(.bottom, WTSpacing.lg)
             }
+
+            if showConfetti {
+                ConfettiView()
+                    .ignoresSafeArea()
+                    .allowsHitTesting(false)
+            }
+        }
+        .onAppear {
+            showConfetti = true
         }
         .sheet(isPresented: $showShareSheet) {
             if let cardImage = viewModel.renderedCardImage {
@@ -995,6 +1002,64 @@ private struct SaveSuccessStep: View {
                     .ignoresSafeArea()
             }
         }
+    }
+}
+
+private struct ConfettiParticle: Identifiable {
+    let id = UUID()
+    let x: CGFloat
+    let color: Color
+    let size: CGFloat
+    let rotation: Double
+    let delay: Double
+    let duration: Double
+}
+
+private struct ConfettiView: View {
+    private let particles: [ConfettiParticle] = (0..<60).map { i in
+        let colors: [Color] = [.yellow, .green, .blue, .red, .orange, .purple, .pink, .cyan]
+        return ConfettiParticle(
+            x: CGFloat.random(in: 0...1),
+            color: colors[i % colors.count],
+            size: CGFloat.random(in: 6...12),
+            rotation: Double.random(in: 0...360),
+            delay: Double.random(in: 0...0.8),
+            duration: Double.random(in: 1.8...3.0)
+        )
+    }
+
+    var body: some View {
+        GeometryReader { geo in
+            ForEach(particles) { p in
+                ConfettiPiece(particle: p, screenSize: geo.size)
+            }
+        }
+    }
+}
+
+private struct ConfettiPiece: View {
+    let particle: ConfettiParticle
+    let screenSize: CGSize
+    @State private var fallen = false
+
+    var body: some View {
+        RoundedRectangle(cornerRadius: 2)
+            .fill(particle.color)
+            .frame(width: particle.size, height: particle.size * 0.5)
+            .rotationEffect(.degrees(fallen ? particle.rotation + 360 : particle.rotation))
+            .position(
+                x: particle.x * screenSize.width,
+                y: fallen ? screenSize.height + 20 : -20
+            )
+            .opacity(fallen ? 0 : 1)
+            .onAppear {
+                withAnimation(
+                    .easeIn(duration: particle.duration)
+                    .delay(particle.delay)
+                ) {
+                    fallen = true
+                }
+            }
     }
 }
 
