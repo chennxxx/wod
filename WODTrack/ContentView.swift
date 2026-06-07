@@ -5,7 +5,7 @@ struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \WODRecord.createdAt, order: .reverse) private var records: [WODRecord]
     @State private var selectedTab = 1
-    @State private var isPresentingRecordFlow = false
+    @State private var isShowingRecordFlow = false
     @State private var appState = AppState()
 
     var body: some View {
@@ -17,8 +17,18 @@ struct ContentView: View {
             NavigationStack {
                 RecordHomeView(
                     records: records,
-                    openRecordFlow: { isPresentingRecordFlow = true }
+                    openRecordFlow: { isShowingRecordFlow = true }
                 )
+                .navigationDestination(isPresented: $isShowingRecordFlow) {
+                    RecordFlowCoordinator(
+                        appState: appState,
+                        onSaved: { record in
+                            modelContext.insert(record)
+                            try? modelContext.save()
+                        }
+                    )
+                    .preferredColorScheme(.dark)
+                }
             }
             .tabItem { Label("记录", systemImage: "plus.app.fill") }
             .tag(1)
@@ -30,18 +40,6 @@ struct ContentView: View {
             .tag(2)
         }
         .tint(.wtPrimary)
-        .sheet(isPresented: $isPresentingRecordFlow) {
-            NavigationStack {
-                RecordFlowCoordinator(
-                    appState: appState,
-                    onSaved: { record in
-                        modelContext.insert(record)
-                        try? modelContext.save()
-                    }
-                )
-            }
-            .preferredColorScheme(.dark)
-        }
     }
 }
 

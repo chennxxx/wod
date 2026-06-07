@@ -98,6 +98,19 @@ final class RecordFlowViewModel {
         step = .cardPreview
     }
 
+    func goBack() {
+        switch step {
+        case .whiteboard:
+            break
+        case .ocrResult:
+            step = .whiteboard
+        case .checkinPhotos, .scoreInput:
+            step = .ocrResult
+        case .cardEditor, .cardPreview:
+            step = .checkinPhotos
+        }
+    }
+
     @MainActor
     func buildPreview(isPro: Bool) async {
         isRendering = true

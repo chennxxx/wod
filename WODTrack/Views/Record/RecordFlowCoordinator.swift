@@ -43,6 +43,8 @@ struct RecordFlowCoordinator: View {
                 })
             }
         }
+        .toolbar(.hidden, for: .tabBar)
+        .navigationBarBackButtonHidden()
     }
 }
 
@@ -115,69 +117,62 @@ private struct CheckinPhotosStep: View {
     @State private var pickerItems: [PhotosPickerItem] = []
 
     var body: some View {
-        VStack(spacing: 0) {
-            ScrollView {
-                VStack(alignment: .leading, spacing: WTSpacing.md) {
-                    Text("选择训练打卡照")
-                        .font(WTFont.title)
-                    Text("选 1-2 张今天的训练照片")
-                        .font(WTFont.caption)
-                        .foregroundStyle(Color.wtTextSecondary)
+        RecordFlowStepPage(title: "选择训练打卡照", backAction: viewModel.goBack) {
+            VStack(alignment: .leading, spacing: WTSpacing.md) {
+                Text("选 1-2 张今天的训练照片")
+                    .font(WTFont.caption)
+                    .foregroundStyle(Color.wtTextSecondary)
 
-                    PhotosPicker(selection: $pickerItems, maxSelectionCount: 2, matching: .images) {
-                        RoundedRectangle(cornerRadius: WTRadius.lg)
-                            .fill(Color.wtSurface)
-                            .frame(maxWidth: .infinity, minHeight: 260)
-                            .overlay {
-                                VStack(spacing: WTSpacing.sm) {
-                                    Image(systemName: "photo.stack")
-                                        .font(.system(size: 42))
-                                        .foregroundStyle(Color.wtPrimary)
-                                    Text("导入训练照片")
-                                        .font(WTFont.bodyBold)
-                                }
+                PhotosPicker(selection: $pickerItems, maxSelectionCount: 2, matching: .images) {
+                    RoundedRectangle(cornerRadius: WTRadius.lg)
+                        .fill(Color.wtSurface)
+                        .frame(maxWidth: .infinity, minHeight: 260)
+                        .overlay {
+                            VStack(spacing: WTSpacing.sm) {
+                                Image(systemName: "photo.stack")
+                                    .font(.system(size: 42))
+                                    .foregroundStyle(Color.wtPrimary)
+                                Text("导入训练照片")
+                                    .font(WTFont.bodyBold)
                             }
-                    }
+                        }
+                }
 
-                    if !viewModel.selectedCheckinImages.isEmpty {
-                        VStack(alignment: .leading, spacing: WTSpacing.sm) {
-                            Text("已选照片")
-                                .font(WTFont.caption)
-                                .foregroundStyle(Color.wtTextSecondary)
+                if !viewModel.selectedCheckinImages.isEmpty {
+                    VStack(alignment: .leading, spacing: WTSpacing.sm) {
+                        Text("已选照片")
+                            .font(WTFont.caption)
+                            .foregroundStyle(Color.wtTextSecondary)
 
-                            HStack(spacing: WTSpacing.sm) {
-                                ForEach(Array(viewModel.selectedCheckinImages.enumerated()), id: \.offset) { index, image in
-                                    ZStack(alignment: .topTrailing) {
-                                        Image(uiImage: image)
-                                            .resizable()
-                                            .scaledToFill()
-                                            .frame(width: 104, height: 104)
-                                            .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
+                        HStack(spacing: WTSpacing.sm) {
+                            ForEach(Array(viewModel.selectedCheckinImages.enumerated()), id: \.offset) { index, image in
+                                ZStack(alignment: .topTrailing) {
+                                    Image(uiImage: image)
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(width: 104, height: 104)
+                                        .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
 
-                                        Text("\(index + 1)")
-                                            .font(.system(size: 11, weight: .bold))
-                                            .foregroundStyle(.black)
-                                            .padding(.horizontal, 8)
-                                            .padding(.vertical, 4)
-                                            .background(Color.wtPrimary)
-                                            .clipShape(Capsule())
-                                            .padding(8)
-                                    }
+                                    Text("\(index + 1)")
+                                        .font(.system(size: 11, weight: .bold))
+                                        .foregroundStyle(.black)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 4)
+                                        .background(Color.wtPrimary)
+                                        .clipShape(Capsule())
+                                        .padding(8)
                                 }
                             }
                         }
                     }
                 }
-                .padding(WTSpacing.lg)
-            }
-
-            VStack(spacing: WTSpacing.sm) {
-                WTButton(title: "下一步", isEnabled: !viewModel.selectedCheckinImages.isEmpty) {
-                    viewModel.goToCardPreview()
-                }
             }
             .padding(WTSpacing.lg)
-            .background(Color.wtBackground)
+        } bottomBar: {
+            WTButton(title: "上一步", style: .secondary, action: viewModel.goBack)
+            WTButton(title: "下一步", isEnabled: !viewModel.selectedCheckinImages.isEmpty) {
+                viewModel.goToCardPreview()
+            }
         }
         .task(id: pickerItems) {
             var images: [UIImage] = []
@@ -228,15 +223,12 @@ private struct OCRResultStep: View {
         case .idle, .processing:
             LoadingOverlay(title: "正在识别白板内容…", subtitle: "通常需要 5-15 秒")
         case .failure(let message):
-            VStack(spacing: 0) {
-                ScrollView {
-                    VStack(alignment: .leading, spacing: WTSpacing.lg) {
-                        Text("识别失败")
-                            .font(WTFont.title)
-                        Text(message).font(WTFont.body)
-                        WTTextEditor(
-                            title: "手动输入 WOD",
-                            placeholder: """
+            RecordFlowStepPage(title: "识别失败", backAction: viewModel.goBack) {
+                VStack(alignment: .leading, spacing: WTSpacing.lg) {
+                    Text(message).font(WTFont.body)
+                    WTTextEditor(
+                        title: "手动输入 WOD",
+                        placeholder: """
 直接输入今日训练内容
 
 例如：
@@ -244,34 +236,25 @@ A 热身/完成以下3轮
 10空杆早安式
 20S原地高抬腿
 """,
-                            text: $viewModel.wodContentText,
-                            minHeight: 280
-                        )
-                    }
-                    .padding(WTSpacing.lg)
-                }
-
-                VStack(spacing: WTSpacing.sm) {
-                    WTButton(title: "继续", isEnabled: !viewModel.wodLines.isEmpty, action: viewModel.goToCheckinPhotos)
-                    WTButton(title: "重试", style: .secondary, action: viewModel.retryOCR)
+                        text: $viewModel.wodContentText,
+                        minHeight: 280
+                    )
                 }
                 .padding(WTSpacing.lg)
-                .background(Color.wtBackground)
+            } bottomBar: {
+                WTButton(title: "重试", style: .secondary, action: viewModel.retryOCR)
+                WTButton(title: "继续", isEnabled: !viewModel.wodLines.isEmpty, action: viewModel.goToCheckinPhotos)
             }
         case .success:
-            VStack(spacing: 0) {
-                ScrollView {
-                    VStack(alignment: .leading, spacing: WTSpacing.md) {
-                        Text("今日 WOD 内容")
-                            .font(WTFont.title)
+            RecordFlowStepPage(title: "今日 WOD 内容", backAction: viewModel.goBack) {
+                VStack(alignment: .leading, spacing: WTSpacing.md) {
+                    Text(viewModel.entryMode == .manual ? "直接输入今天的训练内容。" : "识别完成，请在这里确认和修改内容。")
+                        .font(WTFont.caption)
+                        .foregroundStyle(Color.wtTextSecondary)
 
-                        Text(viewModel.entryMode == .manual ? "直接输入今天的训练内容。" : "识别完成，请在这里确认和修改内容。")
-                            .font(WTFont.caption)
-                            .foregroundStyle(Color.wtTextSecondary)
-
-                        WTTextEditor(
-                            title: "WOD 内容",
-                            placeholder: """
+                    WTTextEditor(
+                        title: "WOD 内容",
+                        placeholder: """
 A 热身/完成以下3轮
 10空杆早安式
 20S原地高抬腿
@@ -284,54 +267,129 @@ C WOD/任务计时/7轮
 11自重硬拉
 100M
 """,
-                            text: $viewModel.wodContentText,
-                            minHeight: 320
-                        )
+                        text: $viewModel.wodContentText,
+                        minHeight: 320
+                    )
 
-                        VStack(alignment: .leading, spacing: WTSpacing.sm) {
-                            Text("今日训练状态")
-                                .font(WTFont.caption)
-                                .foregroundStyle(Color.wtTextSecondary)
-
-                            Picker("完成状态", selection: $viewModel.completionStatus) {
-                                ForEach(CompletionStatus.allCases) { status in
-                                    Text(status.label).tag(status)
-                                }
-                            }
-                            .pickerStyle(.segmented)
-                        }
-
-                        VStack(alignment: .leading, spacing: WTSpacing.sm) {
-                            HStack {
-                                Text("今日难度")
-                                    .font(WTFont.caption)
-                                    .foregroundStyle(Color.wtTextSecondary)
-                                Spacer()
-                                Text("\(viewModel.difficultyRating)/5")
-                                    .font(WTFont.bodyBold)
-                            }
-
-                            Slider(
-                                value: Binding(
-                                    get: { Double(viewModel.difficultyRating) },
-                                    set: { viewModel.difficultyRating = Int($0.rounded()) }
-                                ),
-                                in: 1 ... 5,
-                                step: 1
-                            )
-                            .tint(.wtPrimary)
-                        }
-                    }
-                    .padding(WTSpacing.lg)
-                }
-
-                VStack(spacing: WTSpacing.sm) {
-                    WTButton(title: "下一步：选择训练照", isEnabled: !viewModel.wodLines.isEmpty, action: viewModel.goToCheckinPhotos)
+                    DifficultyRatingField(rating: $viewModel.difficultyRating)
                 }
                 .padding(WTSpacing.lg)
-                .background(Color.wtBackground)
+            } bottomBar: {
+                WTButton(title: "下一步：选择训练照", isEnabled: !viewModel.wodLines.isEmpty, action: viewModel.goToCheckinPhotos)
             }
         }
+    }
+}
+
+private struct RecordFlowStepPage<Content: View, BottomBar: View>: View {
+    let title: String
+    let backAction: () -> Void
+    @ViewBuilder let content: Content
+    @ViewBuilder let bottomBar: BottomBar
+
+    var body: some View {
+        VStack(spacing: 0) {
+            RecordStepHeader(title: title, backAction: backAction)
+                .padding(.horizontal, WTSpacing.lg)
+                .padding(.top, WTSpacing.md)
+                .padding(.bottom, WTSpacing.sm)
+                .background(Color.wtBackground)
+
+            ScrollView {
+                content
+            }
+        }
+        .safeAreaInset(edge: .bottom) {
+            RecordFlowBottomBar {
+                bottomBar
+            }
+        }
+    }
+}
+
+private struct RecordStepHeader: View {
+    let title: String
+    let backAction: () -> Void
+
+    var body: some View {
+        HStack(spacing: WTSpacing.sm) {
+            Button(action: backAction) {
+                Image(systemName: "chevron.left")
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundStyle(Color.wtPrimary)
+                    .frame(width: 36, height: 36)
+                    .background(Color.wtSurface)
+                    .clipShape(Circle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("返回上一步")
+
+            Text(title)
+                .font(WTFont.title)
+
+            Spacer()
+        }
+    }
+}
+
+private struct RecordFlowBottomBar<Content: View>: View {
+    @ViewBuilder let content: Content
+
+    var body: some View {
+        HStack(spacing: WTSpacing.sm) {
+            content
+        }
+        .padding(.horizontal, WTSpacing.lg)
+        .padding(.top, WTSpacing.sm)
+        .padding(.bottom, WTSpacing.md)
+        .background(.ultraThinMaterial)
+    }
+}
+
+private struct DifficultyRatingField: View {
+    @Binding var rating: Int
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: WTSpacing.sm) {
+            HStack {
+                Text("今日难度")
+                    .font(WTFont.caption)
+                    .foregroundStyle(Color.wtTextSecondary)
+                Spacer()
+                Text("\(clampedRating)/5")
+                    .font(WTFont.bodyBold)
+            }
+
+            HStack(spacing: WTSpacing.sm) {
+                ForEach(1 ... 5, id: \.self) { value in
+                    Button {
+                        rating = value
+                    } label: {
+                        Image(systemName: value <= clampedRating ? "star.fill" : "star")
+                            .font(.system(size: 34, weight: .semibold))
+                            .foregroundStyle(value <= clampedRating ? Color.wtPrimary : Color.wtTextDisabled)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 52)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("难度 \(value) 星")
+                    .accessibilityAddTraits(value == clampedRating ? .isSelected : [])
+                }
+            }
+            .padding(.horizontal, WTSpacing.xs)
+            .padding(.vertical, WTSpacing.sm)
+            .background(Color.wtSurface)
+            .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
+            .overlay(
+                RoundedRectangle(cornerRadius: WTRadius.md)
+                    .stroke(Color.wtSurface2, lineWidth: 1)
+            )
+        }
+    }
+
+    private var clampedRating: Int {
+        min(max(rating, 1), 5)
     }
 }
 
@@ -409,16 +467,8 @@ private struct CardPreviewStep: View {
         ZStack {
             Color.wtBackground.ignoresSafeArea()
 
-            ScrollView {
+            RecordFlowStepPage(title: "最终预览", backAction: viewModel.goBack) {
                 VStack(spacing: 0) {
-                    // ── 标题 ──
-                    Text("最终预览")
-                        .font(WTFont.title)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal, WTSpacing.lg)
-                        .padding(.top, WTSpacing.md)
-                        .padding(.bottom, WTSpacing.sm)
-
                     // ── 画布区域 ──
                     canvasArea
                         .padding(.horizontal, WTSpacing.md)
@@ -454,22 +504,16 @@ private struct CardPreviewStep: View {
 
                     Spacer(minLength: 120)
                 }
-            }
-            .safeAreaInset(edge: .bottom) {
-                VStack(spacing: WTSpacing.sm) {
-                    WTButton(title: isSaving ? "保存中…" : "保存记录", isEnabled: !isSaving) {
-                        isSaving = true
-                        Task {
-                            await viewModel.buildPreview(isPro: appState.isPro)
-                            isSaving = false
-                            onSaved()
-                        }
+            } bottomBar: {
+                WTButton(title: "上一步", style: .secondary, action: viewModel.goBack)
+                WTButton(title: isSaving ? "保存中…" : "保存记录", isEnabled: !isSaving) {
+                    isSaving = true
+                    Task {
+                        await viewModel.buildPreview(isPro: appState.isPro)
+                        isSaving = false
+                        onSaved()
                     }
                 }
-                .padding(.horizontal, WTSpacing.lg)
-                .padding(.top, WTSpacing.sm)
-                .padding(.bottom, WTSpacing.md)
-                .background(.ultraThinMaterial)
             }
         }
         .alert("订阅后可用", isPresented: $showPaywall) {

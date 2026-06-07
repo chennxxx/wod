@@ -39,6 +39,33 @@ final class WODTrackTests: XCTestCase {
 
         XCTAssertEqual(viewModel.step, .cardEditor)
     }
+
+    func testRecordFlowCanGoBackFromPreviewToCheckinPhotos() {
+        let viewModel = RecordFlowViewModel(ocrService: ImmediateOCRService())
+
+        viewModel.goToCardPreview()
+        viewModel.goBack()
+
+        XCTAssertEqual(viewModel.step, .checkinPhotos)
+    }
+
+    func testRecordFlowCanGoBackFromCheckinPhotosToWODContent() {
+        let viewModel = RecordFlowViewModel(ocrService: ImmediateOCRService())
+
+        viewModel.goToCheckinPhotos()
+        viewModel.goBack()
+
+        XCTAssertEqual(viewModel.step, .ocrResult)
+    }
+
+    func testRecordFlowCanGoBackFromWODContentToEntryChoice() {
+        let viewModel = RecordFlowViewModel(ocrService: ImmediateOCRService())
+
+        viewModel.goToOCRReview()
+        viewModel.goBack()
+
+        XCTAssertEqual(viewModel.step, .whiteboard)
+    }
 }
 
 private struct ImmediateOCRService: OCRServicing {
