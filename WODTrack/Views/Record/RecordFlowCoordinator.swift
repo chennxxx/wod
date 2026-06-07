@@ -447,6 +447,7 @@ private struct CardEditorStep: View {
                         .padding()
                         .background(Color.wtSurface)
                         .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
+                        .contentShape(RoundedRectangle(cornerRadius: WTRadius.md))
                     }
                     .buttonStyle(.plain)
                 }
@@ -690,6 +691,7 @@ private struct CardPreviewStep: View {
                                 .background(viewModel.textLayout.fontPreset == preset ? Color.wtPrimary : Color.wtSurface2)
                                 .foregroundStyle(viewModel.textLayout.fontPreset == preset ? Color.black : Color.wtTextPrimary)
                                 .clipShape(RoundedRectangle(cornerRadius: WTRadius.sm))
+                                .contentShape(RoundedRectangle(cornerRadius: WTRadius.sm))
                         }
                         .buttonStyle(.plain)
                     }
@@ -775,6 +777,7 @@ private struct CardPreviewStep: View {
                                 : Color.wtTextPrimary
                         )
                         .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
+                        .contentShape(RoundedRectangle(cornerRadius: WTRadius.md))
                     }
                     .buttonStyle(.plain)
                 }
