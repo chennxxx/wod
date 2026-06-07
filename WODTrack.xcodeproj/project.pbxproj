@@ -16,6 +16,7 @@
 		A000000000000000000007 /* AppConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000107 /* AppConfig.swift */; };
 		A000000000000000000008 /* CardStyleConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000108 /* CardStyleConfig.swift */; };
 		A000000000000000000009 /* OCRService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000109 /* OCRService.swift */; };
+		A000000000000000000020 /* DoubaoLLMService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000120 /* DoubaoLLMService.swift */; };
 		A00000000000000000000A /* CardRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000010A /* CardRenderer.swift */; };
 		A00000000000000000000B /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000010B /* Theme.swift */; };
 		A00000000000000000000C /* CardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000010C /* CardView.swift */; };
@@ -49,6 +50,7 @@
 		A000000000000000000107 /* AppConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfig.swift; sourceTree = "<group>"; };
 		A000000000000000000108 /* CardStyleConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardStyleConfig.swift; sourceTree = "<group>"; };
 		A000000000000000000109 /* OCRService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OCRService.swift; sourceTree = "<group>"; };
+		A000000000000000000120 /* DoubaoLLMService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoubaoLLMService.swift; sourceTree = "<group>"; };
 		A00000000000000000010A /* CardRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardRenderer.swift; sourceTree = "<group>"; };
 		A00000000000000000010B /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		A00000000000000000010C /* CardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardView.swift; sourceTree = "<group>"; };
@@ -138,6 +140,7 @@
 			isa = PBXGroup;
 			children = (
 				A000000000000000000109 /* OCRService.swift */,
+				A000000000000000000120 /* DoubaoLLMService.swift */,
 				A00000000000000000010A /* CardRenderer.swift */,
 			);
 			path = Services;
@@ -342,6 +345,7 @@
 				A000000000000000000007 /* AppConfig.swift in Sources */,
 				A000000000000000000008 /* CardStyleConfig.swift in Sources */,
 				A000000000000000000009 /* OCRService.swift in Sources */,
+				A000000000000000000020 /* DoubaoLLMService.swift in Sources */,
 				A00000000000000000000A /* CardRenderer.swift in Sources */,
 				A00000000000000000000B /* Theme.swift in Sources */,
 				A00000000000000000000C /* CardView.swift in Sources */,

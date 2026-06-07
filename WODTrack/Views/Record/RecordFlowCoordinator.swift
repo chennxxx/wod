@@ -2,6 +2,7 @@ import PhotosUI
 import Observation
 import SwiftUI
 import UIKit
+import AVFoundation
 
 struct RecordFlowCoordinator: View {
     @Environment(\.dismiss) private var dismiss
@@ -12,7 +13,7 @@ struct RecordFlowCoordinator: View {
     init(appState: AppState, onSaved: @escaping (WODRecord) -> Void) {
         self.appState = appState
         self.onSaved = onSaved
-        let service: OCRServicing = AppConfig.useMockOCR ? PreviewOCRService() : OCRService.shared
+        let service: OCRServicing = AppConfig.useMockOCR ? PreviewOCRService() : DoubaoLLMService.shared
         _viewModel = State(initialValue: RecordFlowViewModel(ocrService: service))
     }
 
@@ -54,7 +55,8 @@ private struct WhiteboardStep: View {
     @State private var pickerItem: PhotosPickerItem?
     @State private var showSourceDialog = false
     @State private var showPhotoPicker = false
-    @State private var showCameraNotice = false
+    @State private var showCamera = false
+    @State private var showCameraUnavailable = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: WTSpacing.lg) {
@@ -91,7 +93,11 @@ private struct WhiteboardStep: View {
         .padding(WTSpacing.lg)
         .confirmationDialog("导入方式", isPresented: $showSourceDialog, titleVisibility: .visible) {
             Button("立即拍摄") {
-                showCameraNotice = true
+                if UIImagePickerController.isSourceTypeAvailable(.camera) {
+                    showCamera = true
+                } else {
+                    showCameraUnavailable = true
+                }
             }
             Button("从相册选取") {
                 showPhotoPicker = true
@@ -99,10 +105,19 @@ private struct WhiteboardStep: View {
             Button("取消", role: .cancel) {}
         }
         .photosPicker(isPresented: $showPhotoPicker, selection: $pickerItem, matching: .images)
-        .alert("拍摄入口待接入", isPresented: $showCameraNotice) {
+        .fullScreenCover(isPresented: $showCamera) {
+            CameraPickerView { image in
+                showCamera = false
+                viewModel.startFlow(with: image)
+            } onCancel: {
+                showCamera = false
+            }
+            .ignoresSafeArea()
+        }
+        .alert("相机不可用", isPresented: $showCameraUnavailable) {
             Button("知道了", role: .cancel) {}
         } message: {
-            Text("当前版本先保留相册导入和手动输入，系统拍摄入口我下一步接入。")
+            Text("当前设备不支持相机拍摄，请使用相册导入。")
         }
         .task(id: pickerItem) {
             guard let data = try? await pickerItem?.loadTransferable(type: Data.self),
@@ -886,5 +901,50 @@ private struct WhiteboardActionCard: View {
                     Text(subtitle).font(WTFont.micro).foregroundStyle(Color.wtTextSecondary)
                 }
             }
+    }
+}
+
+// MARK: - Camera Picker
+
+private struct CameraPickerView: UIViewControllerRepresentable {
+    let onPhoto: (UIImage) -> Void
+    let onCancel: () -> Void
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(onPhoto: onPhoto, onCancel: onCancel)
+    }
+
+    func makeUIViewController(context: Context) -> UIImagePickerController {
+        let picker = UIImagePickerController()
+        picker.sourceType = .camera
+        picker.cameraCaptureMode = .photo
+        picker.delegate = context.coordinator
+        return picker
+    }
+
+    func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
+
+    final class Coordinator: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+        let onPhoto: (UIImage) -> Void
+        let onCancel: () -> Void
+
+        init(onPhoto: @escaping (UIImage) -> Void, onCancel: @escaping () -> Void) {
+            self.onPhoto = onPhoto
+            self.onCancel = onCancel
+        }
+
+        func imagePickerController(_ picker: UIImagePickerController,
+                                   didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
+            let image = (info[.editedImage] ?? info[.originalImage]) as? UIImage
+            if let image {
+                onPhoto(image)
+            } else {
+                onCancel()
+            }
+        }
+
+        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+            onCancel()
+        }
     }
 }
