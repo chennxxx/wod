@@ -9,7 +9,7 @@ struct CardView: View {
     var body: some View {
         GeometryReader { proxy in
             ZStack {
-                backgroundLayer
+                backgroundLayer(proxy: proxy)
                     .overlay(backgroundOverlay)
 
                 switch style.layout {
@@ -27,61 +27,27 @@ struct CardView: View {
                     watermark
                 }
             }
+            .frame(width: proxy.size.width, height: proxy.size.height)
             .clipped()
         }
     }
 
-    @ViewBuilder private var backgroundLayer: some View {
+    @ViewBuilder private func backgroundLayer(proxy: GeometryProxy) -> some View {
         if checkinImages.isEmpty {
             LinearGradient(colors: [Color.wtSurface2, Color.black], startPoint: .top, endPoint: .bottom)
-        } else if checkinImages.count == 1, let image = checkinImages.first {
+                .frame(width: proxy.size.width, height: proxy.size.height)
+        } else if let image = checkinImages.first {
             imageBackground(image: image)
-        } else {
-            // 多张图片：始终使用 fill 模式，上下各占一半
-            VStack(spacing: 0) {
-                if let first = checkinImages.first {
-                    Image(uiImage: first)
-                        .resizable()
-                        .scaledToFill()
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .clipped()
-                }
-                if checkinImages.count > 1 {
-                    Image(uiImage: checkinImages[1])
-                        .resizable()
-                        .scaledToFill()
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .clipped()
-                }
-            }
+                .frame(width: proxy.size.width, height: proxy.size.height)
+                .clipped()
         }
     }
 
-    /// 单张图片背景：根据 imageDisplayMode 决定渲染方式
     @ViewBuilder private func imageBackground(image: UIImage) -> some View {
-        switch record.textLayout.imageDisplayMode {
-        case .fill:
-            // 原行为：铺满整个卡片，超出部分裁切
-            Image(uiImage: image)
-                .resizable()
-                .scaledToFill()
-
-        case .fit:
-            // 完整显示：模糊背景 + 居中原图，横版/竖版照片都能完整呈现
-            ZStack {
-                // 底层：放大版模糊图，填满背景
-                Image(uiImage: image)
-                    .resizable()
-                    .scaledToFill()
-                    .blur(radius: 28, opaque: true)
-                    .overlay(Color.black.opacity(0.35))
-
-                // 上层：原图完整居中
-                Image(uiImage: image)
-                    .resizable()
-                    .scaledToFit()
-            }
-        }
+        Image(uiImage: image)
+            .resizable()
+            .scaledToFit()
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     @ViewBuilder private var backgroundOverlay: some View {
@@ -101,106 +67,127 @@ struct CardView: View {
                 endPoint: .bottom
             )
         case .soft:
-            LinearGradient(
-                colors: [Color.black.opacity(0.04), Color.black.opacity(0.22)],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
+            ZStack {
+                LinearGradient(
+                    colors: [Color.black.opacity(0.08), Color.black.opacity(0.28)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                LinearGradient(
+                    colors: [Color.clear, Color.black.opacity(0.48)],
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+            }
         }
     }
 
     private func bottomCardLayout(proxy: GeometryProxy) -> some View {
-        VStack {
-            Spacer()
+        let verticalMargin = overlayVerticalMargin(proxy: proxy)
+        let textSize = CGFloat(record.textLayout.fontSize)
+        let lineSpacing = adaptiveLineSpacing(for: textSize, defaultSpacing: 6)
+        let panelWidth = overlayPanelWidth(proxy: proxy, horizontalInset: 48)
 
-            VStack(alignment: .leading, spacing: 10) {
-                metaChips(darkDifficulty: true)
-                contentLines(weight: .bold)
-                dateLine(accented: false)
-            }
-            .padding(16)
-            .frame(width: proxy.size.width - 48, alignment: .leading)
-            .background(
-                RoundedRectangle(cornerRadius: 18)
-                    .fill(Color.black.opacity(0.55))
-            )
-            .padding(.horizontal, 24)
-            .padding(.bottom, 120)
+        return VStack(alignment: .leading, spacing: 10) {
+            metaChips(darkDifficulty: true)
+            contentLines(fontSize: textSize, lineSpacing: lineSpacing, weight: .bold)
+            dateLine(accented: false)
         }
+        .padding(16)
+        .frame(width: panelWidth, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 18)
+                .fill(Color.black.opacity(0.55))
+        )
+        .padding(.horizontal, 24)
+        .padding(.vertical, verticalMargin)
+        .frame(width: proxy.size.width, height: proxy.size.height, alignment: trailingCardAlignment)
     }
 
     private func centerGlassLayout(proxy: GeometryProxy) -> some View {
-        VStack {
-            Spacer()
+        let verticalMargin = overlayVerticalMargin(proxy: proxy)
+        let textSize = CGFloat(record.textLayout.fontSize)
+        let lineSpacing = adaptiveLineSpacing(for: textSize, defaultSpacing: 6)
+        let panelWidth = overlayPanelWidth(proxy: proxy, horizontalInset: 56)
 
-            VStack(alignment: .leading, spacing: 12) {
-                metaChips(darkDifficulty: false)
-                contentLines(weight: .semibold)
-                dateLine(accented: false)
-            }
-            .padding(20)
-            .frame(width: proxy.size.width - 56, alignment: .leading)
-            .background(
-                RoundedRectangle(cornerRadius: 22)
-                    .fill(.ultraThinMaterial)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 22)
-                            .stroke(Color.white.opacity(0.18), lineWidth: 1)
-                    )
-            )
-            .padding(.horizontal, 28)
-
-            Spacer()
+        return VStack(alignment: .leading, spacing: 12) {
+            metaChips(darkDifficulty: false)
+            contentLines(fontSize: textSize, lineSpacing: lineSpacing, weight: .semibold)
+            dateLine(accented: false)
         }
+        .padding(20)
+        .frame(width: panelWidth, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 22)
+                .fill(Color.black.opacity(0.42))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 22)
+                        .stroke(Color.white.opacity(0.18), lineWidth: 1)
+                )
+        )
+        .padding(.horizontal, 28)
+        .padding(.vertical, verticalMargin)
+        .frame(width: proxy.size.width, height: proxy.size.height, alignment: trailingCardAlignment)
     }
 
     private func editorialTopLayout(proxy: GeometryProxy) -> some View {
-        VStack(alignment: .leading, spacing: 14) {
+        let verticalMargin = overlayVerticalMargin(proxy: proxy)
+        let textSize = CGFloat(record.textLayout.fontSize)
+        let lineSpacing = adaptiveLineSpacing(for: textSize, defaultSpacing: 6)
+
+        return VStack(alignment: .leading, spacing: 14) {
             dateLine(accented: true)
             metaChips(darkDifficulty: false)
-            contentLines(weight: .bold)
+            contentLines(fontSize: textSize, lineSpacing: lineSpacing, weight: .bold)
         }
         .padding(.horizontal, 26)
-        .padding(.top, 36)
-        .frame(width: proxy.size.width - 52, height: proxy.size.height, alignment: .topLeading)
+        .padding(.vertical, verticalMargin)
+        .frame(width: proxy.size.width - 52, alignment: .leading)
+        .frame(width: proxy.size.width, height: proxy.size.height, alignment: leadingCardAlignment)
     }
 
     private func rightOverlayMonoLayout(proxy: GeometryProxy) -> some View {
-        VStack(alignment: .trailing, spacing: 14) {
+        let verticalMargin = overlayVerticalMargin(proxy: proxy)
+        let textSize = CGFloat(record.textLayout.fontSize)
+        let lineSpacing = adaptiveLineSpacing(for: textSize, defaultSpacing: 8)
+
+        return VStack(alignment: .trailing, spacing: 14) {
             Text(record.wodDate.formatted(.dateTime.month(.abbreviated).day().year()))
-                .font(.system(size: 16, weight: .bold, design: .monospaced))
+                .font(font(for: min(16, textSize + 2), weight: .bold))
                 .textCase(.uppercase)
                 .foregroundStyle(textColor)
-                .shadow(color: .black.opacity(0.45), radius: 3, x: 0, y: 2)
+                .shadow(color: .black.opacity(0.85), radius: 5, x: 0, y: 2)
 
-            VStack(alignment: .trailing, spacing: 8) {
+            VStack(alignment: .trailing, spacing: lineSpacing) {
                 ForEach(Array(record.wodContent.enumerated()), id: \.offset) { index, line in
                     Text(formattedMonoLine(line, index: index))
-                        .font(.system(size: max(CGFloat(record.textLayout.fontSize), 13), weight: index == 0 ? .semibold : .regular, design: .monospaced))
+                        .font(font(for: textSize, weight: index == 0 ? .semibold : .regular))
                         .multilineTextAlignment(.trailing)
                         .foregroundStyle(textColor.opacity(record.textLayout.textOpacity))
-                        .shadow(color: .black.opacity(0.42), radius: 3, x: 0, y: 2)
+                        .shadow(color: .black.opacity(0.9), radius: 5, x: 0, y: 2)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.75)
                 }
             }
 
             HStack(spacing: 8) {
                 if let difficultyRating = record.difficultyRating {
                     Text("RPE \(difficultyRating)/5")
-                        .font(.system(size: 14, weight: .semibold, design: .monospaced))
+                        .font(font(for: min(14, textSize + 1), weight: .semibold))
                         .foregroundStyle(textColor)
-                        .shadow(color: .black.opacity(0.42), radius: 3, x: 0, y: 2)
+                        .shadow(color: .black.opacity(0.9), radius: 5, x: 0, y: 2)
                 }
 
                 Text(record.completionStatus == .completed ? "🏆 已完成" : "未完成")
-                    .font(.system(size: 16, weight: .bold, design: .serif))
+                    .font(font(for: min(16, textSize + 2), weight: .bold))
                     .foregroundStyle(record.completionStatus == .completed ? Color.wtPrimary : textColor)
-                    .shadow(color: .black.opacity(0.42), radius: 3, x: 0, y: 2)
+                    .shadow(color: .black.opacity(0.9), radius: 5, x: 0, y: 2)
             }
         }
-        .padding(.top, 42)
         .padding(.trailing, 24)
-        .frame(width: proxy.size.width * 0.58, height: proxy.size.height, alignment: .topTrailing)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+        .padding(.vertical, verticalMargin)
+        .frame(width: proxy.size.width * 0.72, alignment: .trailing)
+        .frame(width: proxy.size.width, height: proxy.size.height, alignment: trailingCardAlignment)
     }
 
     private func metaChips(darkDifficulty: Bool) -> some View {
@@ -225,16 +212,17 @@ struct CardView: View {
         }
     }
 
-    private func contentLines(weight: Font.Weight) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
+    private func contentLines(fontSize: CGFloat, lineSpacing: CGFloat, weight: Font.Weight) -> some View {
+        VStack(alignment: .leading, spacing: lineSpacing) {
             ForEach(record.wodContent, id: \.self) { line in
                 Text(line)
-                    .font(font(for: CGFloat(record.textLayout.fontSize), weight: weight))
+                    .font(font(for: fontSize, weight: weight))
                     .multilineTextAlignment(style.layout == .rightOverlayMono ? .trailing : .leading)
                     .foregroundStyle(textColor.opacity(record.textLayout.textOpacity))
                     .shadow(color: style.layout == .rightOverlayMono ? .black.opacity(0.42) : .clear, radius: 3, x: 0, y: 2)
                     .frame(maxWidth: .infinity, alignment: style.layout == .rightOverlayMono ? .trailing : .leading)
-                    .fixedSize(horizontal: false, vertical: true)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
             }
         }
         .frame(maxWidth: .infinity, alignment: style.layout == .rightOverlayMono ? .trailing : .leading)
@@ -264,12 +252,52 @@ struct CardView: View {
         Color(hex: record.textLayout.textColor)
     }
 
+    private var cardAlignment: Alignment {
+        switch record.textLayout.verticalPosition {
+        case .top: .top
+        case .center: .center
+        case .bottom: .bottom
+        }
+    }
+
+    private var trailingCardAlignment: Alignment {
+        switch record.textLayout.verticalPosition {
+        case .top: .topTrailing
+        case .center: .trailing
+        case .bottom: .bottomTrailing
+        }
+    }
+
+    private var leadingCardAlignment: Alignment {
+        switch record.textLayout.verticalPosition {
+        case .top: .topLeading
+        case .center: .leading
+        case .bottom: .bottomLeading
+        }
+    }
+
     private func formattedMonoLine(_ line: String, index: Int) -> String {
         guard style.layout == .rightOverlayMono else { return line }
         if index == 0 {
             return line.uppercased()
         }
         return line
+    }
+
+    private func adaptiveLineSpacing(for fontSize: CGFloat, defaultSpacing: CGFloat) -> CGFloat {
+        min(defaultSpacing, max(0.5, fontSize * 0.24))
+    }
+
+    private func overlayVerticalMargin(proxy: GeometryProxy) -> CGFloat {
+        min(36, max(8, proxy.size.height * 0.08))
+    }
+
+    private func overlayPanelWidth(proxy: GeometryProxy, horizontalInset: CGFloat) -> CGFloat {
+        let maxWidth = max(proxy.size.width - horizontalInset, 1)
+        guard proxy.size.width > proxy.size.height else {
+            return maxWidth
+        }
+        return min(maxWidth, max(120, proxy.size.width * 0.5))
     }
 
     private func font(for size: CGFloat, weight: Font.Weight) -> Font {

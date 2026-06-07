@@ -119,11 +119,11 @@ private struct CheckinPhotosStep: View {
     var body: some View {
         RecordFlowStepPage(title: "选择训练打卡照", backAction: viewModel.goBack) {
             VStack(alignment: .leading, spacing: WTSpacing.md) {
-                Text("选 1-2 张今天的训练照片")
+                Text("选 1 张今天的训练照片")
                     .font(WTFont.caption)
                     .foregroundStyle(Color.wtTextSecondary)
 
-                PhotosPicker(selection: $pickerItems, maxSelectionCount: 2, matching: .images) {
+                PhotosPicker(selection: $pickerItems, maxSelectionCount: 1, matching: .images) {
                     RoundedRectangle(cornerRadius: WTRadius.lg)
                         .fill(Color.wtSurface)
                         .frame(maxWidth: .infinity, minHeight: 260)
@@ -175,14 +175,13 @@ private struct CheckinPhotosStep: View {
             }
         }
         .task(id: pickerItems) {
-            var images: [UIImage] = []
-            for item in pickerItems {
-                if let data = try? await item.loadTransferable(type: Data.self),
-                   let image = UIImage(data: data) {
-                    images.append(image)
-                }
+            guard let item = pickerItems.first,
+                  let data = try? await item.loadTransferable(type: Data.self),
+                  let image = UIImage(data: data) else {
+                viewModel.selectedCheckinImages = []
+                return
             }
-            viewModel.selectedCheckinImages = images
+            viewModel.selectedCheckinImages = [image]
         }
     }
 }
@@ -467,54 +466,15 @@ private struct CardPreviewStep: View {
         ZStack {
             Color.wtBackground.ignoresSafeArea()
 
-            RecordFlowStepPage(title: "最终预览", backAction: viewModel.goBack) {
-                VStack(spacing: 0) {
-                    // ── 画布区域 ──
-                    canvasArea
-                        .padding(.horizontal, WTSpacing.md)
+            VStack(spacing: 0) {
+                previewTopBar
 
-                    // ── 编辑面板 ──
-                    VStack(spacing: 0) {
-                        // 图标标签栏
-                        editorTabBar
-                            .padding(.horizontal, WTSpacing.md)
-                            .padding(.top, WTSpacing.md)
-                            .padding(.bottom, WTSpacing.sm)
+                canvasArea
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-                        Divider()
-                            .background(Color.wtSurface2)
-
-                        // 标签内容
-                        VStack(alignment: .leading, spacing: WTSpacing.md) {
-                            switch selectedTab {
-                            case .template: templatePanel
-                            case .text:     textPanel
-                            case .image:    imagePanel
-                            case .position: positionPanel
-                            }
-                        }
-                        .padding(WTSpacing.md)
-                        .padding(.bottom, WTSpacing.sm)
-                        .animation(.easeInOut(duration: 0.18), value: selectedTab)
-                    }
-                    .background(Color.wtSurface)
-                    .clipShape(RoundedRectangle(cornerRadius: WTRadius.lg))
-                    .padding(.horizontal, WTSpacing.md)
-                    .padding(.top, WTSpacing.sm)
-
-                    Spacer(minLength: 120)
-                }
-            } bottomBar: {
-                WTButton(title: "上一步", style: .secondary, action: viewModel.goBack)
-                WTButton(title: isSaving ? "保存中…" : "保存记录", isEnabled: !isSaving) {
-                    isSaving = true
-                    Task {
-                        await viewModel.buildPreview(isPro: appState.isPro)
-                        isSaving = false
-                        onSaved()
-                    }
-                }
+                editorPanel
             }
+            .ignoresSafeArea(.keyboard, edges: .bottom)
         }
         .alert("订阅后可用", isPresented: $showPaywall) {
             Button("知道了", role: .cancel) {}
@@ -525,23 +485,89 @@ private struct CardPreviewStep: View {
 
     // MARK: - 画布区域
 
-    /// 画布：深色背景 + 卡片预览，视觉上与编辑面板区分
-    private var canvasArea: some View {
-        ZStack {
-            // 画布背景
-            RoundedRectangle(cornerRadius: WTRadius.lg)
-                .fill(Color(white: 0.08))
+    private var previewTopBar: some View {
+        HStack(spacing: WTSpacing.sm) {
+            Button(action: viewModel.goBack) {
+                Image(systemName: "xmark")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundStyle(Color.wtTextPrimary)
+                    .frame(width: 44, height: 44)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("返回上一步")
 
-            CardView(
-                record: previewRecord,
-                style: CardStyleConfig.style(for: viewModel.selectedStyleId),
-                isPro: appState.isPro,
-                checkinImages: viewModel.selectedCheckinImages
-            )
-            .aspectRatio(CardRenderer.exportAspectRatio, contentMode: .fit)
-            .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
-            .shadow(color: .black.opacity(0.4), radius: 12, x: 0, y: 4)
-            .padding(WTSpacing.lg)
+            Spacer()
+
+            Text("最终预览")
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(Color.wtTextSecondary)
+
+            Spacer()
+
+            Button {
+                saveRecord()
+            } label: {
+                Text(isSaving ? "保存中" : "保存")
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundStyle(.black)
+                    .frame(width: 76, height: 44)
+                    .background(Color.wtPrimary)
+                    .clipShape(RoundedRectangle(cornerRadius: WTRadius.sm))
+            }
+            .buttonStyle(.plain)
+            .disabled(isSaving)
+            .opacity(isSaving ? 0.65 : 1)
+        }
+        .padding(.horizontal, WTSpacing.md)
+        .padding(.top, WTSpacing.sm)
+        .padding(.bottom, WTSpacing.xs)
+        .background(Color.wtBackground)
+    }
+
+    /// 画布区域只负责等比展示最终导出卡片，不裁切、不套固定预览框。
+    private var canvasArea: some View {
+        GeometryReader { proxy in
+            let canvasSize = fittedCardSize(in: proxy.size)
+
+            ZStack {
+                Color.wtBackground
+
+                CardView(
+                    record: previewRecord,
+                    style: CardStyleConfig.style(for: viewModel.selectedStyleId),
+                    isPro: appState.isPro,
+                    checkinImages: viewModel.selectedCheckinImages
+                )
+                .frame(width: canvasSize.width, height: canvasSize.height)
+                .clipShape(RoundedRectangle(cornerRadius: WTRadius.sm))
+                .shadow(color: .black.opacity(0.42), radius: 18, x: 0, y: 8)
+            }
+            .frame(width: proxy.size.width, height: proxy.size.height)
+        }
+    }
+
+    // MARK: - 编辑面板
+
+    private var editorPanel: some View {
+        VStack(spacing: 0) {
+            panelContent
+                .frame(height: 116)
+
+            Divider()
+                .background(Color.wtSurface2)
+
+            editorTabBar
+                .frame(height: 64)
+        }
+        .background(Color.black)
+    }
+
+    @ViewBuilder private var panelContent: some View {
+        switch selectedTab {
+        case .template: templatePanel
+        case .text:     textPanel
+        case .image:    imagePanel
+        case .position: positionPanel
         }
     }
 
@@ -561,174 +587,153 @@ private struct CardPreviewStep: View {
     // MARK: - 标签栏
 
     private var editorTabBar: some View {
-        HStack(spacing: 0) {
-            ForEach(EditorTab.allCases) { tab in
-                Button {
-                    selectedTab = tab
-                } label: {
-                    VStack(spacing: 4) {
-                        Image(systemName: tab.icon)
-                            .font(.system(size: 17, weight: .medium))
-                        Text(tab.label)
-                            .font(.system(size: 10, weight: .medium))
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: WTSpacing.xl) {
+                ForEach(EditorTab.allCases) { tab in
+                    Button {
+                        selectedTab = tab
+                    } label: {
+                        VStack(spacing: 6) {
+                            Text(tab.label)
+                                .font(.system(size: 15, weight: .semibold))
+
+                            Capsule()
+                                .fill(selectedTab == tab ? Color.wtPrimary : Color.clear)
+                                .frame(width: 28, height: 3)
+                        }
+                        .foregroundStyle(selectedTab == tab ? Color.wtPrimary : Color.wtTextSecondary)
+                        .frame(minWidth: 56)
+                        .contentShape(Rectangle())
                     }
-                    .foregroundStyle(selectedTab == tab ? Color.wtPrimary : Color.wtTextSecondary)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, WTSpacing.sm)
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
             }
+            .padding(.horizontal, WTSpacing.lg)
         }
     }
 
     // MARK: - 模板面板
 
     private var templatePanel: some View {
-        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: WTSpacing.sm) {
-            ForEach(CardStyleConfig.all) { style in
-                Button {
-                    if !viewModel.selectStyle(style, isPro: appState.isPro) {
-                        showPaywall = true
-                    }
-                } label: {
-                    VStack(alignment: .leading, spacing: WTSpacing.xs) {
-                        HStack {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: WTSpacing.sm) {
+                ForEach(CardStyleConfig.all) { style in
+                    Button {
+                        if !viewModel.selectStyle(style, isPro: appState.isPro) {
+                            showPaywall = true
+                        }
+                    } label: {
+                        VStack(alignment: .leading, spacing: WTSpacing.xs) {
+                            ZStack {
+                                RoundedRectangle(cornerRadius: WTRadius.sm)
+                                    .fill(style.id == viewModel.selectedStyleId ? Color.wtPrimary.opacity(0.9) : Color.wtSurface2)
+
+                                Image(systemName: styleIcon(for: style.layout))
+                                    .font(.system(size: 22, weight: .semibold))
+                                    .foregroundStyle(style.id == viewModel.selectedStyleId ? Color.black : Color.wtTextPrimary)
+                            }
+                            .frame(width: 62, height: 62)
+
                             Text(style.name)
-                                .font(WTFont.bodyBold)
-                            Spacer()
+                                .font(.system(size: 12, weight: .semibold))
+                                .lineLimit(1)
+
                             if style.isPro {
                                 Text("PRO")
                                     .font(.system(size: 10, weight: .bold))
-                                    .padding(.horizontal, 6)
-                                    .padding(.vertical, 3)
-                                    .background(Color.wtPrimary)
-                                    .foregroundStyle(.black)
-                                    .clipShape(Capsule())
+                                    .foregroundStyle(Color.wtPrimary)
                             }
                         }
-                        Text(style.summary)
-                            .font(WTFont.caption)
-                            .foregroundStyle(Color.wtTextSecondary)
-                            .fixedSize(horizontal: false, vertical: true)
-                        Spacer(minLength: 0)
+                        .foregroundStyle(style.id == viewModel.selectedStyleId ? Color.wtPrimary : Color.wtTextPrimary)
+                        .frame(width: 78, height: 98, alignment: .topLeading)
+                        .contentShape(Rectangle())
                     }
-                    .padding(WTSpacing.md)
-                    .frame(maxWidth: .infinity, minHeight: 100, alignment: .topLeading)
-                    .background(style.id == viewModel.selectedStyleId ? Color.wtSurface2 : Color.black.opacity(0.12))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: WTRadius.md)
-                            .stroke(style.id == viewModel.selectedStyleId ? Color.wtPrimary : .clear, lineWidth: 1.5)
-                    )
-                    .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
             }
+            .padding(.horizontal, WTSpacing.lg)
+            .padding(.vertical, WTSpacing.sm)
         }
     }
 
     // MARK: - 文字面板
 
     private var textPanel: some View {
-        VStack(alignment: .leading, spacing: WTSpacing.md) {
-            Text("字体风格")
-                .font(WTFont.caption)
-                .foregroundStyle(Color.wtTextSecondary)
-
-            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: WTSpacing.sm) {
-                ForEach(TextLayout.FontPreset.allCases) { preset in
-                    Button {
-                        viewModel.applyFontPreset(preset)
-                    } label: {
-                        Text(preset.label)
-                            .font(fontPreview(for: preset))
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 14)
-                            .background(viewModel.textLayout.fontPreset == preset ? Color.wtPrimary : Color.wtSurface2)
-                            .foregroundStyle(viewModel.textLayout.fontPreset == preset ? Color.black : Color.wtTextPrimary)
-                            .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
+        VStack(spacing: WTSpacing.sm) {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: WTSpacing.sm) {
+                    ForEach(TextLayout.FontPreset.allCases) { preset in
+                        Button {
+                            viewModel.applyFontPreset(preset)
+                        } label: {
+                            Text(preset.label)
+                                .font(fontPreview(for: preset))
+                                .frame(width: 76, height: 38)
+                                .background(viewModel.textLayout.fontPreset == preset ? Color.wtPrimary : Color.wtSurface2)
+                                .foregroundStyle(viewModel.textLayout.fontPreset == preset ? Color.black : Color.wtTextPrimary)
+                                .clipShape(RoundedRectangle(cornerRadius: WTRadius.sm))
+                        }
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
                 }
+                .padding(.horizontal, WTSpacing.lg)
             }
 
-            HStack {
-                Text("字号")
-                    .font(WTFont.caption)
+            HStack(spacing: WTSpacing.sm) {
+                Image(systemName: "textformat.size")
                     .foregroundStyle(Color.wtTextSecondary)
-                Spacer()
-                Text("\(Int(viewModel.textLayout.fontSize)) pt")
-                    .font(WTFont.bodyBold)
+                Slider(value: fontSizeBinding, in: 5 ... 30, step: 1)
+                    .tint(.wtPrimary)
+                Text("\(Int(viewModel.textLayout.fontSize))")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(Color.wtTextPrimary)
+                    .frame(width: 28, alignment: .trailing)
             }
-            Slider(value: $viewModel.textLayout.fontSize, in: 12 ... 30, step: 1)
-                .tint(.wtPrimary)
+            .padding(.horizontal, WTSpacing.lg)
         }
+        .padding(.vertical, WTSpacing.sm)
     }
 
     // MARK: - 图片面板
 
     private var imagePanel: some View {
-        VStack(alignment: .leading, spacing: WTSpacing.md) {
-            Text("照片显示方式")
-                .font(WTFont.caption)
-                .foregroundStyle(Color.wtTextSecondary)
-
+        VStack(alignment: .leading, spacing: WTSpacing.sm) {
             HStack(spacing: WTSpacing.sm) {
-                ForEach(TextLayout.ImageDisplayMode.allCases) { mode in
-                    Button {
-                        viewModel.textLayout.imageDisplayMode = mode
-                    } label: {
-                        VStack(spacing: WTSpacing.xs) {
-                            Image(systemName: mode.icon)
-                                .font(.system(size: 22))
-                                .frame(height: 28)
-                            Text(mode.label)
-                                .font(WTFont.bodyBold)
-                            Text(mode.description)
-                                .font(WTFont.micro)
-                                .foregroundStyle(
-                                    viewModel.textLayout.imageDisplayMode == mode
-                                        ? Color.black.opacity(0.6)
-                                        : Color.wtTextSecondary
-                                )
-                                .multilineTextAlignment(.center)
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, WTSpacing.md)
-                        .padding(.horizontal, WTSpacing.sm)
-                        .background(
-                            viewModel.textLayout.imageDisplayMode == mode
-                                ? Color.wtPrimary
-                                : Color.wtSurface2
-                        )
-                        .foregroundStyle(
-                            viewModel.textLayout.imageDisplayMode == mode
-                                ? Color.black
-                                : Color.wtTextPrimary
-                        )
-                        .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
-                    }
-                    .buttonStyle(.plain)
+                Image(systemName: "photo.on.rectangle.angled")
+                    .font(.system(size: 24, weight: .medium))
+                    .foregroundStyle(Color.wtPrimary)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("原图比例")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(Color.wtTextPrimary)
+                    Text("横图保存为横图，竖图保存为竖图")
+                        .font(WTFont.micro)
+                        .foregroundStyle(Color.wtTextSecondary)
                 }
+
+                Spacer()
             }
+            .padding(.horizontal, WTSpacing.md)
+            .frame(height: 76)
+            .background(Color.wtSurface2)
+            .clipShape(RoundedRectangle(cornerRadius: WTRadius.sm))
+            .padding(.horizontal, WTSpacing.lg)
 
             if viewModel.selectedCheckinImages.isEmpty {
                 Label("请先返回上一步添加训练照片", systemImage: "info.circle")
                     .font(WTFont.micro)
                     .foregroundStyle(Color.wtTextSecondary)
+                    .padding(.horizontal, WTSpacing.lg)
             }
         }
+        .padding(.vertical, WTSpacing.sm)
     }
 
     // MARK: - 位置面板
 
     private var positionPanel: some View {
-        VStack(alignment: .leading, spacing: WTSpacing.md) {
-            Text("文字位置")
-                .font(WTFont.caption)
-                .foregroundStyle(Color.wtTextSecondary)
-
-            // 位置选择器（图标按钮组）
+        VStack(spacing: WTSpacing.sm) {
             HStack(spacing: WTSpacing.sm) {
                 ForEach(TextLayout.VerticalPosition.allCases) { position in
                     Button {
@@ -736,13 +741,11 @@ private struct CardPreviewStep: View {
                     } label: {
                         VStack(spacing: 6) {
                             Image(systemName: positionIcon(for: position))
-                                .font(.system(size: 20))
-                                .frame(height: 26)
+                                .font(.system(size: 20, weight: .medium))
                             Text(position.label)
-                                .font(WTFont.caption)
+                                .font(.system(size: 12, weight: .semibold))
                         }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, WTSpacing.md)
+                        .frame(maxWidth: .infinity, minHeight: 48)
                         .background(
                             viewModel.textLayout.verticalPosition == position
                                 ? Color.wtPrimary
@@ -758,22 +761,49 @@ private struct CardPreviewStep: View {
                     .buttonStyle(.plain)
                 }
             }
+            .padding(.horizontal, WTSpacing.lg)
 
-            // 透明度
-            HStack {
-                Text("文字透明度")
-                    .font(WTFont.caption)
+            HStack(spacing: WTSpacing.sm) {
+                Image(systemName: "circle.lefthalf.filled")
                     .foregroundStyle(Color.wtTextSecondary)
-                Spacer()
-                Text("\(Int(viewModel.textLayout.textOpacity * 100))%")
-                    .font(WTFont.bodyBold)
+                Slider(value: $viewModel.textLayout.textOpacity, in: 0.3 ... 1.0, step: 0.05)
+                    .tint(.wtPrimary)
+                Text("\(Int(viewModel.textLayout.textOpacity * 100))")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(Color.wtTextPrimary)
+                    .frame(width: 32, alignment: .trailing)
             }
-            Slider(value: $viewModel.textLayout.textOpacity, in: 0.3 ... 1.0, step: 0.05)
-                .tint(.wtPrimary)
+            .padding(.horizontal, WTSpacing.lg)
         }
+        .padding(.vertical, WTSpacing.sm)
     }
 
     // MARK: - 辅助
+
+    private func saveRecord() {
+        guard !isSaving else { return }
+        isSaving = true
+        Task { @MainActor in
+            await viewModel.buildPreview(isPro: appState.isPro)
+            isSaving = false
+            onSaved()
+        }
+    }
+
+    private func fittedCardSize(in availableSize: CGSize) -> CGSize {
+        let horizontalInset: CGFloat = 32
+        let verticalInset: CGFloat = 24
+        let maxWidth = max(availableSize.width - horizontalInset, 1)
+        let maxHeight = max(availableSize.height - verticalInset, 1)
+        let aspectRatio = CardRenderer.aspectRatio(for: viewModel.selectedCheckinImages)
+        let widthFromHeight = maxHeight * aspectRatio
+
+        if widthFromHeight <= maxWidth {
+            return CGSize(width: widthFromHeight, height: maxHeight)
+        }
+
+        return CGSize(width: maxWidth, height: maxWidth / aspectRatio)
+    }
 
     private func fontPreview(for preset: TextLayout.FontPreset) -> Font {
         switch preset {
@@ -784,11 +814,27 @@ private struct CardPreviewStep: View {
         }
     }
 
+    private var fontSizeBinding: Binding<Double> {
+        Binding(
+            get: { viewModel.textLayout.fontSize },
+            set: { viewModel.updateFontSize($0) }
+        )
+    }
+
     private func positionIcon(for position: TextLayout.VerticalPosition) -> String {
         switch position {
         case .top:    "arrow.up.to.line"
         case .center: "arrow.up.and.down"
         case .bottom: "arrow.down.to.line"
+        }
+    }
+
+    private func styleIcon(for layout: CardStyle.LayoutStyle) -> String {
+        switch layout {
+        case .bottomCard: "rectangle.bottomthird.inset.filled"
+        case .centerGlass: "rectangle.center.inset.filled"
+        case .editorialTop: "rectangle.topthird.inset.filled"
+        case .rightOverlayMono: "text.alignright"
         }
     }
 

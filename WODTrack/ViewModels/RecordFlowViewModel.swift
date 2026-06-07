@@ -42,6 +42,7 @@ final class RecordFlowViewModel {
     var entryMode: EntryMode = .photoOCR
 
     private let ocrService: OCRServicing
+    private var hasUserAdjustedFontSize = false
 
     init(ocrService: OCRServicing = PreviewOCRService()) {
         self.ocrService = ocrService
@@ -95,6 +96,7 @@ final class RecordFlowViewModel {
     }
 
     func goToCardPreview() {
+        applySuggestedFontSizeIfNeeded()
         step = .cardPreview
     }
 
@@ -113,6 +115,7 @@ final class RecordFlowViewModel {
 
     @MainActor
     func buildPreview(isPro: Bool) async {
+        applySuggestedFontSizeIfNeeded()
         isRendering = true
         defer { isRendering = false }
 
@@ -169,6 +172,7 @@ final class RecordFlowViewModel {
 
     func applyTemplate(_ style: CardStyle) {
         selectedStyleId = style.id
+        hasUserAdjustedFontSize = false
         switch style.id {
         case "style_basic_dark":
             textLayout.verticalPosition = .bottom
@@ -197,10 +201,16 @@ final class RecordFlowViewModel {
         default:
             break
         }
+        applySuggestedFontSizeIfNeeded()
     }
 
     func applyFontPreset(_ preset: TextLayout.FontPreset) {
         textLayout.fontPreset = preset
+    }
+
+    func updateFontSize(_ size: Double) {
+        textLayout.fontSize = size
+        hasUserAdjustedFontSize = true
     }
 
     var wodLines: [String] {
@@ -212,6 +222,16 @@ final class RecordFlowViewModel {
 
     private func persistImages(_ images: [UIImage], prefix: String) -> [String] {
         images.compactMap { persistImage($0, prefix: prefix) }
+    }
+
+    private func applySuggestedFontSizeIfNeeded() {
+        guard !hasUserAdjustedFontSize else { return }
+        textLayout.fontSize = CardRenderer.suggestedFontSize(
+            for: wodLines,
+            images: selectedCheckinImages,
+            style: CardStyleConfig.style(for: selectedStyleId),
+            preferredSize: textLayout.fontSize
+        )
     }
 
     private func persistImage(_ image: UIImage, prefix: String) -> String? {

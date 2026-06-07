@@ -30,9 +30,7 @@ struct HistoryDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: WTSpacing.md) {
-                HistoryHero(record: record)
-                    .frame(height: 420)
-                    .clipShape(RoundedRectangle(cornerRadius: WTRadius.lg))
+                HistoryCardPreview(record: record)
 
                 VStack(alignment: .leading, spacing: WTSpacing.sm) {
                     Text(record.wodDate.formatted(.dateTime.year().month().day().weekday(.wide)))
@@ -94,6 +92,28 @@ struct HistoryDetailView: View {
     }
 }
 
+private struct HistoryCardPreview: View {
+    let record: WODRecord
+
+    var body: some View {
+        GeometryReader { proxy in
+            HistoryHero(record: record)
+                .frame(width: proxy.size.width, height: proxy.size.height)
+                .background(Color.black)
+                .clipShape(RoundedRectangle(cornerRadius: WTRadius.lg))
+        }
+        .aspectRatio(aspectRatio, contentMode: .fit)
+        .frame(maxWidth: .infinity)
+    }
+
+    private var aspectRatio: CGFloat {
+        if let image = UIImage(contentsOfFile: record.cardImagePath ?? "") {
+            return image.size.width / max(image.size.height, 1)
+        }
+        return CardRenderer.fallbackAspectRatio
+    }
+}
+
 private struct HistoryRecordCard: View {
     let record: WODRecord
 
@@ -136,7 +156,7 @@ private struct HistoryHero: View {
         if let cardImage = cardImage {
             Image(uiImage: cardImage)
                 .resizable()
-                .scaledToFill()
+                .scaledToFit()
         } else {
             CardView(record: record, style: CardStyleConfig.style(for: record.cardStyleId), isPro: false)
         }
