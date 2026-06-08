@@ -1,7 +1,19 @@
 import SwiftData
 import SwiftUI
 
-// MARK: - Filter
+// MARK: - Page Switcher
+
+private enum SkillPage: CaseIterable {
+    case actions, paths
+    var label: String {
+        switch self {
+        case .actions: "动作"
+        case .paths: "进阶路径"
+        }
+    }
+}
+
+// MARK: - Status Filter
 
 private enum SkillFilter: CaseIterable {
     case all, mastered, inProgress, wantToLearn
@@ -48,7 +60,11 @@ private enum SkillFilter: CaseIterable {
 struct SkillTreeView: View {
     @Query private var allStatuses: [SkillStatus]
     @Query private var allEntries: [SkillTrainingEntry]
+
+    @State private var selectedPage: SkillPage = .actions
     @State private var selectedFilter: SkillFilter = .all
+    @State private var selectedSubcategory: String? = nil
+    @State private var selectedTier: SkillTier? = nil
 
     private var statusMap: [String: SkillStatus] {
         Dictionary(uniqueKeysWithValues: allStatuses.map { ($0.skillId, $0) })
@@ -66,41 +82,95 @@ struct SkillTreeView: View {
         return map
     }
 
+    // MARK: Filter helpers
+
     private func status(for skill: SkillDefinition) -> SkillMasteryStatus {
         statusMap[skill.id]?.status ?? .unmarked
     }
 
+    /// 分类/难度筛选是否被激活——决定用「大类卡片」还是「扁平列表」展示
+    private var isSubFiltering: Bool {
+        selectedSubcategory != nil || selectedTier != nil
+    }
+
+    private func matchesSecondary(_ skill: SkillDefinition) -> Bool {
+        (selectedSubcategory == nil || skill.subcategoryId == selectedSubcategory) &&
+        (selectedTier == nil || skill.tier == selectedTier)
+    }
+
+    /// 状态筛选计数，受当前分类/难度约束（联动）
     private func count(for filter: SkillFilter) -> Int {
-        let allSkills = SkillLibrary.categories.flatMap { $0.skills }
-        if filter == .all { return allSkills.count }
-        return allSkills.filter { filter.matches(status(for: $0)) }.count
+        SkillLibrary.allSkills.filter {
+            matchesSecondary($0) && (filter == .all || filter.matches(status(for: $0)))
+        }.count
+    }
+
+    /// 扁平模式：通过全部筛选的动作，按子类别保序分组
+    private var flatGroups: [(subcat: SkillSubcategoryDefinition, skills: [SkillDefinition])] {
+        let matched = SkillLibrary.allSkills.filter {
+            selectedFilter.matches(status(for: $0)) && matchesSecondary($0)
+        }
+        return SkillLibrary.categories.flatMap { $0.subcategories }.compactMap { sub in
+            let skills = matched.filter { $0.subcategoryId == sub.id }
+            return skills.isEmpty ? nil : (subcat: sub, skills: skills)
+        }
+    }
+
+    private func categoryColor(forSub subId: String) -> Color {
+        for category in SkillLibrary.categories where category.subcategories.contains(where: { $0.id == subId }) {
+            return category.color
+        }
+        return Color.wtTextSecondary
     }
 
     var body: some View {
         NavigationStack {
-            ZStack {
-                Color.wtBackground.ignoresSafeArea()
-                ScrollView {
-                    VStack(alignment: .leading, spacing: WTSpacing.md) {
-                        filterBar
-                        ForEach(SkillLibrary.categories) { category in
-                            CategorySection(
-                                category: category,
-                                selectedFilter: selectedFilter,
-                                statusMap: statusMap,
-                                bestEntryMap: bestEntryMap
-                            )
+            ScrollView {
+                LazyVStack(spacing: WTSpacing.md) {
+                    Picker("视图", selection: $selectedPage.animation(.easeInOut(duration: 0.2))) {
+                        ForEach(SkillPage.allCases, id: \.self) { page in
+                            Text(page.label).tag(page)
                         }
                     }
-                    .padding(.vertical, WTSpacing.md)
+                    .pickerStyle(.segmented)
+                    .padding(.horizontal, WTSpacing.lg)
+                    .padding(.top, WTSpacing.xs)
+
+                    switch selectedPage {
+                    case .actions: actionsContent
+                    case .paths:   pathsContent
+                    }
                 }
+                .padding(.bottom, WTSpacing.md)
             }
+            .background(Color.wtBackground)
             .navigationTitle("技能树")
-            .navigationBarTitleDisplayMode(.large)
         }
     }
 
-    private var filterBar: some View {
+    // MARK: Actions Content
+
+    @ViewBuilder private var actionsContent: some View {
+        VStack(spacing: WTSpacing.sm) {
+            statusFilterBar
+            secondaryFilters
+        }
+
+        if isSubFiltering {
+            flatSkillList
+        } else {
+            ForEach(SkillLibrary.categories) { category in
+                CategorySection(
+                    category: category,
+                    selectedFilter: selectedFilter,
+                    statusMap: statusMap,
+                    bestEntryMap: bestEntryMap
+                )
+            }
+        }
+    }
+
+    private var statusFilterBar: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: WTSpacing.sm) {
                 ForEach(SkillFilter.allCases, id: \.self) { filter in
@@ -130,6 +200,178 @@ struct SkillTreeView: View {
             .padding(.horizontal, WTSpacing.lg)
         }
     }
+
+    // MARK: Secondary Filters (分类 + 难度)
+
+    private var secondaryFilters: some View {
+        VStack(spacing: WTSpacing.sm) {
+            // 分类
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: WTSpacing.sm) {
+                    SecondaryChip(label: "全部分类", dotColor: nil, isSelected: selectedSubcategory == nil) {
+                        selectedSubcategory = nil
+                    }
+                    ForEach(SkillLibrary.categories) { category in
+                        ForEach(category.subcategories) { sub in
+                            SecondaryChip(label: sub.name, dotColor: category.color,
+                                          isSelected: selectedSubcategory == sub.id) {
+                                selectedSubcategory = selectedSubcategory == sub.id ? nil : sub.id
+                            }
+                        }
+                    }
+                }
+                .padding(.horizontal, WTSpacing.lg)
+            }
+
+            // 难度
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: WTSpacing.sm) {
+                    SecondaryChip(label: "全部难度", dotColor: nil, isSelected: selectedTier == nil) {
+                        selectedTier = nil
+                    }
+                    ForEach(SkillTier.allCases) { tier in
+                        SecondaryChip(label: "\(tier.label) · \(tier.description)", dotColor: tier.color,
+                                      isSelected: selectedTier == tier) {
+                            selectedTier = selectedTier == tier ? nil : tier
+                        }
+                    }
+                }
+                .padding(.horizontal, WTSpacing.lg)
+            }
+        }
+    }
+
+    private var flatSkillList: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            if flatGroups.isEmpty {
+                Text("没有符合条件的动作")
+                    .font(WTFont.caption)
+                    .foregroundStyle(Color.wtTextSecondary)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, WTSpacing.xl)
+            } else {
+                ForEach(flatGroups, id: \.subcat.id) { group in
+                    SubcategoryGroup(
+                        subcat: group.subcat,
+                        skills: group.skills,
+                        categoryColor: categoryColor(forSub: group.subcat.id),
+                        statusMap: statusMap,
+                        bestEntryMap: bestEntryMap
+                    )
+                }
+            }
+        }
+        .background(Color.wtSurface)
+        .clipShape(RoundedRectangle(cornerRadius: WTRadius.lg))
+        .padding(.horizontal, WTSpacing.lg)
+    }
+
+    // MARK: Paths Content
+
+    @ViewBuilder private var pathsContent: some View {
+        ForEach(SkillLibrary.categories) { category in
+            let paths = ProgressionPathLibrary.all.filter { $0.categoryId == category.id }
+            if !paths.isEmpty {
+                VStack(alignment: .leading, spacing: WTSpacing.sm) {
+                    HStack(spacing: WTSpacing.xs) {
+                        Image(systemName: category.icon)
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(category.color)
+                        Text("\(category.name) · \(paths.count) 条主线")
+                            .font(WTFont.micro)
+                            .foregroundStyle(Color.wtTextSecondary)
+                    }
+                    .padding(.horizontal, WTSpacing.lg)
+                    .padding(.top, WTSpacing.sm)
+
+                    VStack(spacing: WTSpacing.sm) {
+                        ForEach(paths) { path in
+                            NavigationLink(destination: ProgressionPathDetailView(path: path)) {
+                                PathRowCard(path: path, color: category.color, statusMap: statusMap)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .padding(.horizontal, WTSpacing.lg)
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Secondary Chip
+
+private struct SecondaryChip: View {
+    let label: String
+    let dotColor: Color?
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 5) {
+                if let dotColor {
+                    Circle()
+                        .fill(isSelected ? Color.black : dotColor)
+                        .frame(width: 6, height: 6)
+                }
+                Text(label)
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(isSelected ? Color.black : Color.wtTextSecondary)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .background(isSelected ? Color.wtPrimary : Color.wtSurface)
+            .clipShape(Capsule())
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+// MARK: - Path Row Card
+
+private struct PathRowCard: View {
+    let path: ProgressionPath
+    let color: Color
+    let statusMap: [String: SkillStatus]
+
+    private var progress: (mastered: Int, inProgress: Int, total: Int) {
+        let skills = path.steps.compactMap { SkillLibrary.skillById[$0] }
+        let m = skills.filter { statusMap[$0.id]?.status == .mastered }.count
+        let ip = skills.filter { statusMap[$0.id]?.status == .inProgress }.count
+        return (m, ip, skills.count)
+    }
+
+    var body: some View {
+        HStack(spacing: WTSpacing.md) {
+            Image(systemName: path.icon)
+                .font(.system(size: 20, weight: .semibold))
+                .foregroundStyle(color)
+                .frame(width: 44, height: 44)
+                .background(color.opacity(0.12))
+                .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
+
+            VStack(alignment: .leading, spacing: 6) {
+                HStack {
+                    Text(path.name)
+                        .font(WTFont.bodyBold)
+                        .foregroundStyle(Color.wtTextPrimary)
+                    Spacer()
+                    Text("\(progress.mastered)/\(progress.total)")
+                        .font(WTFont.caption)
+                        .foregroundStyle(Color.wtTextSecondary)
+                }
+                ProgressBar(total: progress.total, mastered: progress.mastered, inProgress: progress.inProgress)
+            }
+
+            Image(systemName: "chevron.right")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(Color.wtTextDisabled)
+        }
+        .padding(WTSpacing.md)
+        .background(Color.wtSurface)
+        .clipShape(RoundedRectangle(cornerRadius: WTRadius.lg))
+    }
 }
 
 // MARK: - Category Section
@@ -155,10 +397,16 @@ private struct CategorySection: View {
     private var displayedSkills: [SkillDefinition] { selectedFilter == .all ? category.skills : filteredSkills }
     private var showSection: Bool { selectedFilter == .all || !filteredSkills.isEmpty }
 
+    private var groupedSkills: [(subcat: SkillSubcategoryDefinition, skills: [SkillDefinition])] {
+        category.subcategories.compactMap { subcat in
+            let skills = displayedSkills.filter { $0.subcategoryId == subcat.id }
+            return skills.isEmpty ? nil : (subcat: subcat, skills: skills)
+        }
+    }
+
     var body: some View {
         if showSection {
             VStack(alignment: .leading, spacing: 0) {
-                // Header — 整个区域可点击
                 Button {
                     withAnimation(.easeInOut(duration: 0.2)) { isExpanded.toggle() }
                 } label: {
@@ -201,17 +449,15 @@ private struct CategorySection: View {
 
                 if isExpanded {
                     Divider().background(Color.wtSurface2)
-                    ForEach(Array(displayedSkills.enumerated()), id: \.element.id) { index, skill in
-                        NavigationLink(destination: SkillDetailView(skill: skill)) {
-                            SkillRow(skill: skill, statusEntry: statusMap[skill.id], bestEntry: bestEntryMap[skill.id])
-                                .contentShape(Rectangle())
-                        }
-                        .buttonStyle(.plain)
-                        if index < displayedSkills.count - 1 {
-                            Divider()
-                                .background(Color.wtSurface2)
-                                .padding(.leading, WTSpacing.md)
-                        }
+
+                    ForEach(groupedSkills, id: \.subcat.id) { group in
+                        SubcategoryGroup(
+                            subcat: group.subcat,
+                            skills: group.skills,
+                            categoryColor: category.color,
+                            statusMap: statusMap,
+                            bestEntryMap: bestEntryMap
+                        )
                     }
                     .padding(.bottom, WTSpacing.xs)
                 }
@@ -219,6 +465,51 @@ private struct CategorySection: View {
             .background(Color.wtSurface)
             .clipShape(RoundedRectangle(cornerRadius: WTRadius.lg))
             .padding(.horizontal, WTSpacing.lg)
+        }
+    }
+}
+
+// MARK: - Subcategory Group
+
+private struct SubcategoryGroup: View {
+    let subcat: SkillSubcategoryDefinition
+    let skills: [SkillDefinition]
+    let categoryColor: Color
+    let statusMap: [String: SkillStatus]
+    let bestEntryMap: [String: SkillTrainingEntry]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(spacing: WTSpacing.xs) {
+                Circle().fill(categoryColor).frame(width: 6, height: 6)
+                Text(subcat.name)
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(categoryColor)
+                Text("·")
+                    .font(.system(size: 11))
+                    .foregroundStyle(Color.wtTextDisabled)
+                Text("\(skills.count)")
+                    .font(.system(size: 11))
+                    .foregroundStyle(Color.wtTextDisabled)
+            }
+            .padding(.horizontal, WTSpacing.md)
+            .padding(.top, WTSpacing.sm)
+            .padding(.bottom, WTSpacing.xs)
+
+            ForEach(Array(skills.enumerated()), id: \.element.id) { index, skill in
+                NavigationLink(destination: SkillDetailView(skill: skill)) {
+                    SkillRow(skill: skill, statusEntry: statusMap[skill.id], bestEntry: bestEntryMap[skill.id])
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                if index < skills.count - 1 {
+                    Divider()
+                        .background(Color.wtSurface2)
+                        .padding(.leading, WTSpacing.md)
+                }
+            }
+
+            Divider().background(Color.wtSurface2)
         }
     }
 }
@@ -263,10 +554,10 @@ private struct SkillRow: View {
 
     private var statusIcon: (name: String, color: Color) {
         switch masteryStatus {
-        case .mastered: ("checkmark.circle.fill", Color.wtPrimary)
-        case .inProgress: ("moon.fill", Color(hex: "#5E81F4"))
-        case .wantToLearn: ("circle", Color.wtTextSecondary)
-        case .unmarked: ("circle", Color.wtTextDisabled)
+        case .mastered:    ("checkmark.circle.fill", Color.wtPrimary)
+        case .inProgress:  ("moon.fill",             Color(hex: "#5E81F4"))
+        case .wantToLearn: ("circle",                Color.wtTextSecondary)
+        case .unmarked:    ("circle",                Color.wtTextDisabled)
         }
     }
 
@@ -278,9 +569,12 @@ private struct SkillRow: View {
                 .frame(width: 28)
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(skill.name)
-                    .font(WTFont.bodyBold)
-                    .foregroundStyle(Color.wtTextPrimary)
+                HStack(spacing: 6) {
+                    TierBadge(tier: skill.tier)
+                    Text(skill.name)
+                        .font(WTFont.bodyBold)
+                        .foregroundStyle(Color.wtTextPrimary)
+                }
                 Text(skill.englishName)
                     .font(.system(size: 11, weight: .regular, design: .monospaced))
                     .foregroundStyle(Color.wtTextSecondary)
@@ -288,14 +582,11 @@ private struct SkillRow: View {
 
             Spacer()
 
+            // 右侧预留：个人 RPT 数据
             if let entry = bestEntry {
                 Text(entry.formattedValue)
                     .font(WTFont.caption)
                     .foregroundStyle(Color.wtTextSecondary)
-            } else {
-                Text("—")
-                    .font(WTFont.caption)
-                    .foregroundStyle(Color.wtTextDisabled)
             }
 
             Image(systemName: "chevron.right")
@@ -304,5 +595,21 @@ private struct SkillRow: View {
         }
         .padding(.horizontal, WTSpacing.md)
         .padding(.vertical, 12)
+    }
+}
+
+// MARK: - Tier Badge
+
+struct TierBadge: View {
+    let tier: SkillTier
+
+    var body: some View {
+        Text(tier.label)
+            .font(.system(size: 10, weight: .bold))
+            .foregroundStyle(tier.color)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
+            .background(tier.color.opacity(0.12))
+            .clipShape(Capsule())
     }
 }

@@ -32,6 +32,8 @@
 		A000000000000000000040 /* SkillStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000140 /* SkillStatus.swift */; };
 		A000000000000000000044 /* SkillData.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000144 /* SkillData.swift */; };
 		A000000000000000000043 /* SkillDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000143 /* SkillDetailView.swift */; };
+		A000000000000000000045 /* ProgressionPathData.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000145 /* ProgressionPathData.swift */; };
+		A000000000000000000046 /* ProgressionPathDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000146 /* ProgressionPathDetailView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -73,6 +75,8 @@
 		A000000000000000000140 /* SkillStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillStatus.swift; sourceTree = "<group>"; };
 		A000000000000000000144 /* SkillData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillData.swift; sourceTree = "<group>"; };
 		A000000000000000000143 /* SkillDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillDetailView.swift; sourceTree = "<group>"; };
+		A000000000000000000145 /* ProgressionPathData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressionPathData.swift; sourceTree = "<group>"; };
+		A000000000000000000146 /* ProgressionPathDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressionPathDetailView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -142,6 +146,7 @@
 				A000000000000000000107 /* AppConfig.swift */,
 				A000000000000000000108 /* CardStyleConfig.swift */,
 				A000000000000000000144 /* SkillData.swift */,
+				A000000000000000000145 /* ProgressionPathData.swift */,
 			);
 			path = Config;
 			sourceTree = "<group>";
@@ -218,6 +223,7 @@
 			children = (
 				A000000000000000000110 /* SkillTreeView.swift */,
 				A000000000000000000143 /* SkillDetailView.swift */,
+				A000000000000000000146 /* ProgressionPathDetailView.swift */,
 			);
 			path = Skills;
 			sourceTree = "<group>";
@@ -369,6 +375,8 @@
 				A000000000000000000040 /* SkillStatus.swift in Sources */,
 				A000000000000000000044 /* SkillData.swift in Sources */,
 				A000000000000000000043 /* SkillDetailView.swift in Sources */,
+				A000000000000000000045 /* ProgressionPathData.swift in Sources */,
+				A000000000000000000046 /* ProgressionPathDetailView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
