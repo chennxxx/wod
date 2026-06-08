@@ -47,7 +47,6 @@ struct RecordFlowCoordinator: View {
                 })
             }
         }
-        .toolbar(.hidden, for: .tabBar)
         .navigationBarBackButtonHidden()
     }
 }
@@ -63,12 +62,22 @@ private struct WhiteboardStep: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: WTSpacing.lg) {
-            HStack {
+            HStack(spacing: WTSpacing.sm) {
+                Button(action: dismiss) {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundStyle(Color.wtPrimary)
+                        .frame(width: 36, height: 36)
+                        .background(Color.wtSurface)
+                        .clipShape(Circle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("关闭")
+
                 Text("记录今日 WOD")
                     .font(WTFont.title)
+
                 Spacer()
-                Button("关闭", action: dismiss)
-                    .foregroundStyle(Color.wtTextSecondary)
             }
 
             Text("你可以拍摄白板、从相册导入，或者直接手动输入今日训练内容。")
@@ -154,6 +163,7 @@ private struct CheckinPhotosStep: View {
                                     .font(WTFont.bodyBold)
                             }
                         }
+                        .contentShape(RoundedRectangle(cornerRadius: WTRadius.lg))
                 }
 
                 if !viewModel.selectedCheckinImages.isEmpty {
@@ -214,6 +224,10 @@ private struct OCRStatusBanner: View {
                 ProgressView()
                     .tint(.wtPrimary)
                 Text("正在识别白板内容…")
+            case .timeout:
+                Image(systemName: "clock.badge.exclamationmark")
+                    .foregroundStyle(Color.wtDanger)
+                Text("识别超时，请重试")
             case .success:
                 Image(systemName: "checkmark.circle.fill")
                     .foregroundStyle(Color.wtSuccess)
@@ -232,42 +246,112 @@ private struct OCRStatusBanner: View {
     }
 }
 
+private struct OCRLoadingView: View {
+    let isTimeout: Bool
+    let onRetry: () -> Void
+    let onBack: () -> Void
+
+    private let messages = ["正在抓取白板内容", "正在处理白板内容", "正在将图片转化为文字"]
+    @State private var messageIndex = 0
+    @State private var cycleTimer: Timer?
+
+    var body: some View {
+        ZStack {
+            Color.wtBackground.ignoresSafeArea()
+
+            VStack(spacing: WTSpacing.lg) {
+                ProgressView()
+                    .tint(.wtPrimary)
+                    .scaleEffect(1.4)
+
+                VStack(spacing: WTSpacing.xs) {
+                    Text(isTimeout ? "识别时间较长…" : messages[messageIndex])
+                        .font(WTFont.bodyBold)
+                        .foregroundStyle(Color.wtTextPrimary)
+                        .id(isTimeout ? -1 : messageIndex)
+                        .transition(.opacity)
+                        .animation(.easeInOut(duration: 0.4), value: messageIndex)
+
+                    Text(isTimeout ? "网络可能较慢，你可以重试或返回上一步" : "通常需要 5-15 秒")
+                        .font(WTFont.caption)
+                        .foregroundStyle(Color.wtTextSecondary)
+                        .multilineTextAlignment(.center)
+                        .animation(.easeInOut, value: isTimeout)
+                }
+            }
+            .padding(WTSpacing.lg)
+        }
+        .safeAreaInset(edge: .bottom) {
+            if isTimeout {
+                HStack(spacing: WTSpacing.sm) {
+                    WTButton(title: "返回上一步", style: .secondary, action: onBack)
+                    WTButton(title: "重试", action: onRetry)
+                }
+                .padding(.horizontal, WTSpacing.lg)
+                .padding(.top, WTSpacing.sm)
+                .padding(.bottom, WTSpacing.md)
+                .background(.ultraThinMaterial)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+        }
+        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: isTimeout)
+        .onAppear {
+            startCycling()
+        }
+        .onDisappear {
+            cycleTimer?.invalidate()
+            cycleTimer = nil
+        }
+    }
+
+    private func startCycling() {
+        cycleTimer = Timer.scheduledTimer(withTimeInterval: 2.2, repeats: true) { _ in
+            withAnimation {
+                messageIndex = (messageIndex + 1) % messages.count
+            }
+        }
+    }
+}
+
 private struct OCRResultStep: View {
     @Bindable var viewModel: RecordFlowViewModel
 
-    var body: some View {
+    /// 是否处于"需要展示内容页"的状态（包括失败、成功、手动输入）
+    private var isContentReady: Bool {
         switch viewModel.ocrState {
-        case .idle, .processing:
-            LoadingOverlay(title: "正在识别白板内容…", subtitle: "通常需要 5-15 秒")
-        case .failure(let message):
-            RecordFlowStepPage(title: "识别失败", backAction: viewModel.goBack) {
-                VStack(alignment: .leading, spacing: WTSpacing.lg) {
-                    Text(message).font(WTFont.body)
-                    WTTextEditor(
-                        title: "手动输入 WOD",
-                        placeholder: """
-直接输入今日训练内容
+        case .idle, .processing, .timeout: return false
+        case .success, .failure: return true
+        }
+    }
 
-例如：
-A 热身/完成以下3轮
-10空杆早安式
-20S原地高抬腿
-""",
-                        text: $viewModel.wodContentText,
-                        minHeight: 280
-                    )
-                }
-                .padding(WTSpacing.lg)
-            } bottomBar: {
-                WTButton(title: "重试", style: .secondary, action: viewModel.retryOCR)
-                WTButton(title: "继续", isEnabled: !viewModel.wodLines.isEmpty, action: viewModel.goToCheckinPhotos)
-            }
-        case .success:
+    /// 失败时的错误信息，nil 表示无错误
+    private var errorMessage: String? {
+        if case .failure(let msg) = viewModel.ocrState { return msg }
+        return nil
+    }
+
+    var body: some View {
+        if isContentReady {
             RecordFlowStepPage(title: "今日 WOD 内容", backAction: viewModel.goBack) {
                 VStack(alignment: .leading, spacing: WTSpacing.md) {
-                    Text(viewModel.entryMode == .manual ? "直接输入今天的训练内容。" : "识别完成，请在这里确认和修改内容。")
-                        .font(WTFont.caption)
-                        .foregroundStyle(Color.wtTextSecondary)
+                    // 错误 banner（仅识别失败时显示）
+                    if let errorMessage {
+                        HStack(spacing: WTSpacing.sm) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundStyle(Color.wtDanger)
+                            Text(errorMessage)
+                                .font(WTFont.caption)
+                                .foregroundStyle(Color.wtTextPrimary)
+                            Spacer()
+                        }
+                        .padding(WTSpacing.md)
+                        .background(Color.wtDanger.opacity(0.12))
+                        .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
+                    } else {
+                        Text(viewModel.entryMode == .manual ? "直接输入今天的训练内容。" : "识别完成，请在这里确认和修改内容。")
+                            .font(WTFont.caption)
+                            .foregroundStyle(Color.wtTextSecondary)
+                    }
 
                     WTTextEditor(
                         title: "WOD 内容",
@@ -285,15 +369,27 @@ C WOD/任务计时/7轮
 100M
 """,
                         text: $viewModel.wodContentText,
-                        minHeight: 320
+                        minHeight: 280
                     )
+
+                    CompletionTimeField(completionMinutes: $viewModel.completionMinutes)
 
                     DifficultyRatingField(rating: $viewModel.difficultyRating)
                 }
                 .padding(WTSpacing.lg)
             } bottomBar: {
+                if errorMessage != nil {
+                    WTButton(title: "重试", style: .secondary, action: viewModel.retryOCR)
+                }
                 WTButton(title: "下一步：选择训练照", isEnabled: !viewModel.wodLines.isEmpty, action: viewModel.goToCheckinPhotos)
             }
+        } else {
+            // loading / timeout
+            OCRLoadingView(
+                isTimeout: viewModel.ocrState == .timeout,
+                onRetry: viewModel.retryOCR,
+                onBack: viewModel.goBack
+            )
         }
     }
 }
@@ -363,6 +459,79 @@ private struct RecordFlowBottomBar<Content: View>: View {
     }
 }
 
+private struct CompletionTimeField: View {
+    @Binding var completionMinutes: Int?
+    @State private var customText = ""
+    @State private var isCustom = false
+
+    private let presets = [45, 60]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: WTSpacing.sm) {
+            Text("完成时间")
+                .font(WTFont.caption)
+                .foregroundStyle(Color.wtTextSecondary)
+
+            HStack(spacing: WTSpacing.sm) {
+                ForEach(presets, id: \.self) { minutes in
+                    Button {
+                        isCustom = false
+                        customText = ""
+                        completionMinutes = completionMinutes == minutes ? nil : minutes
+                    } label: {
+                        Text("\(minutes) 分钟")
+                            .font(WTFont.bodyBold)
+                            .foregroundStyle((!isCustom && completionMinutes == minutes) ? Color.black : Color.wtTextPrimary)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 40)
+                            .background((!isCustom && completionMinutes == minutes) ? Color.wtPrimary : Color.wtSurface)
+                            .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
+                            .contentShape(RoundedRectangle(cornerRadius: WTRadius.md))
+                    }
+                    .buttonStyle(.plain)
+                }
+
+                Button {
+                    isCustom.toggle()
+                    if !isCustom {
+                        completionMinutes = Int(customText)
+                    }
+                } label: {
+                    Text("自定义")
+                        .font(WTFont.bodyBold)
+                        .foregroundStyle(isCustom ? Color.black : Color.wtTextPrimary)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 40)
+                        .background(isCustom ? Color.wtPrimary : Color.wtSurface)
+                        .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
+                        .contentShape(RoundedRectangle(cornerRadius: WTRadius.md))
+                }
+                .buttonStyle(.plain)
+            }
+
+            if isCustom {
+                HStack(spacing: WTSpacing.sm) {
+                    TextField("输入分钟数", text: $customText)
+                        .keyboardType(.numberPad)
+                        .font(WTFont.body)
+                        .foregroundStyle(Color.wtTextPrimary)
+                        .padding(.horizontal, WTSpacing.md)
+                        .frame(height: 40)
+                        .background(Color.wtSurface)
+                        .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
+                        .onChange(of: customText) { _, new in
+                            completionMinutes = Int(new)
+                        }
+
+                    Text("分钟")
+                        .font(WTFont.caption)
+                        .foregroundStyle(Color.wtTextSecondary)
+                }
+            }
+        }
+    }
+}
+
 private struct DifficultyRatingField: View {
     @Binding var rating: Int
 
@@ -383,10 +552,10 @@ private struct DifficultyRatingField: View {
                         rating = value
                     } label: {
                         Image(systemName: value <= clampedRating ? "star.fill" : "star")
-                            .font(.system(size: 34, weight: .semibold))
+                            .font(.system(size: 26, weight: .semibold))
                             .foregroundStyle(value <= clampedRating ? Color.wtPrimary : Color.wtTextDisabled)
                             .frame(maxWidth: .infinity)
-                            .frame(height: 52)
+                            .frame(height: 40)
                             .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
@@ -507,19 +676,18 @@ private struct CardPreviewStep: View {
     private var previewTopBar: some View {
         HStack(spacing: WTSpacing.sm) {
             Button(action: viewModel.goBack) {
-                Image(systemName: "xmark")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundStyle(Color.wtTextPrimary)
-                    .frame(width: 44, height: 44)
+                Image(systemName: "chevron.left")
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundStyle(Color.wtPrimary)
+                    .frame(width: 36, height: 36)
+                    .background(Color.wtSurface)
+                    .clipShape(Circle())
             }
             .buttonStyle(.plain)
             .accessibilityLabel("返回上一步")
 
-            Spacer()
-
             Text("最终预览")
-                .font(.system(size: 15, weight: .semibold))
-                .foregroundStyle(Color.wtTextSecondary)
+                .font(WTFont.title)
 
             Spacer()
 
@@ -951,18 +1119,33 @@ private struct WhiteboardActionCard: View {
     let subtitle: String
 
     var body: some View {
-        RoundedRectangle(cornerRadius: WTRadius.lg)
-            .stroke(Color.wtSurface2, lineWidth: 1)
-            .frame(maxWidth: .infinity, minHeight: 120)
-            .overlay {
-                VStack(spacing: WTSpacing.sm) {
-                    Image(systemName: icon)
-                        .font(.system(size: 32))
-                        .foregroundStyle(Color.wtPrimary)
-                    Text(title).font(WTFont.bodyBold)
-                    Text(subtitle).font(WTFont.micro).foregroundStyle(Color.wtTextSecondary)
-                }
+        ZStack {
+            RoundedRectangle(cornerRadius: WTRadius.lg)
+                .fill(Color.wtSurface)
+                .overlay(
+                    RoundedRectangle(cornerRadius: WTRadius.lg)
+                        .stroke(Color.wtSurface2, lineWidth: 1)
+                )
+
+            // 右下角装饰图标
+            Image(systemName: icon)
+                .font(.system(size: 64, weight: .semibold))
+                .foregroundStyle(Color.wtPrimary.opacity(0.06))
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+                .padding(WTSpacing.sm)
+                .clipped()
+
+            VStack(spacing: WTSpacing.sm) {
+                Image(systemName: icon)
+                    .font(.system(size: 28))
+                    .foregroundStyle(Color.wtPrimary)
+                Text(title).font(WTFont.bodyBold)
+                Text(subtitle).font(WTFont.micro).foregroundStyle(Color.wtTextSecondary)
             }
+            .padding(WTSpacing.md)
+        }
+        .frame(maxWidth: .infinity, minHeight: 96)
+        .contentShape(RoundedRectangle(cornerRadius: WTRadius.lg))
     }
 }
 

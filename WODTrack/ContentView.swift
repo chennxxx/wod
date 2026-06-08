@@ -19,16 +19,6 @@ struct ContentView: View {
                     records: records,
                     openRecordFlow: { isShowingRecordFlow = true }
                 )
-                .navigationDestination(isPresented: $isShowingRecordFlow) {
-                    RecordFlowCoordinator(
-                        appState: appState,
-                        onSaved: { record in
-                            modelContext.insert(record)
-                            try? modelContext.save()
-                        }
-                    )
-                    .preferredColorScheme(.dark)
-                }
             }
             .tabItem { Label("记录", systemImage: "plus.app.fill") }
             .tag(1)
@@ -40,6 +30,16 @@ struct ContentView: View {
             .tag(2)
         }
         .tint(.wtPrimary)
+        .fullScreenCover(isPresented: $isShowingRecordFlow) {
+            RecordFlowCoordinator(
+                appState: appState,
+                onSaved: { record in
+                    modelContext.insert(record)
+                    try? modelContext.save()
+                }
+            )
+            .preferredColorScheme(.dark)
+        }
     }
 }
 
