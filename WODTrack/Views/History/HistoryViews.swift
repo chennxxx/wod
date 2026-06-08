@@ -7,20 +7,56 @@ struct HistoryListView: View {
     var scrollToDate: Date? = nil
     @State private var scrollPosition: UUID?
 
+    private var groupedByMonth: [(key: String, records: [WODRecord])] {
+        let calendar = Calendar.current
+        let grouped = Dictionary(grouping: records) { record -> String in
+            let comps = calendar.dateComponents([.year, .month], from: record.wodDate)
+            return "\(comps.year ?? 0)-\(String(format: "%02d", comps.month ?? 0))"
+        }
+        return grouped.keys.sorted(by: >).map { key in
+            (key: key, records: grouped[key]!.sorted { $0.wodDate > $1.wodDate })
+        }
+    }
+
+    private func monthTitle(from key: String) -> String {
+        let parts = key.split(separator: "-")
+        guard parts.count == 2,
+              let year = Int(parts[0]),
+              let month = Int(parts[1]),
+              let date = Calendar.current.date(from: DateComponents(year: year, month: month))
+        else { return key }
+        return date.formatted(.dateTime.year().month(.wide))
+    }
+
     var body: some View {
         ScrollView {
-            LazyVStack(spacing: WTSpacing.md) {
-                ForEach(records) { record in
-                    NavigationLink {
-                        HistoryDetailView(record: record)
-                    } label: {
-                        HistoryRecordCard(record: record)
+            LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
+                ForEach(groupedByMonth, id: \.key) { group in
+                    Section {
+                        VStack(spacing: WTSpacing.md) {
+                            ForEach(group.records) { record in
+                                NavigationLink {
+                                    HistoryDetailView(record: record)
+                                } label: {
+                                    HistoryRecordCard(record: record)
+                                }
+                                .buttonStyle(.plain)
+                                .id(record.id)
+                            }
+                        }
+                        .padding(.horizontal, WTSpacing.lg)
+                        .padding(.bottom, WTSpacing.lg)
+                    } header: {
+                        Text(monthTitle(from: group.key))
+                            .font(WTFont.caption)
+                            .foregroundStyle(Color.wtPrimary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.horizontal, WTSpacing.lg)
+                            .padding(.vertical, WTSpacing.sm)
+                            .background(Color.wtBackground.opacity(0.92))
                     }
-                    .buttonStyle(.plain)
-                    .id(record.id)
                 }
             }
-            .padding(WTSpacing.lg)
         }
         .scrollPosition(id: $scrollPosition)
         .background(Color.wtBackground)
