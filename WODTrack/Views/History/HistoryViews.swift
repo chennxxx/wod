@@ -214,7 +214,8 @@ struct DifficultyStars: View {
             ForEach(0 ..< rating, id: \.self) { _ in
                 Image(systemName: "star.fill")
                     .font(.system(size: 10))
-                    .foregroundStyle(Color.white.opacity(0.85))
+                    .foregroundStyle(Color.white.opacity(0.6))
+                    .shadow(color: .white.opacity(0.5), radius: 3, x: 0, y: 0)
             }
         }
     }
