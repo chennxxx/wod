@@ -49,13 +49,11 @@ private struct RecordHomeView: View {
     @State private var historyScrollDate: Date?
 
     var body: some View {
-        ZStack {
+        ZStack(alignment: .bottomTrailing) {
             Color.wtBackground.ignoresSafeArea()
 
             ScrollView {
                 VStack(alignment: .leading, spacing: WTSpacing.lg) {
-                    WTButton(title: records.isEmpty ? "开始记录" : "记录今天的 WOD", action: openRecordFlow)
-
                     OverviewCard(
                         records: records,
                         streakDays: streakDays,
@@ -70,7 +68,25 @@ private struct RecordHomeView: View {
                     }
                 }
                 .padding(WTSpacing.lg)
+                .padding(.bottom, 80)
             }
+
+            Button(action: openRecordFlow) {
+                HStack(spacing: WTSpacing.xs) {
+                    Image(systemName: "plus")
+                        .font(.system(size: 16, weight: .semibold))
+                    Text("记录 WOD")
+                        .font(WTFont.bodyBold)
+                }
+                .foregroundStyle(Color.black)
+                .padding(.horizontal, WTSpacing.lg)
+                .padding(.vertical, WTSpacing.md)
+                .background(Color.wtPrimary)
+                .clipShape(Capsule())
+                .shadow(color: Color.wtPrimary.opacity(0.4), radius: 12, x: 0, y: 4)
+            }
+            .padding(.trailing, WTSpacing.lg)
+            .padding(.bottom, WTSpacing.lg)
         }
         .navigationTitle("记录")
         .navigationDestination(item: $historyScrollDate) { date in
