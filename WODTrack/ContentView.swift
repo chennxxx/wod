@@ -110,18 +110,12 @@ private struct OverviewCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: WTSpacing.md) {
-            HStack {
-                Text("训练概览")
-                    .font(WTFont.title)
-                Spacer()
-                Text("近 12 周")
-                    .font(WTFont.caption)
-                    .foregroundStyle(Color.wtTextSecondary)
-            }
+            Text("训练概览")
+                .font(WTFont.title)
 
             HStack(spacing: WTSpacing.md) {
-                RecordStatBlock(value: "\(streakDays)", label: "连续打卡")
-                RecordStatBlock(value: "\(checkinDaysCount)", label: "累计打卡天数")
+                RecordStatBlock(icon: "flame.fill", value: "\(streakDays)", label: "连续打卡天数")
+                RecordStatBlock(icon: "calendar", value: "\(checkinDaysCount)", label: "累计打卡天数")
             }
 
             HeatmapGrid(records: records, onDayTapped: onDayTapped)
@@ -136,39 +130,45 @@ private struct HeatmapGrid: View {
     let records: [WODRecord]
     var onDayTapped: ((Date) -> Void)? = nil
     private let spacing: CGFloat = 6
+    private let cellSize: CGFloat = 14
 
     var body: some View {
-        VStack(alignment: .leading, spacing: WTSpacing.sm) {
-            monthLabels
+        let weeks = heatmapWeeks
+        let lastWeekId = weeks.count - 1
 
-            GeometryReader { proxy in
-                let columns = heatmapWeeks.count
-                let cellSize = max(10, (proxy.size.width - CGFloat(max(columns - 1, 0)) * spacing) / CGFloat(max(columns, 1)))
+        ScrollViewReader { proxy in
+            ScrollView(.horizontal, showsIndicators: false) {
+                VStack(alignment: .leading, spacing: WTSpacing.xs) {
+                    monthLabels(for: weeks)
 
-                HStack(alignment: .top, spacing: spacing) {
-                    ForEach(Array(heatmapWeeks.enumerated()), id: \.offset) { _, week in
-                        VStack(spacing: spacing) {
-                            ForEach(week) { day in
-                                RoundedRectangle(cornerRadius: 4)
-                                    .fill(day.didCheckIn ? Color.wtPrimary : Color.wtSurface2)
-                                    .frame(width: cellSize, height: cellSize)
-                                    .overlay {
-                                        if Calendar.current.isDateInToday(day.date) {
-                                            RoundedRectangle(cornerRadius: 4)
-                                                .stroke(Color.white.opacity(0.75), lineWidth: 1)
+                    HStack(alignment: .top, spacing: spacing) {
+                        ForEach(Array(weeks.enumerated()), id: \.offset) { index, week in
+                            VStack(spacing: spacing) {
+                                ForEach(week) { day in
+                                    RoundedRectangle(cornerRadius: 4)
+                                        .fill(day.didCheckIn ? Color.wtPrimary : Color.wtSurface2)
+                                        .frame(width: cellSize, height: cellSize)
+                                        .overlay {
+                                            if Calendar.current.isDateInToday(day.date) {
+                                                RoundedRectangle(cornerRadius: 4)
+                                                    .stroke(Color.white.opacity(0.75), lineWidth: 1)
+                                            }
                                         }
-                                    }
-                                    .onTapGesture {
-                                        onDayTapped?(day.date)
-                                    }
+                                        .onTapGesture {
+                                            onDayTapped?(day.date)
+                                        }
+                                }
                             }
+                            .id(index == lastWeekId ? "last-week" : nil)
                         }
                     }
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
             }
-            .frame(height: gridHeight)
+            .onAppear {
+                proxy.scrollTo("last-week", anchor: .trailing)
+            }
         }
+        .frame(height: CGFloat(7) * cellSize + CGFloat(6) * spacing + WTSpacing.xs + 14)
     }
 
     private var heatmapWeeks: [[HeatmapDay]] {
@@ -183,68 +183,66 @@ private struct HeatmapGrid: View {
         let today = calendar.startOfDay(for: .now)
         let uniqueDays = Set(records.map { calendar.startOfDay(for: $0.wodDate) })
 
-        return (0 ..< 84).reversed().compactMap { offset in
+        let earliestDate = calendar.date(from: DateComponents(year: 2026, month: 1, day: 1))!
+        let totalDays = calendar.dateComponents([.day], from: earliestDate, to: today).day ?? 0
+        let dayCount = max(totalDays + 1, 84)
+
+        return (0 ..< dayCount).reversed().compactMap { offset in
             guard let date = calendar.date(byAdding: .day, value: -offset, to: today) else { return nil }
             return HeatmapDay(date: date, didCheckIn: uniqueDays.contains(date))
         }
     }
 
-    private var monthLabels: some View {
+    private func monthLabels(for weeks: [[HeatmapDay]]) -> some View {
         HStack(spacing: spacing) {
-            ForEach(Array(heatmapWeeks.enumerated()), id: \.offset) { index, week in
-                let label = monthLabel(for: week, weekIndex: index)
+            ForEach(Array(weeks.enumerated()), id: \.offset) { index, week in
+                let label: String = {
+                    guard let first = week.first else { return "" }
+                    let calendar = Calendar.current
+                    let month = calendar.component(.month, from: first.date)
+                    if index == 0 { return first.date.formatted(.dateTime.month(.abbreviated)) }
+                    let prevMonth = weeks[safe: index - 1].flatMap { $0.first }.map {
+                        calendar.component(.month, from: $0.date)
+                    }
+                    return prevMonth == month ? "" : first.date.formatted(.dateTime.month(.abbreviated))
+                }()
                 Text(label)
                     .font(.system(size: 9, weight: .medium))
                     .foregroundStyle(Color.wtTextSecondary)
                     .lineLimit(1)
-                    .minimumScaleFactor(0.7)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .frame(width: cellSize, alignment: .leading)
             }
         }
-    }
-
-    private var gridHeight: CGFloat {
-        let rows = 7
-        let weekCount = max(heatmapWeeks.count, 1)
-        let availableWidth = UIScreen.main.bounds.width - (WTSpacing.lg * 2) - (WTSpacing.md * 2)
-        let cellSize = max(10, (availableWidth - CGFloat(max(weekCount - 1, 0)) * spacing) / CGFloat(weekCount))
-        return CGFloat(rows) * cellSize + CGFloat(rows - 1) * spacing
-    }
-
-    private func monthLabel(for week: [HeatmapDay], weekIndex: Int) -> String {
-        guard let first = week.first else { return "" }
-        let calendar = Calendar.current
-        let month = calendar.component(.month, from: first.date)
-
-        if weekIndex == 0 {
-            return first.date.formatted(.dateTime.month(.abbreviated))
-        }
-
-        let previousMonth = heatmapWeeks[safe: weekIndex - 1].flatMap { $0.first }.map {
-            calendar.component(.month, from: $0.date)
-        }
-
-        return previousMonth == month ? "" : first.date.formatted(.dateTime.month(.abbreviated))
     }
 }
 
 private struct RecordStatBlock: View {
+    let icon: String
     let value: String
     let label: String
 
     var body: some View {
-        VStack(alignment: .leading, spacing: WTSpacing.xs) {
-            Text(value)
-                .font(.system(size: 28, weight: .bold))
+        HStack(spacing: WTSpacing.sm) {
+            Image(systemName: icon)
+                .font(.system(size: 20))
                 .foregroundStyle(Color.wtPrimary)
-            Text(label)
-                .font(WTFont.caption)
-                .foregroundStyle(Color.wtTextSecondary)
+                .frame(width: 28)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(value)
+                    .font(.system(size: 22, weight: .bold))
+                    .foregroundStyle(Color.wtPrimary)
+                Text(label)
+                    .font(WTFont.caption)
+                    .foregroundStyle(Color.wtTextSecondary)
+            }
+
+            Spacer(minLength: 0)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(WTSpacing.sm)
         .background(Color.black.opacity(0.18))
         .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
+        .frame(maxWidth: .infinity)
     }
 }
 

@@ -129,34 +129,46 @@ private struct HistoryRecordCard: View {
     let record: WODRecord
 
     var body: some View {
-        HStack(alignment: .top, spacing: WTSpacing.md) {
-            HistoryThumbnail(record: record)
-                .frame(width: 88, height: 88)
-                .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
-
-            VStack(alignment: .leading, spacing: WTSpacing.sm) {
-                Text(record.wodDate.formatted(.dateTime.year().month().day().weekday(.wide)))
+        VStack(alignment: .leading, spacing: WTSpacing.sm) {
+            HStack {
+                Text(record.wodDate.formatted(Date.FormatStyle().year().month().day()))
                     .font(WTFont.bodyBold)
                     .foregroundStyle(Color.wtTextPrimary)
-
-                Text(record.wodContent.prefix(3).joined(separator: " · "))
-                    .font(WTFont.caption)
-                    .foregroundStyle(Color.wtTextSecondary)
-                    .lineLimit(3)
-
-                HStack(spacing: WTSpacing.sm) {
-                    HistoryMetaBadge(title: record.completionStatus.label, isPrimary: record.completionStatus == .completed)
-                    if let difficultyRating = record.difficultyRating {
-                        HistoryMetaBadge(title: "难度 \(difficultyRating)/5")
-                    }
+                Spacer(minLength: 0)
+                if let rating = record.difficultyRating {
+                    DifficultyStars(rating: rating)
                 }
             }
 
-            Spacer(minLength: 0)
+            HStack(alignment: .top, spacing: WTSpacing.md) {
+                HistoryThumbnail(record: record)
+                    .frame(width: 72, height: 72)
+                    .clipShape(RoundedRectangle(cornerRadius: WTRadius.sm))
+
+                Text(record.wodContent.prefix(2).joined(separator: "\n"))
+                    .font(WTFont.caption)
+                    .foregroundStyle(Color.wtTextSecondary)
+                    .lineLimit(2)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
         }
         .padding(WTSpacing.md)
         .background(Color.wtSurface)
         .clipShape(RoundedRectangle(cornerRadius: WTRadius.lg))
+    }
+}
+
+private struct DifficultyStars: View {
+    let rating: Int
+
+    var body: some View {
+        HStack(spacing: 2) {
+            ForEach(1 ... 5, id: \.self) { i in
+                Image(systemName: i <= rating ? "star.fill" : "star")
+                    .font(.system(size: 10))
+                    .foregroundStyle(i <= rating ? Color.wtPrimary : Color.wtTextSecondary.opacity(0.5))
+            }
+        }
     }
 }
 
