@@ -211,10 +211,10 @@ struct DifficultyStars: View {
 
     var body: some View {
         HStack(spacing: 2) {
-            ForEach(1 ... 5, id: \.self) { i in
-                Image(systemName: i <= rating ? "star.fill" : "star")
+            ForEach(0 ..< rating, id: \.self) { _ in
+                Image(systemName: "star.fill")
                     .font(.system(size: 10))
-                    .foregroundStyle(i <= rating ? Color.wtPrimary : Color.wtTextSecondary.opacity(0.5))
+                    .foregroundStyle(Color.white.opacity(0.85))
             }
         }
     }
