@@ -72,7 +72,7 @@ private struct RecordHomeView: View {
                 .padding(WTSpacing.lg)
             }
         }
-        .navigationTitle("WODTrack")
+        .navigationTitle("记录")
         .navigationDestination(item: $historyScrollDate) { date in
             HistoryListView(scrollToDate: date)
         }
