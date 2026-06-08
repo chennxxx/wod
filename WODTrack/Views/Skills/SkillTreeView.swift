@@ -126,7 +126,7 @@ struct SkillTreeView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                LazyVStack(spacing: WTSpacing.md, pinnedViews: [.sectionHeaders]) {
+                LazyVStack(spacing: WTSpacing.md) {
                     Picker("视图", selection: $selectedPage.animation(.easeInOut(duration: 0.2))) {
                         ForEach(SkillPage.allCases, id: \.self) { page in
                             Text(page.label).tag(page)
@@ -151,27 +151,22 @@ struct SkillTreeView: View {
     // MARK: Actions Content
 
     @ViewBuilder private var actionsContent: some View {
-        Section {
-            if isSubFiltering {
-                flatSkillList
-            } else {
-                ForEach(SkillLibrary.categories) { category in
-                    CategorySection(
-                        category: category,
-                        selectedFilter: selectedFilter,
-                        statusMap: statusMap,
-                        bestEntryMap: bestEntryMap
-                    )
-                }
+        VStack(spacing: WTSpacing.sm) {
+            statusFilterBar
+            secondaryFilters
+        }
+
+        if isSubFiltering {
+            flatSkillList
+        } else {
+            ForEach(SkillLibrary.categories) { category in
+                CategorySection(
+                    category: category,
+                    selectedFilter: selectedFilter,
+                    statusMap: statusMap,
+                    bestEntryMap: bestEntryMap
+                )
             }
-        } header: {
-            VStack(spacing: WTSpacing.sm) {
-                statusFilterBar
-                secondaryFilters
-            }
-            .padding(.top, WTSpacing.sm)
-            .padding(.bottom, WTSpacing.sm)
-            .background(Color.wtBackground)
         }
     }
 

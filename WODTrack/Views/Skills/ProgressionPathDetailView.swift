@@ -126,6 +126,8 @@ private struct PathStepRow: View {
                     .padding(.top, WTSpacing.sm)
             }
             .padding(.horizontal, WTSpacing.lg)
+            .padding(.vertical, WTSpacing.xs)
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
     }

@@ -139,6 +139,7 @@ struct SkillDetailView: View {
                     let prereqStatus = statusMap[prereq.id]?.status ?? .unmarked
                     NavigationLink(destination: SkillDetailView(skill: prereq)) {
                         PrereqRow(skill: prereq, status: prereqStatus)
+                            .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
                     if index < prereqSkills.count - 1 {
