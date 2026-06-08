@@ -138,30 +138,33 @@ private struct HeatmapGrid: View {
 
         ScrollViewReader { proxy in
             ScrollView(.horizontal, showsIndicators: false) {
-                VStack(alignment: .leading, spacing: WTSpacing.xs) {
-                    monthLabels(for: weeks)
+                HStack(alignment: .top, spacing: spacing) {
+                    ForEach(Array(weeks.enumerated()), id: \.offset) { index, week in
+                        VStack(spacing: spacing) {
+                            Text(monthLabel(for: week, index: index, in: weeks))
+                                .font(.system(size: 9, weight: .medium))
+                                .foregroundStyle(Color.wtTextSecondary)
+                                .lineLimit(1)
+                                .fixedSize(horizontal: true, vertical: false)
+                                .frame(width: cellSize, alignment: .leading)
 
-                    HStack(alignment: .top, spacing: spacing) {
-                        ForEach(Array(weeks.enumerated()), id: \.offset) { index, week in
-                            VStack(spacing: spacing) {
-                                ForEach(week) { day in
-                                    RoundedRectangle(cornerRadius: 4)
-                                        .fill(cellColor(for: day))
-                                        .frame(width: cellSize, height: cellSize)
-                                        .overlay {
-                                            if Calendar.current.isDateInToday(day.date) {
-                                                RoundedRectangle(cornerRadius: 4)
-                                                    .stroke(Color.white.opacity(0.75), lineWidth: 1)
-                                            }
+                            ForEach(week) { day in
+                                RoundedRectangle(cornerRadius: 4)
+                                    .fill(cellColor(for: day))
+                                    .frame(width: cellSize, height: cellSize)
+                                    .overlay {
+                                        if Calendar.current.isDateInToday(day.date) {
+                                            RoundedRectangle(cornerRadius: 4)
+                                                .stroke(Color.white.opacity(0.75), lineWidth: 1)
                                         }
-                                        .onTapGesture {
-                                            guard day.didCheckIn else { return }
-                                            onDayTapped?(day.date)
-                                        }
-                                }
+                                    }
+                                    .onTapGesture {
+                                        guard day.didCheckIn else { return }
+                                        onDayTapped?(day.date)
+                                    }
                             }
-                            .id(index == lastWeekId ? "last-week" : nil)
                         }
+                        .id(index == lastWeekId ? "last-week" : nil)
                     }
                 }
             }
@@ -169,7 +172,7 @@ private struct HeatmapGrid: View {
                 proxy.scrollTo("last-week", anchor: .trailing)
             }
         }
-        .frame(height: CGFloat(7) * cellSize + CGFloat(6) * spacing + WTSpacing.xs + 14)
+        .frame(height: CGFloat(7) * cellSize + CGFloat(7) * spacing + 12)
     }
 
     private var heatmapWeeks: [[HeatmapDay]] {
@@ -207,26 +210,15 @@ private struct HeatmapGrid: View {
         }
     }
 
-    private func monthLabels(for weeks: [[HeatmapDay]]) -> some View {
-        HStack(spacing: spacing) {
-            ForEach(Array(weeks.enumerated()), id: \.offset) { index, week in
-                let label: String = {
-                    guard let first = week.first else { return "" }
-                    let calendar = Calendar.current
-                    let month = calendar.component(.month, from: first.date)
-                    if index == 0 { return first.date.formatted(.dateTime.month(.abbreviated)) }
-                    let prevMonth = weeks[safe: index - 1].flatMap { $0.first }.map {
-                        calendar.component(.month, from: $0.date)
-                    }
-                    return prevMonth == month ? "" : first.date.formatted(.dateTime.month(.abbreviated))
-                }()
-                Text(label)
-                    .font(.system(size: 9, weight: .medium))
-                    .foregroundStyle(Color.wtTextSecondary)
-                    .lineLimit(1)
-                    .frame(width: cellSize, alignment: .leading)
-            }
+    private func monthLabel(for week: [HeatmapDay], index: Int, in weeks: [[HeatmapDay]]) -> String {
+        guard let first = week.first else { return "" }
+        let calendar = Calendar.current
+        let month = calendar.component(.month, from: first.date)
+        if index == 0 { return first.date.formatted(.dateTime.month(.abbreviated)) }
+        let prevMonth = weeks[safe: index - 1].flatMap { $0.first }.map {
+            calendar.component(.month, from: $0.date)
         }
+        return prevMonth == month ? "" : first.date.formatted(.dateTime.month(.abbreviated))
     }
 }
 
