@@ -224,6 +224,10 @@ private struct OCRStatusBanner: View {
                 ProgressView()
                     .tint(.wtPrimary)
                 Text("正在识别白板内容…")
+            case .timeout:
+                Image(systemName: "clock.badge.exclamationmark")
+                    .foregroundStyle(Color.wtDanger)
+                Text("识别超时，请重试")
             case .success:
                 Image(systemName: "checkmark.circle.fill")
                     .foregroundStyle(Color.wtSuccess)
@@ -243,8 +247,13 @@ private struct OCRStatusBanner: View {
 }
 
 private struct OCRLoadingView: View {
+    let isTimeout: Bool
+    let onRetry: () -> Void
+    let onBack: () -> Void
+
     private let messages = ["正在抓取白板内容", "正在处理白板内容", "正在将图片转化为文字"]
     @State private var messageIndex = 0
+    @State private var cycleTimer: Timer?
 
     var body: some View {
         ZStack {
@@ -256,26 +265,47 @@ private struct OCRLoadingView: View {
                     .scaleEffect(1.4)
 
                 VStack(spacing: WTSpacing.xs) {
-                    Text(messages[messageIndex])
+                    Text(isTimeout ? "识别时间较长…" : messages[messageIndex])
                         .font(WTFont.bodyBold)
                         .foregroundStyle(Color.wtTextPrimary)
-                        .id(messageIndex)
+                        .id(isTimeout ? -1 : messageIndex)
                         .transition(.opacity)
                         .animation(.easeInOut(duration: 0.4), value: messageIndex)
 
-                    Text("通常需要 5-15 秒")
+                    Text(isTimeout ? "网络可能较慢，你可以重试或返回上一步" : "通常需要 5-15 秒")
                         .font(WTFont.caption)
                         .foregroundStyle(Color.wtTextSecondary)
+                        .multilineTextAlignment(.center)
+                        .animation(.easeInOut, value: isTimeout)
                 }
             }
+            .padding(WTSpacing.lg)
         }
+        .safeAreaInset(edge: .bottom) {
+            if isTimeout {
+                HStack(spacing: WTSpacing.sm) {
+                    WTButton(title: "返回上一步", style: .secondary, action: onBack)
+                    WTButton(title: "重试", action: onRetry)
+                }
+                .padding(.horizontal, WTSpacing.lg)
+                .padding(.top, WTSpacing.sm)
+                .padding(.bottom, WTSpacing.md)
+                .background(.ultraThinMaterial)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+        }
+        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: isTimeout)
         .onAppear {
             startCycling()
+        }
+        .onDisappear {
+            cycleTimer?.invalidate()
+            cycleTimer = nil
         }
     }
 
     private func startCycling() {
-        Timer.scheduledTimer(withTimeInterval: 2.2, repeats: true) { timer in
+        cycleTimer = Timer.scheduledTimer(withTimeInterval: 2.2, repeats: true) { _ in
             withAnimation {
                 messageIndex = (messageIndex + 1) % messages.count
             }
@@ -289,7 +319,17 @@ private struct OCRResultStep: View {
     var body: some View {
         switch viewModel.ocrState {
         case .idle, .processing:
-            OCRLoadingView()
+            OCRLoadingView(
+                isTimeout: false,
+                onRetry: viewModel.retryOCR,
+                onBack: viewModel.goBack
+            )
+        case .timeout:
+            OCRLoadingView(
+                isTimeout: true,
+                onRetry: viewModel.retryOCR,
+                onBack: viewModel.goBack
+            )
         case .failure(let message):
             RecordFlowStepPage(title: "识别失败", backAction: viewModel.goBack) {
                 VStack(alignment: .leading, spacing: WTSpacing.lg) {

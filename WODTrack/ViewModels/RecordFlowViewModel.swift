@@ -23,6 +23,7 @@ final class RecordFlowViewModel {
     enum OCRState: Equatable {
         case idle
         case processing
+        case timeout
         case success(OCRResult)
         case failure(String)
     }
@@ -47,6 +48,8 @@ final class RecordFlowViewModel {
     private var hasUserAdjustedFontSize = false
     private var networkRetryCount = 0
     private let maxNetworkRetries = 3
+    private var ocrTask: Task<Void, Never>?
+    private let ocrTimeoutSeconds: Double = 10
 
     init(ocrService: OCRServicing = PreviewOCRService()) {
         self.ocrService = ocrService
@@ -62,15 +65,33 @@ final class RecordFlowViewModel {
     }
 
     private func performOCR(image: UIImage) {
-        Task {
+        ocrTask?.cancel()
+
+        let task = Task {
+            // 超时竞争：ocrTimeoutSeconds 秒后取消请求
+            let timeoutTask = Task {
+                try? await Task.sleep(for: .seconds(ocrTimeoutSeconds))
+                guard !Task.isCancelled else { return }
+                await MainActor.run {
+                    // 只有在仍处于 processing 时才触发超时
+                    if case .processing = ocrState {
+                        ocrState = .timeout
+                    }
+                }
+            }
+
             do {
                 let result = try await ocrService.recognize(image: image)
+                timeoutTask.cancel()
+                guard !Task.isCancelled else { return }
                 await MainActor.run {
                     ocrState = .success(result)
                     wodType = result.wodType
                     wodContentText = result.wodContent.joined(separator: "\n")
                 }
             } catch {
+                timeoutTask.cancel()
+                guard !Task.isCancelled else { return }
                 let isNetworkError = error is URLError || (error as NSError).domain == NSURLErrorDomain
                 await MainActor.run {
                     if isNetworkError && networkRetryCount < maxNetworkRetries {
@@ -85,6 +106,7 @@ final class RecordFlowViewModel {
                 }
             }
         }
+        ocrTask = task
     }
 
     func startManualEntry() {
@@ -126,6 +148,8 @@ final class RecordFlowViewModel {
         case .whiteboard:
             break
         case .ocrResult:
+            ocrTask?.cancel()
+            ocrTask = nil
             step = .whiteboard
         case .checkinPhotos, .scoreInput:
             step = .ocrResult
@@ -183,7 +207,9 @@ final class RecordFlowViewModel {
 
     func retryOCR() {
         guard let selectedWhiteboardImage else { return }
-        startFlow(with: selectedWhiteboardImage)
+        networkRetryCount = 0
+        ocrState = .processing
+        performOCR(image: selectedWhiteboardImage)
     }
 
     func selectStyle(_ style: CardStyle, isPro: Bool) -> Bool {
