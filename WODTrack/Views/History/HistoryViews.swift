@@ -93,14 +93,22 @@ struct HistoryListView: View {
                     Button {
                         selectedMonth = nil
                     } label: {
-                        Label("全部", systemImage: selectedMonth == nil ? "checkmark" : "")
+                        if selectedMonth == nil {
+                            Label("全部", systemImage: "checkmark")
+                        } else {
+                            Text("全部")
+                        }
                     }
                     Divider()
                     ForEach(allMonthKeys, id: \.self) { key in
                         Button {
                             selectedMonth = selectedMonth == key ? nil : key
                         } label: {
-                            Label(sectionTitle(from: key), systemImage: selectedMonth == key ? "checkmark" : "")
+                            if selectedMonth == key {
+                                Label(sectionTitle(from: key), systemImage: "checkmark")
+                            } else {
+                                Text(sectionTitle(from: key))
+                            }
                         }
                     }
                 } label: {
