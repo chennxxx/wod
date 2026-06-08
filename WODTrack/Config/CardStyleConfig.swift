@@ -10,16 +10,20 @@ struct CardStyle: Identifiable, Hashable {
 
     enum OverlayStyle: String, Hashable {
         case plain
-        case glass
         case dark
         case soft
+        case light
+        case grain
     }
 
     enum LayoutStyle: String, Hashable {
         case bottomCard
-        case centerGlass
         case editorialTop
         case rightOverlayMono
+        case bottomCardLight
+        case heroTitle
+        case dataDashboard
+        case retroFilm
     }
 }
 
@@ -34,19 +38,43 @@ enum CardStyleConfig {
             isPro: false
         ),
         .init(
-            id: "style_glass_light",
-            name: "玻璃海报",
-            summary: "居中毛玻璃，适合单张训练照",
-            overlay: .glass,
-            layout: .centerGlass,
-            isPro: false
-        ),
-        .init(
             id: "style_mono_overlay",
             name: "训练日志",
             summary: "直接压字到图片上，参考你发的样式",
             overlay: .soft,
             layout: .rightOverlayMono,
+            isPro: false
+        ),
+        .init(
+            id: "style_minimal_white",
+            name: "极简白底",
+            summary: "浅色信息卡，适合日间分享",
+            overlay: .light,
+            layout: .bottomCardLight,
+            isPro: false
+        ),
+        .init(
+            id: "style_hero_title",
+            name: "大字报",
+            summary: "超大标题字体，视觉冲击力强",
+            overlay: .dark,
+            layout: .heroTitle,
+            isPro: false
+        ),
+        .init(
+            id: "style_data_dashboard",
+            name: "数据仪表盘",
+            summary: "强调训练数字，数据卡片风格",
+            overlay: .dark,
+            layout: .dataDashboard,
+            isPro: false
+        ),
+        .init(
+            id: "style_retro_film",
+            name: "胶片复古",
+            summary: "胶片颗粒感，带日期戳，怀旧拍摄风",
+            overlay: .grain,
+            layout: .retroFilm,
             isPro: false
         )
     ]
@@ -65,6 +93,6 @@ enum CardStyleConfig {
     static let all = freeStyles + proStyles
 
     static func style(for id: String) -> CardStyle {
-        all.first(where: { $0.id == id }) ?? freeStyles[0]
+        all.first(where: { $0.id == id }) ?? freeStyles.first(where: { $0.id == "style_mono_overlay" }) ?? freeStyles[0]
     }
 }

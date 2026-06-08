@@ -28,7 +28,7 @@ final class WODRecord {
         self.completionStatus = .completed
         self.difficultyRating = nil
         self.checkinPhotoURLs = []
-        self.cardStyleId = CardStyleConfig.freeStyles.first?.id ?? "style_basic_dark"
+        self.cardStyleId = "style_mono_overlay"
         self.textLayout = TextLayout()
         self.cardImagePath = nil
         self.boxId = nil
@@ -90,6 +90,7 @@ enum CompletionStatus: String, Codable, CaseIterable, Identifiable {
 
 struct TextLayout: Codable {
     var verticalPosition: VerticalPosition = .bottom
+    var horizontalPosition: HorizontalPosition = .leading
     var fontSize: Double = 16
     var textColor: String = "#FFFFFF"
     var textOpacity: Double = 1
@@ -99,6 +100,7 @@ struct TextLayout: Codable {
 
     init(
         verticalPosition: VerticalPosition = .bottom,
+        horizontalPosition: HorizontalPosition = .leading,
         fontSize: Double = 16,
         textColor: String = "#FFFFFF",
         textOpacity: Double = 1,
@@ -106,6 +108,7 @@ struct TextLayout: Codable {
         imageDisplayMode: ImageDisplayMode = .fit
     ) {
         self.verticalPosition = verticalPosition
+        self.horizontalPosition = horizontalPosition
         self.fontSize = fontSize
         self.textColor = textColor
         self.textOpacity = textOpacity
@@ -115,6 +118,7 @@ struct TextLayout: Codable {
 
     enum CodingKeys: String, CodingKey {
         case verticalPosition
+        case horizontalPosition
         case fontSize
         case textColor
         case textOpacity
@@ -125,6 +129,7 @@ struct TextLayout: Codable {
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         verticalPosition = try container.decodeIfPresent(VerticalPosition.self, forKey: .verticalPosition) ?? .bottom
+        horizontalPosition = try container.decodeIfPresent(HorizontalPosition.self, forKey: .horizontalPosition) ?? .leading
         fontSize = try container.decodeIfPresent(Double.self, forKey: .fontSize) ?? 16
         textColor = try container.decodeIfPresent(String.self, forKey: .textColor) ?? "#FFFFFF"
         textOpacity = try container.decodeIfPresent(Double.self, forKey: .textOpacity) ?? 1
@@ -135,6 +140,7 @@ struct TextLayout: Codable {
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(verticalPosition, forKey: .verticalPosition)
+        try container.encode(horizontalPosition, forKey: .horizontalPosition)
         try container.encode(fontSize, forKey: .fontSize)
         try container.encode(textColor, forKey: .textColor)
         try container.encode(textOpacity, forKey: .textOpacity)
@@ -169,6 +175,27 @@ struct TextLayout: Codable {
             switch self {
             case .fill: "照片铺满画布，边缘自动裁切"
             case .fit: "完整保留照片，边缘用模糊填充"
+            }
+        }
+    }
+
+    enum HorizontalPosition: String, Codable, CaseIterable, Identifiable {
+        case leading
+        case trailing
+
+        var id: String { rawValue }
+
+        var label: String {
+            switch self {
+            case .leading: "左侧"
+            case .trailing: "右侧"
+            }
+        }
+
+        var icon: String {
+            switch self {
+            case .leading: "text.alignleft"
+            case .trailing: "text.alignright"
             }
         }
     }

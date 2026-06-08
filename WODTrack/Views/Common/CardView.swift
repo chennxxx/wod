@@ -15,15 +15,19 @@ struct CardView: View {
                 switch style.layout {
                 case .bottomCard:
                     bottomCardLayout(proxy: proxy)
-                case .centerGlass:
-                    centerGlassLayout(proxy: proxy)
                 case .editorialTop:
                     editorialTopLayout(proxy: proxy)
                 case .rightOverlayMono:
                     rightOverlayMonoLayout(proxy: proxy)
+                case .bottomCardLight:
+                    bottomCardLightLayout(proxy: proxy)
+                case .heroTitle:
+                    heroTitleLayout(proxy: proxy)
+                case .dataDashboard:
+                    dataDashboardLayout(proxy: proxy)
+                case .retroFilm:
+                    retroFilmLayout(proxy: proxy)
                 }
-
-
             }
             .frame(width: proxy.size.width, height: proxy.size.height)
             .clipped()
@@ -52,12 +56,6 @@ struct CardView: View {
         switch style.overlay {
         case .plain:
             Color.clear
-        case .glass:
-            LinearGradient(
-                colors: [Color.white.opacity(0.08), Color.black.opacity(0.28)],
-                startPoint: .top,
-                endPoint: .bottom
-            )
         case .dark:
             LinearGradient(
                 colors: [Color.black.opacity(0.08), Color.black.opacity(0.52)],
@@ -77,55 +75,146 @@ struct CardView: View {
                     endPoint: .trailing
                 )
             }
+        case .light:
+            LinearGradient(
+                colors: [Color.white.opacity(0.08), Color.white.opacity(0.38)],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        case .grain:
+            ZStack {
+                Color.black.opacity(0.3)
+                LinearGradient(
+                    colors: [Color(red: 0.25, green: 0.18, blue: 0.08).opacity(0.55), Color.clear],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            }
         }
     }
+
+    // MARK: - Layouts
 
     private func bottomCardLayout(proxy: GeometryProxy) -> some View {
         let verticalMargin = overlayVerticalMargin(proxy: proxy)
         let textSize = CGFloat(record.textLayout.fontSize)
         let lineSpacing = adaptiveLineSpacing(for: textSize, defaultSpacing: 6)
-        let panelWidth = overlayPanelWidth(proxy: proxy, horizontalInset: 48)
 
-        return VStack(alignment: .leading, spacing: 10) {
-            metaChips(darkDifficulty: true)
-            contentLines(fontSize: textSize, lineSpacing: lineSpacing, weight: .bold)
-            dateLine(accented: false)
+        return anchoredPanel(verticalMargin: verticalMargin, proxy: proxy) {
+            VStack(alignment: panelTextAlignment, spacing: 10) {
+                contentLines(fontSize: textSize, lineSpacing: lineSpacing, weight: .bold, fillWidth: false)
+                dateLine(accented: false)
+            }
+            .padding(16)
+            .background(
+                RoundedRectangle(cornerRadius: 18)
+                    .fill(Color.black.opacity(0.55))
+            )
         }
-        .padding(16)
-        .frame(width: panelWidth, alignment: .leading)
-        .background(
-            RoundedRectangle(cornerRadius: 18)
-                .fill(Color.black.opacity(0.55))
-        )
-        .padding(.horizontal, 24)
-        .padding(.vertical, verticalMargin)
-        .frame(width: proxy.size.width, height: proxy.size.height, alignment: trailingCardAlignment)
     }
 
-    private func centerGlassLayout(proxy: GeometryProxy) -> some View {
+    private func bottomCardLightLayout(proxy: GeometryProxy) -> some View {
         let verticalMargin = overlayVerticalMargin(proxy: proxy)
         let textSize = CGFloat(record.textLayout.fontSize)
         let lineSpacing = adaptiveLineSpacing(for: textSize, defaultSpacing: 6)
-        let panelWidth = overlayPanelWidth(proxy: proxy, horizontalInset: 56)
+
+        return anchoredPanel(verticalMargin: verticalMargin, proxy: proxy) {
+            VStack(alignment: panelTextAlignment, spacing: 10) {
+                contentLines(fontSize: textSize, lineSpacing: lineSpacing, weight: .bold, fillWidth: false)
+                dateLine(accented: false)
+            }
+            .padding(16)
+            .background(
+                RoundedRectangle(cornerRadius: 18)
+                    .fill(Color.white.opacity(0.9))
+            )
+        }
+    }
+
+    private func heroTitleLayout(proxy: GeometryProxy) -> some View {
+        let verticalMargin = overlayVerticalMargin(proxy: proxy)
+        let heroSize = min(CGFloat(record.textLayout.fontSize) * 2.2, 58)
+        let subSize = CGFloat(record.textLayout.fontSize) * 0.85
+        let firstLine = record.wodContent.first ?? ""
+        let remainingLines = Array(record.wodContent.dropFirst())
 
         return VStack(alignment: .leading, spacing: 12) {
-            metaChips(darkDifficulty: false)
-            contentLines(fontSize: textSize, lineSpacing: lineSpacing, weight: .semibold)
+            Text(firstLine.uppercased())
+                .font(font(for: heroSize, weight: .black))
+                .foregroundStyle(textColor)
+                .shadow(color: .black.opacity(0.75), radius: 8, x: 0, y: 3)
+                .lineLimit(2)
+                .minimumScaleFactor(0.45)
+
+            if !remainingLines.isEmpty {
+                VStack(alignment: .leading, spacing: 4) {
+                    ForEach(remainingLines, id: \.self) { line in
+                        Text(line)
+                            .font(font(for: subSize, weight: .medium))
+                            .foregroundStyle(textColor.opacity(0.8))
+                            .shadow(color: .black.opacity(0.6), radius: 3, x: 0, y: 1)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.75)
+                    }
+                }
+            }
+
             dateLine(accented: false)
+                .foregroundStyle(textColor.opacity(0.65))
         }
-        .padding(20)
-        .frame(width: panelWidth, alignment: .leading)
-        .background(
-            RoundedRectangle(cornerRadius: 22)
-                .fill(Color.black.opacity(0.42))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 22)
-                        .stroke(Color.white.opacity(0.18), lineWidth: 1)
-                )
-        )
-        .padding(.horizontal, 28)
+        .padding(.horizontal, 24)
         .padding(.vertical, verticalMargin)
-        .frame(width: proxy.size.width, height: proxy.size.height, alignment: trailingCardAlignment)
+        .frame(width: proxy.size.width, height: proxy.size.height, alignment: leadingCardAlignment)
+    }
+
+    private func dataDashboardLayout(proxy: GeometryProxy) -> some View {
+        let verticalMargin = overlayVerticalMargin(proxy: proxy)
+        let textSize = CGFloat(record.textLayout.fontSize)
+        let lineSpacing = adaptiveLineSpacing(for: textSize, defaultSpacing: 6)
+
+        return anchoredPanel(verticalMargin: verticalMargin, proxy: proxy) {
+            VStack(alignment: panelTextAlignment, spacing: 10) {
+                Text(record.wodDate.formatted(.dateTime.month(.abbreviated).day().year()))
+                    .font(.system(size: 11, weight: .bold, design: .monospaced))
+                    .foregroundStyle(textColor.opacity(0.55))
+
+                contentLines(fontSize: textSize, lineSpacing: lineSpacing, weight: .semibold, fillWidth: false)
+            }
+            .padding(18)
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color.black.opacity(0.72))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(textColor.opacity(0.22), lineWidth: 1)
+                    )
+            )
+        }
+    }
+
+    private func retroFilmLayout(proxy: GeometryProxy) -> some View {
+        let verticalMargin = overlayVerticalMargin(proxy: proxy)
+        let textSize = CGFloat(record.textLayout.fontSize)
+        let lineSpacing = adaptiveLineSpacing(for: textSize, defaultSpacing: 8)
+
+        return ZStack {
+            Rectangle()
+                .strokeBorder(Color(red: 0.94, green: 0.9, blue: 0.78).opacity(0.72), lineWidth: 14)
+
+            VStack(alignment: .leading, spacing: 8) {
+                contentLines(fontSize: textSize, lineSpacing: lineSpacing, weight: .regular, fillWidth: false)
+
+                Text(record.wodDate.formatted(
+                    .dateTime.year(.defaultDigits).month(.twoDigits).day(.twoDigits)
+                ))
+                .font(.system(size: 13, weight: .bold, design: .monospaced))
+                .foregroundStyle(Color(red: 1.0, green: 0.55, blue: 0.0).opacity(0.9))
+            }
+            .padding(.horizontal, 28)
+            .padding(.bottom, verticalMargin + 16)
+            .frame(width: proxy.size.width, height: proxy.size.height, alignment: .bottomLeading)
+        }
+        .frame(width: proxy.size.width, height: proxy.size.height)
     }
 
     private func editorialTopLayout(proxy: GeometryProxy) -> some View {
@@ -135,7 +224,6 @@ struct CardView: View {
 
         return VStack(alignment: .leading, spacing: 14) {
             dateLine(accented: true)
-            metaChips(darkDifficulty: false)
             contentLines(fontSize: textSize, lineSpacing: lineSpacing, weight: .bold)
         }
         .padding(.horizontal, 26)
@@ -167,20 +255,6 @@ struct CardView: View {
                         .minimumScaleFactor(0.75)
                 }
             }
-
-            HStack(spacing: 8) {
-                if let difficultyRating = record.difficultyRating {
-                    Text("RPE \(difficultyRating)/5")
-                        .font(font(for: min(14, textSize + 1), weight: .semibold))
-                        .foregroundStyle(textColor)
-                        .shadow(color: .black.opacity(0.9), radius: 5, x: 0, y: 2)
-                }
-
-                Text(record.completionStatus == .completed ? "🏆 已完成" : "未完成")
-                    .font(font(for: min(16, textSize + 2), weight: .bold))
-                    .foregroundStyle(record.completionStatus == .completed ? Color.wtPrimary : textColor)
-                    .shadow(color: .black.opacity(0.9), radius: 5, x: 0, y: 2)
-            }
         }
         .padding(.trailing, 24)
         .padding(.vertical, verticalMargin)
@@ -188,42 +262,36 @@ struct CardView: View {
         .frame(width: proxy.size.width, height: proxy.size.height, alignment: trailingCardAlignment)
     }
 
-    private func metaChips(darkDifficulty: Bool) -> some View {
-        HStack(spacing: WTSpacing.sm) {
-            Text(record.completionStatus.label)
-                .font(.system(size: 11, weight: .bold))
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(Color.wtPrimary)
-                .foregroundStyle(.black)
-                .clipShape(RoundedRectangle(cornerRadius: 4))
+    // MARK: - Shared helpers
 
-            if let difficultyRating = record.difficultyRating {
-                Text("难度 \(difficultyRating)/5")
-                    .font(.system(size: 11, weight: .bold))
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(darkDifficulty ? Color.black.opacity(0.4) : Color.white.opacity(0.16))
-                    .foregroundStyle(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 4))
-            }
+    private func contentLines(
+        fontSize: CGFloat,
+        lineSpacing: CGFloat,
+        weight: Font.Weight,
+        fillWidth: Bool = true
+    ) -> some View {
+        let isTrailing: Bool
+        switch style.layout {
+        case .rightOverlayMono:
+            isTrailing = true
+        case .bottomCard, .bottomCardLight, .dataDashboard:
+            isTrailing = record.textLayout.horizontalPosition == .trailing
+        default:
+            isTrailing = false
         }
-    }
-
-    private func contentLines(fontSize: CGFloat, lineSpacing: CGFloat, weight: Font.Weight) -> some View {
-        VStack(alignment: .leading, spacing: lineSpacing) {
+        return VStack(alignment: isTrailing ? .trailing : .leading, spacing: lineSpacing) {
             ForEach(record.wodContent, id: \.self) { line in
                 Text(line)
                     .font(font(for: fontSize, weight: weight))
-                    .multilineTextAlignment(style.layout == .rightOverlayMono ? .trailing : .leading)
+                    .multilineTextAlignment(isTrailing ? .trailing : .leading)
                     .foregroundStyle(textColor.opacity(record.textLayout.textOpacity))
-                    .shadow(color: style.layout == .rightOverlayMono ? .black.opacity(0.42) : .clear, radius: 3, x: 0, y: 2)
-                    .frame(maxWidth: .infinity, alignment: style.layout == .rightOverlayMono ? .trailing : .leading)
+                    .shadow(color: isTrailing ? .black.opacity(0.42) : .clear, radius: 3, x: 0, y: 2)
                     .lineLimit(1)
                     .minimumScaleFactor(0.75)
+                    .if(fillWidth) { $0.frame(maxWidth: .infinity, alignment: isTrailing ? .trailing : .leading) }
             }
         }
-        .frame(maxWidth: .infinity, alignment: style.layout == .rightOverlayMono ? .trailing : .leading)
+        .if(fillWidth) { $0.frame(maxWidth: .infinity, alignment: isTrailing ? .trailing : .leading) }
     }
 
     private func dateLine(accented: Bool) -> some View {
@@ -232,17 +300,32 @@ struct CardView: View {
             .foregroundStyle(accented ? Color.wtPrimary : Color.wtTextSecondary)
     }
 
-    private var watermark: some View {
-        VStack {
-            Spacer()
-            HStack {
-                Spacer()
-                Text("WODTrack")
-                    .font(WTFont.caption)
-                    .foregroundStyle(.white.opacity(0.5))
-                    .padding(.trailing, 24)
-                    .padding(.bottom, 32)
+    /// HStack + Spacer 显式锚定面板到选定的左/右侧，保证两侧 padding 完全对称。
+    @ViewBuilder private func anchoredPanel<Content: View>(
+        verticalMargin: CGFloat,
+        proxy: GeometryProxy,
+        @ViewBuilder content: () -> Content
+    ) -> some View {
+        HStack(spacing: 0) {
+            if record.textLayout.horizontalPosition == .trailing {
+                Spacer(minLength: 0)
             }
+            content()
+            if record.textLayout.horizontalPosition == .leading {
+                Spacer(minLength: 0)
+            }
+        }
+        .padding(.horizontal, 24)
+        .padding(.vertical, verticalMargin)
+        .frame(width: proxy.size.width, height: proxy.size.height, alignment: cardVerticalAlignment)
+    }
+
+    private var panelTextAlignment: HorizontalAlignment {
+        switch style.layout {
+        case .bottomCard, .bottomCardLight, .dataDashboard:
+            return record.textLayout.horizontalPosition == .trailing ? .trailing : .leading
+        default:
+            return .leading
         }
     }
 
@@ -250,7 +333,7 @@ struct CardView: View {
         Color(hex: record.textLayout.textColor)
     }
 
-    private var cardAlignment: Alignment {
+    private var cardVerticalAlignment: Alignment {
         switch record.textLayout.verticalPosition {
         case .top: .top
         case .center: .center
@@ -276,10 +359,7 @@ struct CardView: View {
 
     private func formattedMonoLine(_ line: String, index: Int) -> String {
         guard style.layout == .rightOverlayMono else { return line }
-        if index == 0 {
-            return line.uppercased()
-        }
-        return line
+        return index == 0 ? line.uppercased() : line
     }
 
     private func adaptiveLineSpacing(for fontSize: CGFloat, defaultSpacing: CGFloat) -> CGFloat {
@@ -309,5 +389,12 @@ struct CardView: View {
         case .mono:
             return .system(size: size, weight: weight, design: .monospaced)
         }
+    }
+}
+
+// MARK: - View extension for conditional modifier
+private extension View {
+    @ViewBuilder func `if`<Content: View>(_ condition: Bool, transform: (Self) -> Content) -> some View {
+        if condition { transform(self) } else { self }
     }
 }

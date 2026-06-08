@@ -64,22 +64,26 @@ struct CardRenderer {
 
     private static func chromeHeight(for layout: CardStyle.LayoutStyle) -> CGFloat {
         switch layout {
-        case .bottomCard, .centerGlass:
+        case .bottomCard, .bottomCardLight:
             return 54
         case .editorialTop:
             return 50
         case .rightOverlayMono:
             return 82
+        case .heroTitle:
+            return 64
+        case .dataDashboard:
+            return 100
+        case .retroFilm:
+            return 32
         }
     }
 
     private static func verticalMargins(for layout: CardStyle.LayoutStyle, verticalMargin: CGFloat) -> CGFloat {
         switch layout {
-        case .bottomCard:
+        case .bottomCard, .bottomCardLight:
             return 32 + verticalMargin * 2
-        case .centerGlass:
-            return 40 + verticalMargin * 2
-        case .editorialTop, .rightOverlayMono:
+        case .editorialTop, .rightOverlayMono, .heroTitle, .dataDashboard, .retroFilm:
             return verticalMargin * 2
         }
     }

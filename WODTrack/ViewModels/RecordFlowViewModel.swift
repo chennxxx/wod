@@ -34,7 +34,7 @@ final class RecordFlowViewModel {
     var wodContentText = ""
     var completionStatus: CompletionStatus = .completed
     var difficultyRating = 3
-    var selectedStyleId = CardStyleConfig.freeStyles[0].id
+    var selectedStyleId = "style_mono_overlay"
     var textLayout = TextLayout()
     var ocrState: OCRState = .idle
     var previewRecord = WODRecord()
@@ -183,16 +183,11 @@ final class RecordFlowViewModel {
         switch style.id {
         case "style_basic_dark":
             textLayout.verticalPosition = .bottom
+            textLayout.horizontalPosition = .trailing
             textLayout.fontSize = 16
             textLayout.textColor = "#FFFFFF"
             textLayout.textOpacity = 1
             textLayout.fontPreset = .display
-        case "style_glass_light":
-            textLayout.verticalPosition = .center
-            textLayout.fontSize = 18
-            textLayout.textColor = "#FFFFFF"
-            textLayout.textOpacity = 1
-            textLayout.fontPreset = .rounded
         case "style_mono_overlay":
             textLayout.verticalPosition = .top
             textLayout.fontSize = 15
@@ -205,6 +200,32 @@ final class RecordFlowViewModel {
             textLayout.textColor = "#FFF4C2"
             textLayout.textOpacity = 1
             textLayout.fontPreset = .serif
+        case "style_minimal_white":
+            textLayout.verticalPosition = .bottom
+            textLayout.horizontalPosition = .leading
+            textLayout.fontSize = 16
+            textLayout.textColor = "#1A1A1A"
+            textLayout.textOpacity = 1
+            textLayout.fontPreset = .display
+        case "style_hero_title":
+            textLayout.verticalPosition = .center
+            textLayout.fontSize = 18
+            textLayout.textColor = "#FFFFFF"
+            textLayout.textOpacity = 1
+            textLayout.fontPreset = .display
+        case "style_data_dashboard":
+            textLayout.verticalPosition = .bottom
+            textLayout.horizontalPosition = .leading
+            textLayout.fontSize = 14
+            textLayout.textColor = "#00FF88"
+            textLayout.textOpacity = 1
+            textLayout.fontPreset = .mono
+        case "style_retro_film":
+            textLayout.verticalPosition = .bottom
+            textLayout.fontSize = 15
+            textLayout.textColor = "#F0E6C8"
+            textLayout.textOpacity = 1
+            textLayout.fontPreset = .mono
         default:
             break
         }

@@ -794,10 +794,53 @@ private struct CardPreviewStep: View {
                             .foregroundStyle(Color.wtTextSecondary)
                     }
                 }
+
+                if supportsHorizontalAlignment {
+                    Rectangle()
+                        .fill(Color.wtSurface2)
+                        .frame(width: 1, height: 48)
+
+                    ForEach(TextLayout.HorizontalPosition.allCases) { position in
+                        VStack(spacing: 6) {
+                            Button {
+                                viewModel.textLayout.horizontalPosition = position
+                            } label: {
+                                Image(systemName: position.icon)
+                                    .font(.system(size: 20, weight: .medium))
+                                    .frame(maxWidth: .infinity, minHeight: 48)
+                                    .background(
+                                        viewModel.textLayout.horizontalPosition == position
+                                            ? Color.wtPrimary
+                                            : Color.wtSurface2
+                                    )
+                                    .foregroundStyle(
+                                        viewModel.textLayout.horizontalPosition == position
+                                            ? Color.black
+                                            : Color.wtTextPrimary
+                                    )
+                                    .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
+                                    .contentShape(RoundedRectangle(cornerRadius: WTRadius.md))
+                            }
+                            .buttonStyle(.plain)
+
+                            Text(position.label)
+                                .font(.system(size: 11, weight: .semibold))
+                                .foregroundStyle(Color.wtTextSecondary)
+                        }
+                    }
+                }
             }
             .padding(.horizontal, WTSpacing.lg)
         }
         .padding(.vertical, WTSpacing.sm)
+    }
+
+    private var supportsHorizontalAlignment: Bool {
+        let layout = CardStyleConfig.style(for: viewModel.selectedStyleId).layout
+        switch layout {
+        case .bottomCard, .bottomCardLight, .dataDashboard: return true
+        default: return false
+        }
     }
 
     // MARK: - 辅助
@@ -866,9 +909,12 @@ private struct CardPreviewStep: View {
     private func styleIcon(for layout: CardStyle.LayoutStyle) -> String {
         switch layout {
         case .bottomCard: "rectangle.bottomthird.inset.filled"
-        case .centerGlass: "rectangle.center.inset.filled"
+        case .bottomCardLight: "rectangle.bottomthird.inset.filled"
         case .editorialTop: "rectangle.topthird.inset.filled"
         case .rightOverlayMono: "text.alignright"
+        case .heroTitle: "textformat.size.larger"
+        case .dataDashboard: "chart.bar.fill"
+        case .retroFilm: "film.fill"
         }
     }
 
