@@ -29,36 +29,25 @@ struct HistoryListView: View {
     }
 
     var body: some View {
-        ScrollView {
-            LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
-                ForEach(groupedByMonth, id: \.key) { group in
-                    Section {
-                        VStack(spacing: WTSpacing.md) {
-                            ForEach(group.records) { record in
-                                NavigationLink {
-                                    HistoryDetailView(record: record)
-                                } label: {
-                                    HistoryRecordCard(record: record)
-                                }
-                                .buttonStyle(.plain)
-                                .id(record.id)
-                            }
+        List {
+            ForEach(groupedByMonth, id: \.key) { group in
+                Section(monthTitle(from: group.key)) {
+                    ForEach(group.records) { record in
+                        NavigationLink {
+                            HistoryDetailView(record: record)
+                        } label: {
+                            HistoryRecordCard(record: record)
                         }
-                        .padding(.horizontal, WTSpacing.lg)
-                        .padding(.bottom, WTSpacing.lg)
-                    } header: {
-                        Text(monthTitle(from: group.key))
-                            .font(WTFont.caption)
-                            .foregroundStyle(Color.wtPrimary)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.horizontal, WTSpacing.lg)
-                            .padding(.vertical, WTSpacing.sm)
-                            .background(Color.wtBackground.opacity(0.92))
+                        .listRowBackground(Color.wtBackground)
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets(top: WTSpacing.xs, leading: WTSpacing.lg, bottom: WTSpacing.xs, trailing: WTSpacing.lg))
+                        .id(record.id)
                     }
                 }
             }
         }
-        .scrollPosition(id: $scrollPosition)
+        .listStyle(.plain)
+        .scrollContentBackground(.hidden)
         .background(Color.wtBackground)
         .navigationTitle("历史记录")
         .onAppear {

@@ -268,7 +268,7 @@ private struct HistoryPreviewSection: View {
                 .foregroundStyle(Color.wtPrimary)
             }
 
-            VStack(spacing: WTSpacing.sm) {
+            VStack(spacing: WTSpacing.md) {
                 ForEach(records) { record in
                     NavigationLink {
                         HistoryDetailView(record: record)
