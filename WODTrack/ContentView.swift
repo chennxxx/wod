@@ -290,7 +290,7 @@ private struct HistoryPreviewRow: View {
             HStack {
                 Text(record.wodDate.formatted(Date.FormatStyle().year().month().day()))
                     .font(WTFont.bodyBold)
-                    .foregroundStyle(Color.wtTextPrimary)
+                    .foregroundStyle(Color.wtPrimary)
                 Spacer(minLength: 0)
                 if let rating = record.difficultyRating {
                     PreviewDifficultyStars(rating: rating)
@@ -312,6 +312,12 @@ private struct HistoryPreviewRow: View {
         .padding(WTSpacing.md)
         .background(Color.wtSurface)
         .clipShape(RoundedRectangle(cornerRadius: WTRadius.lg))
+        .overlay {
+            RoundedRectangle(cornerRadius: WTRadius.lg)
+                .stroke(Color.white.opacity(0.07), lineWidth: 1)
+        }
+        .shadow(color: Color.wtPrimary.opacity(0.08), radius: 10, x: 0, y: 2)
+        .shadow(color: Color.black.opacity(0.4), radius: 6, x: 0, y: 3)
     }
 }
 
