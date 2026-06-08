@@ -273,16 +273,18 @@ private struct HistoryPreviewSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: WTSpacing.md) {
-            HStack {
-                Text("历史记录")
-                    .font(WTFont.title)
-                Spacer()
-                NavigationLink("查看更多") {
-                    HistoryListView()
+            NavigationLink(destination: HistoryListView()) {
+                HStack {
+                    Text("历史记录")
+                        .font(WTFont.title)
+                        .foregroundStyle(Color.wtTextPrimary)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundStyle(Color.wtTextSecondary)
                 }
-                .font(WTFont.caption)
-                .foregroundStyle(Color.wtPrimary)
             }
+            .buttonStyle(.plain)
 
             VStack(spacing: WTSpacing.md) {
                 ForEach(records) { record in
