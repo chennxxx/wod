@@ -146,7 +146,7 @@ private struct HeatmapGrid: View {
                                 .foregroundStyle(Color.wtTextSecondary)
                                 .lineLimit(1)
                                 .fixedSize(horizontal: true, vertical: false)
-                                .frame(width: cellSize, alignment: .leading)
+                                .frame(width: cellSize, height: 12, alignment: .leading)
 
                             ForEach(week) { day in
                                 RoundedRectangle(cornerRadius: 4)
@@ -286,34 +286,46 @@ private struct HistoryPreviewRow: View {
     let record: WODRecord
 
     var body: some View {
-        HStack(alignment: .top, spacing: WTSpacing.md) {
-            HistoryThumbnail(record: record)
-                .frame(width: 60, height: 60)
-                .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
-
-            VStack(alignment: .leading, spacing: WTSpacing.xs) {
-                Text(record.wodDate.formatted(.dateTime.month().day().weekday(.abbreviated)))
+        VStack(alignment: .leading, spacing: WTSpacing.sm) {
+            HStack {
+                Text(record.wodDate.formatted(Date.FormatStyle().year().month().day()))
                     .font(WTFont.bodyBold)
                     .foregroundStyle(Color.wtTextPrimary)
-                Text(record.wodContent.prefix(2).joined(separator: " · "))
+                Spacer(minLength: 0)
+                if let rating = record.difficultyRating {
+                    PreviewDifficultyStars(rating: rating)
+                }
+            }
+
+            HStack(alignment: .top, spacing: WTSpacing.md) {
+                HistoryThumbnail(record: record)
+                    .frame(width: 72, height: 72)
+                    .clipShape(RoundedRectangle(cornerRadius: WTRadius.sm))
+
+                Text(record.wodContent.prefix(2).joined(separator: "\n"))
                     .font(WTFont.caption)
                     .foregroundStyle(Color.wtTextSecondary)
                     .lineLimit(2)
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
-
-            Spacer()
-
-            Text(record.completionStatus.label)
-                .font(WTFont.micro)
-                .foregroundStyle(record.completionStatus == .completed ? Color.black : Color.wtTextPrimary)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 5)
-                .background(record.completionStatus == .completed ? Color.wtPrimary : Color.wtSurface2)
-                .clipShape(Capsule())
         }
         .padding(WTSpacing.md)
         .background(Color.wtSurface)
         .clipShape(RoundedRectangle(cornerRadius: WTRadius.lg))
+    }
+}
+
+private struct PreviewDifficultyStars: View {
+    let rating: Int
+
+    var body: some View {
+        HStack(spacing: 2) {
+            ForEach(1 ... 5, id: \.self) { i in
+                Image(systemName: i <= rating ? "star.fill" : "star")
+                    .font(.system(size: 10))
+                    .foregroundStyle(i <= rating ? Color.wtPrimary : Color.wtTextSecondary.opacity(0.5))
+            }
+        }
     }
 }
 
