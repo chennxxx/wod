@@ -110,14 +110,7 @@ struct SkillDetailView: View {
                 .foregroundStyle(Color.wtTextSecondary)
 
             HStack(spacing: WTSpacing.xs) {
-                Text(skill.tier.label)
-                    .font(.system(size: 11, weight: .bold))
-                    .foregroundStyle(skill.tier.color)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 3)
-                    .background(skill.tier.color.opacity(0.12))
-                    .clipShape(Capsule())
-
+                TierBadge(tier: skill.tier)
                 Text(skill.tier.description)
                     .font(WTFont.micro)
                     .foregroundStyle(Color.wtTextSecondary)
@@ -379,23 +372,18 @@ private struct PrereqRow: View {
                 .frame(width: 24)
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(skill.name)
-                    .font(WTFont.body)
-                    .foregroundStyle(Color.wtTextPrimary)
+                HStack(spacing: 6) {
+                    TierBadge(tier: skill.tier)
+                    Text(skill.name)
+                        .font(WTFont.body)
+                        .foregroundStyle(Color.wtTextPrimary)
+                }
                 Text(skill.englishName)
                     .font(.system(size: 10, weight: .regular, design: .monospaced))
                     .foregroundStyle(Color.wtTextSecondary)
             }
 
             Spacer()
-
-            Text(skill.tier.label)
-                .font(.system(size: 10, weight: .bold))
-                .foregroundStyle(skill.tier.color)
-                .padding(.horizontal, 6)
-                .padding(.vertical, 2)
-                .background(skill.tier.color.opacity(0.12))
-                .clipShape(Capsule())
 
             Image(systemName: "chevron.right")
                 .font(.system(size: 11, weight: .semibold))

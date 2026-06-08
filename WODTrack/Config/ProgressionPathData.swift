@@ -20,7 +20,7 @@ enum ProgressionPathLibrary {
         ProgressionPath(
             id: "path_pulling",
             name: "拉类主线",
-            icon: "figure.pull.ups",
+            icon: "arrow.up.to.line.circle.fill",
             categoryId: "gymnastics",
             steps: [
                 "gym_dead_hang",
@@ -105,7 +105,7 @@ enum ProgressionPathLibrary {
         ProgressionPath(
             id: "path_squat",
             name: "深蹲主线",
-            icon: "figure.squat",
+            icon: "arrow.down.to.line.circle.fill",
             categoryId: "weightlifting",
             steps: [
                 "wl_air_squat",

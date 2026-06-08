@@ -96,17 +96,10 @@ private struct PathStepRow: View {
                 // Skill info
                 VStack(alignment: .leading, spacing: 4) {
                     HStack(spacing: WTSpacing.xs) {
+                        TierBadge(tier: skill.tier)
                         Text(skill.name)
                             .font(WTFont.bodyBold)
                             .foregroundStyle(Color.wtTextPrimary)
-
-                        Text(skill.tier.label)
-                            .font(.system(size: 10, weight: .bold))
-                            .foregroundStyle(skill.tier.color)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(skill.tier.color.opacity(0.12))
-                            .clipShape(Capsule())
                     }
 
                     Text(skill.englishName)
