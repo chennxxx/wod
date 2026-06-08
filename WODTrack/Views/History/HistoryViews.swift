@@ -6,10 +6,25 @@ struct HistoryListView: View {
     @Query(sort: \WODRecord.createdAt, order: .reverse) private var records: [WODRecord]
     var scrollToDate: Date? = nil
     @State private var scrollPosition: UUID?
+    @State private var selectedMonth: String? = nil
+
+    private var allMonthKeys: [String] {
+        let calendar = Calendar.current
+        let keys = Set(records.map { record -> String in
+            let comps = calendar.dateComponents([.year, .month], from: record.wodDate)
+            return "\(comps.year ?? 0)-\(String(format: "%02d", comps.month ?? 0))"
+        })
+        return keys.sorted(by: >)
+    }
 
     private var groupedByMonth: [(key: String, records: [WODRecord])] {
         let calendar = Calendar.current
-        let grouped = Dictionary(grouping: records) { record -> String in
+        let filtered = selectedMonth == nil ? records : records.filter { record in
+            let comps = calendar.dateComponents([.year, .month], from: record.wodDate)
+            let key = "\(comps.year ?? 0)-\(String(format: "%02d", comps.month ?? 0))"
+            return key == selectedMonth
+        }
+        let grouped = Dictionary(grouping: filtered) { record -> String in
             let comps = calendar.dateComponents([.year, .month], from: record.wodDate)
             return "\(comps.year ?? 0)-\(String(format: "%02d", comps.month ?? 0))"
         }
@@ -18,7 +33,17 @@ struct HistoryListView: View {
         }
     }
 
-    private func monthTitle(from key: String) -> String {
+    private func monthLabel(from key: String) -> String {
+        let parts = key.split(separator: "-")
+        guard parts.count == 2,
+              let year = Int(parts[0]),
+              let month = Int(parts[1]),
+              let date = Calendar.current.date(from: DateComponents(year: year, month: month))
+        else { return key }
+        return date.formatted(.dateTime.year(.twoDigits).month(.abbreviated))
+    }
+
+    private func sectionTitle(from key: String) -> String {
         let parts = key.split(separator: "-")
         guard parts.count == 2,
               let year = Int(parts[0]),
@@ -29,36 +54,61 @@ struct HistoryListView: View {
     }
 
     var body: some View {
-        ScrollView {
-            LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
-                ForEach(groupedByMonth, id: \.key) { group in
-                    Section {
-                        VStack(spacing: WTSpacing.md) {
-                            ForEach(group.records) { record in
-                                NavigationLink {
-                                    HistoryDetailView(record: record)
-                                } label: {
-                                    HistoryRecordCard(record: record)
-                                }
-                                .buttonStyle(.plain)
-                                .id(record.id)
-                            }
+        VStack(spacing: 0) {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: WTSpacing.sm) {
+                    MonthChip(label: "全部", isSelected: selectedMonth == nil) {
+                        selectedMonth = nil
+                    }
+                    ForEach(allMonthKeys, id: \.self) { key in
+                        MonthChip(label: monthLabel(from: key), isSelected: selectedMonth == key) {
+                            selectedMonth = selectedMonth == key ? nil : key
                         }
-                        .padding(.horizontal, WTSpacing.lg)
-                        .padding(.bottom, WTSpacing.lg)
-                    } header: {
-                        Text(monthTitle(from: group.key))
-                            .font(WTFont.caption)
-                            .foregroundStyle(Color.wtTextSecondary)
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                }
+                .padding(.horizontal, WTSpacing.lg)
+                .padding(.vertical, WTSpacing.sm)
+            }
+            .background(Color.wtBackground)
+
+            Divider().overlay(Color.wtSurface2)
+
+            ScrollView {
+                LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
+                    ForEach(groupedByMonth, id: \.key) { group in
+                        Section {
+                            VStack(spacing: WTSpacing.md) {
+                                ForEach(group.records) { record in
+                                    NavigationLink {
+                                        HistoryDetailView(record: record)
+                                    } label: {
+                                        HistoryRecordCard(record: record)
+                                    }
+                                    .buttonStyle(.plain)
+                                    .id(record.id)
+                                }
+                            }
+                            .padding(.horizontal, WTSpacing.lg)
+                            .padding(.bottom, WTSpacing.lg)
+                        } header: {
+                            HStack {
+                                Text(sectionTitle(from: group.key))
+                                    .font(WTFont.caption)
+                                    .foregroundStyle(Color.wtTextSecondary)
+                                Spacer()
+                                Text("\(group.records.count) 条")
+                                    .font(WTFont.micro)
+                                    .foregroundStyle(Color.wtTextSecondary.opacity(0.6))
+                            }
                             .padding(.horizontal, WTSpacing.lg)
                             .padding(.vertical, WTSpacing.sm)
-                            .background(.ultraThinMaterial)
+                            .background(Color.wtBackground.opacity(0.95))
+                        }
                     }
                 }
             }
+            .scrollPosition(id: $scrollPosition)
         }
-        .scrollPosition(id: $scrollPosition)
         .background(Color.wtBackground)
         .navigationTitle("历史记录")
         .onAppear {
@@ -68,6 +118,26 @@ struct HistoryListView: View {
             let match = records.first { calendar.startOfDay(for: $0.wodDate) <= target }
             scrollPosition = match?.id
         }
+    }
+}
+
+private struct MonthChip: View {
+    let label: String
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Text(label)
+                .font(WTFont.caption)
+                .foregroundStyle(isSelected ? Color.black : Color.wtTextSecondary)
+                .padding(.horizontal, WTSpacing.md)
+                .padding(.vertical, WTSpacing.xs + 2)
+                .background(isSelected ? Color.wtPrimary : Color.wtSurface)
+                .clipShape(Capsule())
+        }
+        .buttonStyle(.plain)
+        .animation(.easeInOut(duration: 0.15), value: isSelected)
     }
 }
 
