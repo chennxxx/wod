@@ -316,53 +316,42 @@ private struct OCRLoadingView: View {
 private struct OCRResultStep: View {
     @Bindable var viewModel: RecordFlowViewModel
 
-    var body: some View {
+    /// 是否处于"需要展示内容页"的状态（包括失败、成功、手动输入）
+    private var isContentReady: Bool {
         switch viewModel.ocrState {
-        case .idle, .processing:
-            OCRLoadingView(
-                isTimeout: false,
-                onRetry: viewModel.retryOCR,
-                onBack: viewModel.goBack
-            )
-        case .timeout:
-            OCRLoadingView(
-                isTimeout: true,
-                onRetry: viewModel.retryOCR,
-                onBack: viewModel.goBack
-            )
-        case .failure(let message):
-            RecordFlowStepPage(title: "识别失败", backAction: viewModel.goBack) {
-                VStack(alignment: .leading, spacing: WTSpacing.md) {
-                    Text(message)
-                        .font(WTFont.body)
-                        .foregroundStyle(Color.wtTextSecondary)
-                    WTTextEditor(
-                        title: "手动输入 WOD",
-                        placeholder: """
-直接输入今日训练内容
+        case .idle, .processing, .timeout: return false
+        case .success, .failure: return true
+        }
+    }
 
-例如：
-A 热身/完成以下3轮
-10空杆早安式
-20S原地高抬腿
-""",
-                        text: $viewModel.wodContentText,
-                        minHeight: 220
-                    )
-                    CompletionTimeField(completionMinutes: $viewModel.completionMinutes)
-                    DifficultyRatingField(rating: $viewModel.difficultyRating)
-                }
-                .padding(WTSpacing.lg)
-            } bottomBar: {
-                WTButton(title: "重试", style: .secondary, action: viewModel.retryOCR)
-                WTButton(title: "继续", isEnabled: !viewModel.wodLines.isEmpty, action: viewModel.goToCheckinPhotos)
-            }
-        case .success:
+    /// 失败时的错误信息，nil 表示无错误
+    private var errorMessage: String? {
+        if case .failure(let msg) = viewModel.ocrState { return msg }
+        return nil
+    }
+
+    var body: some View {
+        if isContentReady {
             RecordFlowStepPage(title: "今日 WOD 内容", backAction: viewModel.goBack) {
                 VStack(alignment: .leading, spacing: WTSpacing.md) {
-                    Text(viewModel.entryMode == .manual ? "直接输入今天的训练内容。" : "识别完成，请在这里确认和修改内容。")
-                        .font(WTFont.caption)
-                        .foregroundStyle(Color.wtTextSecondary)
+                    // 错误 banner（仅识别失败时显示）
+                    if let errorMessage {
+                        HStack(spacing: WTSpacing.sm) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundStyle(Color.wtDanger)
+                            Text(errorMessage)
+                                .font(WTFont.caption)
+                                .foregroundStyle(Color.wtTextPrimary)
+                            Spacer()
+                        }
+                        .padding(WTSpacing.md)
+                        .background(Color.wtDanger.opacity(0.12))
+                        .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
+                    } else {
+                        Text(viewModel.entryMode == .manual ? "直接输入今天的训练内容。" : "识别完成，请在这里确认和修改内容。")
+                            .font(WTFont.caption)
+                            .foregroundStyle(Color.wtTextSecondary)
+                    }
 
                     WTTextEditor(
                         title: "WOD 内容",
@@ -380,7 +369,7 @@ C WOD/任务计时/7轮
 100M
 """,
                         text: $viewModel.wodContentText,
-                        minHeight: 320
+                        minHeight: 280
                     )
 
                     CompletionTimeField(completionMinutes: $viewModel.completionMinutes)
@@ -389,8 +378,18 @@ C WOD/任务计时/7轮
                 }
                 .padding(WTSpacing.lg)
             } bottomBar: {
+                if errorMessage != nil {
+                    WTButton(title: "重试", style: .secondary, action: viewModel.retryOCR)
+                }
                 WTButton(title: "下一步：选择训练照", isEnabled: !viewModel.wodLines.isEmpty, action: viewModel.goToCheckinPhotos)
             }
+        } else {
+            // loading / timeout
+            OCRLoadingView(
+                isTimeout: viewModel.ocrState == .timeout,
+                onRetry: viewModel.retryOCR,
+                onBack: viewModel.goBack
+            )
         }
     }
 }
