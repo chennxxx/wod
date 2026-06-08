@@ -1,240 +1,308 @@
+import SwiftData
 import SwiftUI
 
+// MARK: - Filter
+
+private enum SkillFilter: CaseIterable {
+    case all, mastered, inProgress, wantToLearn
+
+    var label: String {
+        switch self {
+        case .all: "全部"
+        case .mastered: "已掌握"
+        case .inProgress: "进行中"
+        case .wantToLearn: "想学"
+        }
+    }
+
+    var icon: String? {
+        switch self {
+        case .all: nil
+        case .mastered: "checkmark.circle.fill"
+        case .inProgress: "moon.fill"
+        case .wantToLearn: "circle"
+        }
+    }
+
+    var iconColor: Color {
+        switch self {
+        case .all: .clear
+        case .mastered: Color.wtPrimary
+        case .inProgress: Color(hex: "#5E81F4")
+        case .wantToLearn: Color.wtTextSecondary
+        }
+    }
+
+    func matches(_ status: SkillMasteryStatus) -> Bool {
+        switch self {
+        case .all: true
+        case .mastered: status == .mastered
+        case .inProgress: status == .inProgress
+        case .wantToLearn: status == .wantToLearn
+        }
+    }
+}
+
+// MARK: - Main View
+
 struct SkillTreeView: View {
+    @Query private var allStatuses: [SkillStatus]
+    @Query private var allEntries: [SkillTrainingEntry]
+    @State private var selectedFilter: SkillFilter = .all
+
+    private var statusMap: [String: SkillStatus] {
+        Dictionary(uniqueKeysWithValues: allStatuses.map { ($0.skillId, $0) })
+    }
+
+    private var bestEntryMap: [String: SkillTrainingEntry] {
+        var map: [String: SkillTrainingEntry] = [:]
+        for entry in allEntries {
+            if let current = map[entry.skillId] {
+                if entry.value > current.value { map[entry.skillId] = entry }
+            } else {
+                map[entry.skillId] = entry
+            }
+        }
+        return map
+    }
+
+    private func status(for skill: SkillDefinition) -> SkillMasteryStatus {
+        statusMap[skill.id]?.status ?? .unmarked
+    }
+
+    private func count(for filter: SkillFilter) -> Int {
+        let allSkills = SkillLibrary.categories.flatMap { $0.skills }
+        if filter == .all { return allSkills.count }
+        return allSkills.filter { filter.matches(status(for: $0)) }.count
+    }
+
     var body: some View {
         NavigationStack {
             ZStack {
                 Color.wtBackground.ignoresSafeArea()
-
                 ScrollView {
-                    VStack(alignment: .leading, spacing: WTSpacing.lg) {
-                        Text("CrossFit 动作涵盖体操、举重、有氧三大类，每类按 T0–T2 难度递进。")
-                            .font(WTFont.caption)
-                            .foregroundStyle(Color.wtTextSecondary)
-                            .padding(.horizontal, WTSpacing.lg)
-
-                        ForEach(SkillCategory.all) { category in
-                            SkillCategorySection(category: category)
+                    VStack(alignment: .leading, spacing: WTSpacing.md) {
+                        filterBar
+                        ForEach(SkillLibrary.categories) { category in
+                            CategorySection(
+                                category: category,
+                                selectedFilter: selectedFilter,
+                                statusMap: statusMap,
+                                bestEntryMap: bestEntryMap
+                            )
                         }
                     }
-                    .padding(.vertical, WTSpacing.lg)
+                    .padding(.vertical, WTSpacing.md)
                 }
             }
             .navigationTitle("技能树")
+            .navigationBarTitleDisplayMode(.large)
+        }
+    }
+
+    private var filterBar: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: WTSpacing.sm) {
+                ForEach(SkillFilter.allCases, id: \.self) { filter in
+                    let n = count(for: filter)
+                    let isSelected = selectedFilter == filter
+                    Button {
+                        selectedFilter = filter
+                    } label: {
+                        HStack(spacing: 5) {
+                            if let icon = filter.icon {
+                                Image(systemName: icon)
+                                    .font(.system(size: 11, weight: .semibold))
+                                    .foregroundStyle(isSelected ? Color.black : filter.iconColor)
+                            }
+                            Text("\(filter.label) \(n)")
+                                .font(.system(size: 13, weight: .semibold))
+                                .foregroundStyle(isSelected ? Color.black : Color.wtTextSecondary)
+                        }
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 8)
+                        .background(isSelected ? Color.wtPrimary : Color.wtSurface)
+                        .clipShape(Capsule())
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(.horizontal, WTSpacing.lg)
         }
     }
 }
 
 // MARK: - Category Section
 
-private struct SkillCategorySection: View {
-    let category: SkillCategory
+private struct CategorySection: View {
+    let category: SkillCategoryDefinition
+    let selectedFilter: SkillFilter
+    let statusMap: [String: SkillStatus]
+    let bestEntryMap: [String: SkillTrainingEntry]
+
     @State private var isExpanded = true
 
+    private func statusFor(_ skill: SkillDefinition) -> SkillMasteryStatus {
+        statusMap[skill.id]?.status ?? .unmarked
+    }
+
+    private var filteredSkills: [SkillDefinition] {
+        category.skills.filter { selectedFilter.matches(statusFor($0)) }
+    }
+
+    private var masteredCount: Int { category.skills.filter { statusFor($0) == .mastered }.count }
+    private var inProgressCount: Int { category.skills.filter { statusFor($0) == .inProgress }.count }
+    private var displayedSkills: [SkillDefinition] { selectedFilter == .all ? category.skills : filteredSkills }
+    private var showSection: Bool { selectedFilter == .all || !filteredSkills.isEmpty }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            Button {
-                withAnimation(.easeInOut(duration: 0.2)) {
-                    isExpanded.toggle()
-                }
-            } label: {
-                HStack(spacing: WTSpacing.sm) {
-                    Image(systemName: category.icon)
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundStyle(category.color)
-                        .frame(width: 32, height: 32)
-                        .background(category.color.opacity(0.15))
-                        .clipShape(RoundedRectangle(cornerRadius: WTRadius.sm))
+        if showSection {
+            VStack(alignment: .leading, spacing: 0) {
+                // Header — 整个区域可点击
+                Button {
+                    withAnimation(.easeInOut(duration: 0.2)) { isExpanded.toggle() }
+                } label: {
+                    VStack(alignment: .leading, spacing: WTSpacing.sm) {
+                        HStack(spacing: WTSpacing.sm) {
+                            Image(systemName: category.icon)
+                                .font(.system(size: 18, weight: .semibold))
+                                .foregroundStyle(category.color)
+                                .frame(width: 36, height: 36)
+                                .background(category.color.opacity(0.15))
+                                .clipShape(RoundedRectangle(cornerRadius: WTRadius.sm))
 
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(category.name)
-                            .font(WTFont.bodyBold)
-                            .foregroundStyle(Color.wtTextPrimary)
-                        Text(category.subtitle)
-                            .font(WTFont.micro)
-                            .foregroundStyle(Color.wtTextSecondary)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(category.name)
+                                    .font(WTFont.bodyBold)
+                                    .foregroundStyle(Color.wtTextPrimary)
+                                Text(category.englishName)
+                                    .font(.system(size: 11, weight: .regular, design: .monospaced))
+                                    .foregroundStyle(Color.wtTextSecondary)
+                            }
+
+                            Spacer()
+
+                            Text("\(masteredCount)/\(category.skills.count)")
+                                .font(WTFont.caption)
+                                .foregroundStyle(Color.wtTextSecondary)
+
+                            Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundStyle(Color.wtTextSecondary)
+                        }
+
+                        ProgressBar(total: category.skills.count, mastered: masteredCount, inProgress: inProgressCount)
                     }
-
-                    Spacer()
-
-                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundStyle(Color.wtTextSecondary)
+                    .padding(WTSpacing.md)
+                    .frame(maxWidth: .infinity)
+                    .contentShape(Rectangle())
                 }
-                .padding(.horizontal, WTSpacing.lg)
-                .padding(.vertical, WTSpacing.md)
-            }
-            .buttonStyle(.plain)
+                .buttonStyle(.plain)
 
-            if isExpanded {
-                VStack(alignment: .leading, spacing: WTSpacing.xs) {
-                    ForEach(SkillTier.allCases) { tier in
-                        let skills = category.skills.filter { $0.tier == tier }
-                        if !skills.isEmpty {
-                            SkillTierRow(tier: tier, skills: skills)
+                if isExpanded {
+                    Divider().background(Color.wtSurface2)
+                    ForEach(Array(displayedSkills.enumerated()), id: \.element.id) { index, skill in
+                        NavigationLink(destination: SkillDetailView(skill: skill)) {
+                            SkillRow(skill: skill, statusEntry: statusMap[skill.id], bestEntry: bestEntryMap[skill.id])
+                                .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        if index < displayedSkills.count - 1 {
+                            Divider()
+                                .background(Color.wtSurface2)
+                                .padding(.leading, WTSpacing.md)
                         }
                     }
+                    .padding(.bottom, WTSpacing.xs)
                 }
-                .padding(.horizontal, WTSpacing.lg)
-                .padding(.bottom, WTSpacing.md)
             }
+            .background(Color.wtSurface)
+            .clipShape(RoundedRectangle(cornerRadius: WTRadius.lg))
+            .padding(.horizontal, WTSpacing.lg)
         }
-        .background(Color.wtSurface)
-        .clipShape(RoundedRectangle(cornerRadius: WTRadius.lg))
-        .padding(.horizontal, WTSpacing.lg)
     }
 }
 
-// MARK: - Tier Row
+// MARK: - Progress Bar
 
-private struct SkillTierRow: View {
-    let tier: SkillTier
-    let skills: [Skill]
+private struct ProgressBar: View {
+    let total: Int
+    let mastered: Int
+    let inProgress: Int
 
     var body: some View {
-        VStack(alignment: .leading, spacing: WTSpacing.xs) {
-            HStack(spacing: WTSpacing.xs) {
-                Text(tier.label)
-                    .font(.system(size: 10, weight: .bold))
-                    .foregroundStyle(tier.textColor)
-                    .padding(.horizontal, 7)
-                    .padding(.vertical, 3)
-                    .background(tier.badgeColor)
-                    .clipShape(Capsule())
+        GeometryReader { geo in
+            let w = geo.size.width
+            let masteredW = total > 0 ? w * CGFloat(mastered) / CGFloat(total) : 0
+            let inProgressW = total > 0 ? w * CGFloat(inProgress) / CGFloat(total) : 0
+            HStack(spacing: 2) {
+                if masteredW > 0 {
+                    RoundedRectangle(cornerRadius: 2).fill(Color.wtPrimary).frame(width: masteredW)
+                }
+                if inProgressW > 0 {
+                    RoundedRectangle(cornerRadius: 2).fill(Color(hex: "#5E81F4")).frame(width: inProgressW)
+                }
+                Spacer(minLength: 0)
+                    .frame(maxWidth: .infinity)
+                    .background(Color.wtSurface2)
+                    .clipShape(RoundedRectangle(cornerRadius: 2))
+            }
+        }
+        .frame(height: 4)
+    }
+}
 
-                Text(tier.description)
-                    .font(WTFont.micro)
+// MARK: - Skill Row
+
+private struct SkillRow: View {
+    let skill: SkillDefinition
+    let statusEntry: SkillStatus?
+    let bestEntry: SkillTrainingEntry?
+
+    private var masteryStatus: SkillMasteryStatus { statusEntry?.status ?? .unmarked }
+
+    private var statusIcon: (name: String, color: Color) {
+        switch masteryStatus {
+        case .mastered: ("checkmark.circle.fill", Color.wtPrimary)
+        case .inProgress: ("moon.fill", Color(hex: "#5E81F4"))
+        case .wantToLearn: ("circle", Color.wtTextSecondary)
+        case .unmarked: ("circle", Color.wtTextDisabled)
+        }
+    }
+
+    var body: some View {
+        HStack(spacing: WTSpacing.sm) {
+            Image(systemName: statusIcon.name)
+                .font(.system(size: 20))
+                .foregroundStyle(statusIcon.color)
+                .frame(width: 28)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(skill.name)
+                    .font(WTFont.bodyBold)
+                    .foregroundStyle(Color.wtTextPrimary)
+                Text(skill.englishName)
+                    .font(.system(size: 11, weight: .regular, design: .monospaced))
                     .foregroundStyle(Color.wtTextSecondary)
             }
-            .padding(.top, WTSpacing.xs)
 
-            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: WTSpacing.xs) {
-                ForEach(skills) { skill in
-                    Text(skill.name)
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundStyle(Color.wtTextPrimary)
-                        .lineLimit(2)
-                        .multilineTextAlignment(.center)
-                        .frame(maxWidth: .infinity, minHeight: 36)
-                        .padding(.horizontal, WTSpacing.xs)
-                        .background(Color.wtSurface2)
-                        .clipShape(RoundedRectangle(cornerRadius: WTRadius.sm))
-                }
+            Spacer()
+
+            if let entry = bestEntry {
+                Text(entry.formattedValue)
+                    .font(WTFont.caption)
+                    .foregroundStyle(Color.wtTextSecondary)
+            } else {
+                Text("—")
+                    .font(WTFont.caption)
+                    .foregroundStyle(Color.wtTextDisabled)
             }
+
+            Image(systemName: "chevron.right")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(Color.wtTextDisabled)
         }
+        .padding(.horizontal, WTSpacing.md)
+        .padding(.vertical, 12)
     }
-}
-
-// MARK: - Data Models
-
-private enum SkillTier: String, CaseIterable, Identifiable {
-    case t0, t1, t2
-    var id: String { rawValue }
-
-    var label: String {
-        switch self {
-        case .t0: "T0"
-        case .t1: "T1"
-        case .t2: "T2"
-        }
-    }
-
-    var description: String {
-        switch self {
-        case .t0: "基础"
-        case .t1: "进阶"
-        case .t2: "精英"
-        }
-    }
-
-    var badgeColor: Color {
-        switch self {
-        case .t0: Color(hex: "#2C2C2E")
-        case .t1: Color(hex: "#1C3A5E")
-        case .t2: Color(hex: "#3A1C1C")
-        }
-    }
-
-    var textColor: Color {
-        switch self {
-        case .t0: Color(hex: "#AEAEB2")
-        case .t1: Color(hex: "#64B5F6")
-        case .t2: Color(hex: "#F5C518")
-        }
-    }
-}
-
-private struct Skill: Identifiable {
-    let id = UUID()
-    let name: String
-    let tier: SkillTier
-}
-
-private struct SkillCategory: Identifiable {
-    let id = UUID()
-    let name: String
-    let subtitle: String
-    let icon: String
-    let color: Color
-    let skills: [Skill]
-
-    static let all: [SkillCategory] = [gymnastics, weightlifting, cardio]
-
-    static let gymnastics = SkillCategory(
-        name: "体操",
-        subtitle: "Gymnastics",
-        icon: "figure.gymnastics",
-        color: Color(hex: "#5E81F4"),
-        skills: [
-            Skill(name: "俯卧撑", tier: .t0),
-            Skill(name: "引体向上", tier: .t0),
-            Skill(name: "双杠臂屈伸", tier: .t0),
-            Skill(name: "空心体", tier: .t0),
-            Skill(name: "跳箱", tier: .t0),
-            Skill(name: "环上支撑", tier: .t1),
-            Skill(name: "倒立行走", tier: .t1),
-            Skill(name: "肌肉上翻", tier: .t1),
-            Skill(name: "手倒立俯卧撑", tier: .t1),
-            Skill(name: "蝴蝶引体", tier: .t2),
-            Skill(name: "绳索攀爬", tier: .t2),
-            Skill(name: "环上双力臂", tier: .t2),
-        ]
-    )
-
-    static let weightlifting = SkillCategory(
-        name: "举重",
-        subtitle: "Weightlifting",
-        icon: "figure.strengthtraining.traditional",
-        color: Color(hex: "#F5A623"),
-        skills: [
-            Skill(name: "硬拉", tier: .t0),
-            Skill(name: "深蹲", tier: .t0),
-            Skill(name: "推举", tier: .t0),
-            Skill(name: "划船", tier: .t0),
-            Skill(name: "前蹲", tier: .t1),
-            Skill(name: "悬垂抓举", tier: .t1),
-            Skill(name: "悬垂挺举", tier: .t1),
-            Skill(name: "颈后推举", tier: .t1),
-            Skill(name: "抓举", tier: .t2),
-            Skill(name: "挺举", tier: .t2),
-            Skill(name: "分腿挺举", tier: .t2),
-        ]
-    )
-
-    static let cardio = SkillCategory(
-        name: "有氧",
-        subtitle: "Monostructural",
-        icon: "heart.circle.fill",
-        color: Color(hex: "#34C759"),
-        skills: [
-            Skill(name: "跑步", tier: .t0),
-            Skill(name: "划船机", tier: .t0),
-            Skill(name: "跳绳", tier: .t0),
-            Skill(name: "双摇跳绳", tier: .t1),
-            Skill(name: "壶铃摆动", tier: .t1),
-            Skill(name: "攻城锤", tier: .t1),
-            Skill(name: "Echo Bike", tier: .t2),
-            Skill(name: "Ski Erg", tier: .t2),
-        ]
-    )
 }
