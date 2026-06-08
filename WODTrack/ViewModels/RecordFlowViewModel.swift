@@ -34,6 +34,7 @@ final class RecordFlowViewModel {
     var wodContentText = ""
     var completionStatus: CompletionStatus = .completed
     var difficultyRating = 3
+    var completionMinutes: Int? = nil
     var selectedStyleId = "style_mono_overlay"
     var textLayout = TextLayout()
     var ocrState: OCRState = .idle
@@ -44,6 +45,8 @@ final class RecordFlowViewModel {
 
     private let ocrService: OCRServicing
     private var hasUserAdjustedFontSize = false
+    private var networkRetryCount = 0
+    private let maxNetworkRetries = 3
 
     init(ocrService: OCRServicing = PreviewOCRService()) {
         self.ocrService = ocrService
@@ -52,9 +55,13 @@ final class RecordFlowViewModel {
     func startFlow(with image: UIImage) {
         entryMode = .photoOCR
         selectedWhiteboardImage = image
+        networkRetryCount = 0
         ocrState = .processing
         step = .ocrResult
+        performOCR(image: image)
+    }
 
+    private func performOCR(image: UIImage) {
         Task {
             do {
                 let result = try await ocrService.recognize(image: image)
@@ -64,8 +71,17 @@ final class RecordFlowViewModel {
                     wodContentText = result.wodContent.joined(separator: "\n")
                 }
             } catch {
+                let isNetworkError = error is URLError || (error as NSError).domain == NSURLErrorDomain
                 await MainActor.run {
-                    ocrState = .failure(error.localizedDescription)
+                    if isNetworkError && networkRetryCount < maxNetworkRetries {
+                        networkRetryCount += 1
+                        Task {
+                            try? await Task.sleep(for: .seconds(3))
+                            performOCR(image: image)
+                        }
+                    } else {
+                        ocrState = .failure(error.localizedDescription)
+                    }
                 }
             }
         }
@@ -153,6 +169,7 @@ final class RecordFlowViewModel {
         previewRecord.wodContent = wodLines
         previewRecord.completionStatus = completionStatus
         previewRecord.difficultyRating = difficultyRating
+        previewRecord.completionMinutes = completionMinutes
         previewRecord.cardStyleId = selectedStyleId
         previewRecord.textLayout = textLayout
         if let renderedCardImage {

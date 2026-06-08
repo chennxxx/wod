@@ -47,7 +47,6 @@ struct RecordFlowCoordinator: View {
                 })
             }
         }
-        .toolbar(.hidden, for: .tabBar)
         .navigationBarBackButtonHidden()
     }
 }
@@ -63,12 +62,22 @@ private struct WhiteboardStep: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: WTSpacing.lg) {
-            HStack {
+            HStack(spacing: WTSpacing.sm) {
+                Button(action: dismiss) {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundStyle(Color.wtPrimary)
+                        .frame(width: 36, height: 36)
+                        .background(Color.wtSurface)
+                        .clipShape(Circle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("关闭")
+
                 Text("记录今日 WOD")
                     .font(WTFont.title)
+
                 Spacer()
-                Button("关闭", action: dismiss)
-                    .foregroundStyle(Color.wtTextSecondary)
             }
 
             Text("你可以拍摄白板、从相册导入，或者直接手动输入今日训练内容。")
@@ -154,6 +163,7 @@ private struct CheckinPhotosStep: View {
                                     .font(WTFont.bodyBold)
                             }
                         }
+                        .contentShape(RoundedRectangle(cornerRadius: WTRadius.lg))
                 }
 
                 if !viewModel.selectedCheckinImages.isEmpty {
@@ -232,13 +242,54 @@ private struct OCRStatusBanner: View {
     }
 }
 
+private struct OCRLoadingView: View {
+    private let messages = ["正在抓取白板内容", "正在处理白板内容", "正在将图片转化为文字"]
+    @State private var messageIndex = 0
+
+    var body: some View {
+        ZStack {
+            Color.wtBackground.ignoresSafeArea()
+
+            VStack(spacing: WTSpacing.lg) {
+                ProgressView()
+                    .tint(.wtPrimary)
+                    .scaleEffect(1.4)
+
+                VStack(spacing: WTSpacing.xs) {
+                    Text(messages[messageIndex])
+                        .font(WTFont.bodyBold)
+                        .foregroundStyle(Color.wtTextPrimary)
+                        .id(messageIndex)
+                        .transition(.opacity)
+                        .animation(.easeInOut(duration: 0.4), value: messageIndex)
+
+                    Text("通常需要 5-15 秒")
+                        .font(WTFont.caption)
+                        .foregroundStyle(Color.wtTextSecondary)
+                }
+            }
+        }
+        .onAppear {
+            startCycling()
+        }
+    }
+
+    private func startCycling() {
+        Timer.scheduledTimer(withTimeInterval: 2.2, repeats: true) { timer in
+            withAnimation {
+                messageIndex = (messageIndex + 1) % messages.count
+            }
+        }
+    }
+}
+
 private struct OCRResultStep: View {
     @Bindable var viewModel: RecordFlowViewModel
 
     var body: some View {
         switch viewModel.ocrState {
         case .idle, .processing:
-            LoadingOverlay(title: "正在识别白板内容…", subtitle: "通常需要 5-15 秒")
+            OCRLoadingView()
         case .failure(let message):
             RecordFlowStepPage(title: "识别失败", backAction: viewModel.goBack) {
                 VStack(alignment: .leading, spacing: WTSpacing.lg) {
@@ -287,6 +338,8 @@ C WOD/任务计时/7轮
                         text: $viewModel.wodContentText,
                         minHeight: 320
                     )
+
+                    CompletionTimeField(completionMinutes: $viewModel.completionMinutes)
 
                     DifficultyRatingField(rating: $viewModel.difficultyRating)
                 }
@@ -363,6 +416,79 @@ private struct RecordFlowBottomBar<Content: View>: View {
     }
 }
 
+private struct CompletionTimeField: View {
+    @Binding var completionMinutes: Int?
+    @State private var customText = ""
+    @State private var isCustom = false
+
+    private let presets = [45, 60]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: WTSpacing.sm) {
+            Text("完成时间")
+                .font(WTFont.caption)
+                .foregroundStyle(Color.wtTextSecondary)
+
+            HStack(spacing: WTSpacing.sm) {
+                ForEach(presets, id: \.self) { minutes in
+                    Button {
+                        isCustom = false
+                        customText = ""
+                        completionMinutes = completionMinutes == minutes ? nil : minutes
+                    } label: {
+                        Text("\(minutes) 分钟")
+                            .font(WTFont.bodyBold)
+                            .foregroundStyle((!isCustom && completionMinutes == minutes) ? Color.black : Color.wtTextPrimary)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 40)
+                            .background((!isCustom && completionMinutes == minutes) ? Color.wtPrimary : Color.wtSurface)
+                            .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
+                            .contentShape(RoundedRectangle(cornerRadius: WTRadius.md))
+                    }
+                    .buttonStyle(.plain)
+                }
+
+                Button {
+                    isCustom.toggle()
+                    if !isCustom {
+                        completionMinutes = Int(customText)
+                    }
+                } label: {
+                    Text("自定义")
+                        .font(WTFont.bodyBold)
+                        .foregroundStyle(isCustom ? Color.black : Color.wtTextPrimary)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 40)
+                        .background(isCustom ? Color.wtPrimary : Color.wtSurface)
+                        .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
+                        .contentShape(RoundedRectangle(cornerRadius: WTRadius.md))
+                }
+                .buttonStyle(.plain)
+            }
+
+            if isCustom {
+                HStack(spacing: WTSpacing.sm) {
+                    TextField("输入分钟数", text: $customText)
+                        .keyboardType(.numberPad)
+                        .font(WTFont.body)
+                        .foregroundStyle(Color.wtTextPrimary)
+                        .padding(.horizontal, WTSpacing.md)
+                        .frame(height: 40)
+                        .background(Color.wtSurface)
+                        .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
+                        .onChange(of: customText) { _, new in
+                            completionMinutes = Int(new)
+                        }
+
+                    Text("分钟")
+                        .font(WTFont.caption)
+                        .foregroundStyle(Color.wtTextSecondary)
+                }
+            }
+        }
+    }
+}
+
 private struct DifficultyRatingField: View {
     @Binding var rating: Int
 
@@ -383,10 +509,10 @@ private struct DifficultyRatingField: View {
                         rating = value
                     } label: {
                         Image(systemName: value <= clampedRating ? "star.fill" : "star")
-                            .font(.system(size: 34, weight: .semibold))
+                            .font(.system(size: 26, weight: .semibold))
                             .foregroundStyle(value <= clampedRating ? Color.wtPrimary : Color.wtTextDisabled)
                             .frame(maxWidth: .infinity)
-                            .frame(height: 52)
+                            .frame(height: 40)
                             .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
@@ -507,19 +633,18 @@ private struct CardPreviewStep: View {
     private var previewTopBar: some View {
         HStack(spacing: WTSpacing.sm) {
             Button(action: viewModel.goBack) {
-                Image(systemName: "xmark")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundStyle(Color.wtTextPrimary)
-                    .frame(width: 44, height: 44)
+                Image(systemName: "chevron.left")
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundStyle(Color.wtPrimary)
+                    .frame(width: 36, height: 36)
+                    .background(Color.wtSurface)
+                    .clipShape(Circle())
             }
             .buttonStyle(.plain)
             .accessibilityLabel("返回上一步")
 
-            Spacer()
-
             Text("最终预览")
-                .font(.system(size: 15, weight: .semibold))
-                .foregroundStyle(Color.wtTextSecondary)
+                .font(WTFont.title)
 
             Spacer()
 
@@ -951,18 +1076,33 @@ private struct WhiteboardActionCard: View {
     let subtitle: String
 
     var body: some View {
-        RoundedRectangle(cornerRadius: WTRadius.lg)
-            .stroke(Color.wtSurface2, lineWidth: 1)
-            .frame(maxWidth: .infinity, minHeight: 120)
-            .overlay {
-                VStack(spacing: WTSpacing.sm) {
-                    Image(systemName: icon)
-                        .font(.system(size: 32))
-                        .foregroundStyle(Color.wtPrimary)
-                    Text(title).font(WTFont.bodyBold)
-                    Text(subtitle).font(WTFont.micro).foregroundStyle(Color.wtTextSecondary)
-                }
+        ZStack {
+            RoundedRectangle(cornerRadius: WTRadius.lg)
+                .fill(Color.wtSurface)
+                .overlay(
+                    RoundedRectangle(cornerRadius: WTRadius.lg)
+                        .stroke(Color.wtSurface2, lineWidth: 1)
+                )
+
+            // 右下角装饰图标
+            Image(systemName: icon)
+                .font(.system(size: 64, weight: .semibold))
+                .foregroundStyle(Color.wtPrimary.opacity(0.06))
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+                .padding(WTSpacing.sm)
+                .clipped()
+
+            VStack(spacing: WTSpacing.sm) {
+                Image(systemName: icon)
+                    .font(.system(size: 28))
+                    .foregroundStyle(Color.wtPrimary)
+                Text(title).font(WTFont.bodyBold)
+                Text(subtitle).font(WTFont.micro).foregroundStyle(Color.wtTextSecondary)
             }
+            .padding(WTSpacing.md)
+        }
+        .frame(maxWidth: .infinity, minHeight: 96)
+        .contentShape(RoundedRectangle(cornerRadius: WTRadius.lg))
     }
 }
 

@@ -17,6 +17,7 @@ final class WODRecord {
     var cardImagePath: String?
     var boxId: String?
     var wodName: String?
+    var completionMinutes: Int?
 
     init(wodDate: Date = .now) {
         self.id = UUID()
@@ -33,6 +34,7 @@ final class WODRecord {
         self.cardImagePath = nil
         self.boxId = nil
         self.wodName = nil
+        self.completionMinutes = nil
     }
 }
 
