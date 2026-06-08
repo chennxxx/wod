@@ -164,10 +164,16 @@ private struct HistoryCardPreview: View {
 struct HistoryRecordCard: View {
     let record: WODRecord
 
+    private static let dateFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "yyyy.MM.dd"
+        return f
+    }()
+
     var body: some View {
         VStack(alignment: .leading, spacing: WTSpacing.sm) {
             HStack {
-                Text(record.wodDate.formatted(Date.FormatStyle().year().month().day()))
+                Text(Self.dateFormatter.string(from: record.wodDate))
                     .font(WTFont.bodyBold)
                     .foregroundStyle(Color.wtPrimary)
                 Spacer(minLength: 0)
