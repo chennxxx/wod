@@ -54,63 +54,70 @@ struct HistoryListView: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: WTSpacing.sm) {
-                    MonthChip(label: "全部", isSelected: selectedMonth == nil) {
-                        selectedMonth = nil
-                    }
-                    ForEach(allMonthKeys, id: \.self) { key in
-                        MonthChip(label: monthLabel(from: key), isSelected: selectedMonth == key) {
-                            selectedMonth = selectedMonth == key ? nil : key
-                        }
-                    }
-                }
-                .padding(.horizontal, WTSpacing.lg)
-                .padding(.vertical, WTSpacing.sm)
-            }
-            .background(Color.wtBackground)
-
-            Divider().overlay(Color.wtSurface2)
-
-            ScrollView {
-                LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
-                    ForEach(groupedByMonth, id: \.key) { group in
-                        Section {
-                            VStack(spacing: WTSpacing.md) {
-                                ForEach(group.records) { record in
-                                    NavigationLink {
-                                        HistoryDetailView(record: record)
-                                    } label: {
-                                        HistoryRecordCard(record: record)
-                                    }
-                                    .buttonStyle(.plain)
-                                    .id(record.id)
+        ScrollView {
+            LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
+                ForEach(groupedByMonth, id: \.key) { group in
+                    Section {
+                        VStack(spacing: WTSpacing.md) {
+                            ForEach(group.records) { record in
+                                NavigationLink {
+                                    HistoryDetailView(record: record)
+                                } label: {
+                                    HistoryRecordCard(record: record)
                                 }
+                                .buttonStyle(.plain)
+                                .id(record.id)
                             }
-                            .padding(.horizontal, WTSpacing.lg)
-                            .padding(.bottom, WTSpacing.lg)
-                        } header: {
-                            HStack {
-                                Text(sectionTitle(from: group.key))
-                                    .font(WTFont.caption)
-                                    .foregroundStyle(Color.wtTextSecondary)
-                                Spacer()
-                                Text("\(group.records.count) 条")
-                                    .font(WTFont.micro)
-                                    .foregroundStyle(Color.wtTextSecondary.opacity(0.6))
-                            }
-                            .padding(.horizontal, WTSpacing.lg)
-                            .padding(.vertical, WTSpacing.sm)
-                            .background(Color.wtBackground.opacity(0.95))
                         }
+                        .padding(.horizontal, WTSpacing.lg)
+                        .padding(.bottom, WTSpacing.lg)
+                    } header: {
+                        HStack {
+                            Text(sectionTitle(from: group.key))
+                                .font(WTFont.caption)
+                                .foregroundStyle(Color.wtTextSecondary)
+                            Spacer()
+                            Text("\(group.records.count) 条")
+                                .font(WTFont.micro)
+                                .foregroundStyle(Color.wtTextSecondary.opacity(0.6))
+                        }
+                        .padding(.horizontal, WTSpacing.lg)
+                        .padding(.vertical, WTSpacing.sm)
+                        .background(Color.wtBackground.opacity(0.95))
                     }
                 }
             }
-            .scrollPosition(id: $scrollPosition)
         }
+        .scrollPosition(id: $scrollPosition)
         .background(Color.wtBackground)
         .navigationTitle("历史记录")
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Menu {
+                    Button {
+                        selectedMonth = nil
+                    } label: {
+                        Label("全部", systemImage: selectedMonth == nil ? "checkmark" : "")
+                    }
+                    Divider()
+                    ForEach(allMonthKeys, id: \.self) { key in
+                        Button {
+                            selectedMonth = selectedMonth == key ? nil : key
+                        } label: {
+                            Label(sectionTitle(from: key), systemImage: selectedMonth == key ? "checkmark" : "")
+                        }
+                    }
+                } label: {
+                    HStack(spacing: 4) {
+                        Text(selectedMonth == nil ? "全部月份" : monthLabel(from: selectedMonth!))
+                            .font(WTFont.caption)
+                        Image(systemName: "chevron.down")
+                            .font(.system(size: 10, weight: .medium))
+                    }
+                    .foregroundStyle(selectedMonth == nil ? Color.wtTextSecondary : Color.wtPrimary)
+                }
+            }
+        }
         .onAppear {
             guard let targetDate = scrollToDate else { return }
             let calendar = Calendar.current
@@ -118,26 +125,6 @@ struct HistoryListView: View {
             let match = records.first { calendar.startOfDay(for: $0.wodDate) <= target }
             scrollPosition = match?.id
         }
-    }
-}
-
-private struct MonthChip: View {
-    let label: String
-    let isSelected: Bool
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            Text(label)
-                .font(WTFont.caption)
-                .foregroundStyle(isSelected ? Color.black : Color.wtTextSecondary)
-                .padding(.horizontal, WTSpacing.md)
-                .padding(.vertical, WTSpacing.xs + 2)
-                .background(isSelected ? Color.wtPrimary : Color.wtSurface)
-                .clipShape(Capsule())
-        }
-        .buttonStyle(.plain)
-        .animation(.easeInOut(duration: 0.15), value: isSelected)
     }
 }
 
