@@ -9,8 +9,12 @@ struct SkillDetailView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var showAddSheet = false
 
+    private var statusMap: [String: SkillStatus] {
+        Dictionary(uniqueKeysWithValues: allStatuses.map { ($0.skillId, $0) })
+    }
+
     private var statusEntry: SkillStatus? {
-        allStatuses.first { $0.skillId == skill.id }
+        statusMap[skill.id]
     }
 
     private var masteryStatus: SkillMasteryStatus {
@@ -43,6 +47,9 @@ struct SkillDetailView: View {
                 VStack(alignment: .leading, spacing: WTSpacing.lg) {
                     videoPlaceholder
                     titleSection
+                    if !skill.prerequisites.isEmpty {
+                        prerequisitesSection
+                    }
                     statusSection
                     myDataSection
                     if !entries.isEmpty {
@@ -94,14 +101,65 @@ struct SkillDetailView: View {
     }
 
     private var titleSection: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: WTSpacing.sm) {
             Text(skill.name)
                 .font(.system(size: 28, weight: .bold))
                 .foregroundStyle(Color.wtTextPrimary)
             Text(skill.englishName)
                 .font(.system(size: 13, weight: .regular, design: .monospaced))
                 .foregroundStyle(Color.wtTextSecondary)
+
+            HStack(spacing: WTSpacing.xs) {
+                Text(skill.tier.label)
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundStyle(skill.tier.color)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(skill.tier.color.opacity(0.12))
+                    .clipShape(Capsule())
+
+                Text(skill.tier.description)
+                    .font(WTFont.micro)
+                    .foregroundStyle(Color.wtTextSecondary)
+            }
         }
+    }
+
+    private var prerequisitesSection: some View {
+        VStack(alignment: .leading, spacing: WTSpacing.sm) {
+            HStack(spacing: WTSpacing.xs) {
+                Text("前置动作")
+                    .font(WTFont.micro)
+                    .foregroundStyle(Color.wtTextSecondary)
+                if let unlock = skill.unlockCondition {
+                    Text("·")
+                        .font(WTFont.micro)
+                        .foregroundStyle(Color.wtTextDisabled)
+                    Text(unlock)
+                        .font(WTFont.micro)
+                        .foregroundStyle(Color.wtTextDisabled)
+                }
+            }
+
+            VStack(spacing: 0) {
+                ForEach(Array(prereqSkills.enumerated()), id: \.element.id) { index, prereq in
+                    let prereqStatus = statusMap[prereq.id]?.status ?? .unmarked
+                    NavigationLink(destination: SkillDetailView(skill: prereq)) {
+                        PrereqRow(skill: prereq, status: prereqStatus)
+                    }
+                    .buttonStyle(.plain)
+                    if index < prereqSkills.count - 1 {
+                        Divider().background(Color.wtSurface2).padding(.leading, WTSpacing.md)
+                    }
+                }
+            }
+            .background(Color.wtSurface)
+            .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
+        }
+    }
+
+    private var prereqSkills: [SkillDefinition] {
+        skill.prerequisites.compactMap { SkillLibrary.skillById[$0] }
     }
 
     private var statusSection: some View {
@@ -295,6 +353,56 @@ private struct CoachingPoint: View {
                 .foregroundStyle(Color.wtTextSecondary)
                 .fixedSize(horizontal: false, vertical: true)
         }
+    }
+}
+
+// MARK: - Prereq Row
+
+private struct PrereqRow: View {
+    let skill: SkillDefinition
+    let status: SkillMasteryStatus
+
+    private var statusIcon: (name: String, color: Color) {
+        switch status {
+        case .mastered:    ("checkmark.circle.fill", Color.wtPrimary)
+        case .inProgress:  ("moon.fill",             Color(hex: "#5E81F4"))
+        case .wantToLearn: ("circle",                Color.wtTextSecondary)
+        case .unmarked:    ("circle",                Color.wtTextDisabled)
+        }
+    }
+
+    var body: some View {
+        HStack(spacing: WTSpacing.sm) {
+            Image(systemName: statusIcon.name)
+                .font(.system(size: 18))
+                .foregroundStyle(statusIcon.color)
+                .frame(width: 24)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(skill.name)
+                    .font(WTFont.body)
+                    .foregroundStyle(Color.wtTextPrimary)
+                Text(skill.englishName)
+                    .font(.system(size: 10, weight: .regular, design: .monospaced))
+                    .foregroundStyle(Color.wtTextSecondary)
+            }
+
+            Spacer()
+
+            Text(skill.tier.label)
+                .font(.system(size: 10, weight: .bold))
+                .foregroundStyle(skill.tier.color)
+                .padding(.horizontal, 6)
+                .padding(.vertical, 2)
+                .background(skill.tier.color.opacity(0.12))
+                .clipShape(Capsule())
+
+            Image(systemName: "chevron.right")
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundStyle(Color.wtTextDisabled)
+        }
+        .padding(.horizontal, WTSpacing.md)
+        .padding(.vertical, 10)
     }
 }
 

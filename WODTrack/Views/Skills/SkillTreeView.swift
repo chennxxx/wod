@@ -83,6 +83,7 @@ struct SkillTreeView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: WTSpacing.md) {
                         filterBar
+                        ProgressionPathsCarousel()
                         ForEach(SkillLibrary.categories) { category in
                             CategorySection(
                                 category: category,
@@ -132,6 +133,69 @@ struct SkillTreeView: View {
     }
 }
 
+// MARK: - Progression Paths Carousel
+
+private struct ProgressionPathsCarousel: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: WTSpacing.sm) {
+            HStack {
+                Text("进阶路径")
+                    .font(WTFont.micro)
+                    .foregroundStyle(Color.wtTextSecondary)
+                Spacer()
+                Text("\(ProgressionPathLibrary.all.count) 条主线")
+                    .font(WTFont.micro)
+                    .foregroundStyle(Color.wtTextDisabled)
+            }
+            .padding(.horizontal, WTSpacing.lg)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: WTSpacing.sm) {
+                    ForEach(ProgressionPathLibrary.all) { path in
+                        NavigationLink(destination: ProgressionPathDetailView(path: path)) {
+                            PathCard(path: path)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(.horizontal, WTSpacing.lg)
+            }
+        }
+    }
+}
+
+private struct PathCard: View {
+    let path: ProgressionPath
+
+    private var categoryColor: Color {
+        SkillLibrary.categories.first { $0.id == path.categoryId }?.color ?? Color.wtTextSecondary
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: WTSpacing.sm) {
+            Image(systemName: path.icon)
+                .font(.system(size: 20, weight: .semibold))
+                .foregroundStyle(categoryColor)
+                .frame(width: 36, height: 36)
+                .background(categoryColor.opacity(0.12))
+                .clipShape(RoundedRectangle(cornerRadius: WTRadius.sm))
+
+            Text(path.name)
+                .font(WTFont.bodyBold)
+                .foregroundStyle(Color.wtTextPrimary)
+                .lineLimit(1)
+
+            Text("\(path.steps.count) 个动作")
+                .font(WTFont.micro)
+                .foregroundStyle(Color.wtTextSecondary)
+        }
+        .padding(WTSpacing.md)
+        .frame(width: 120)
+        .background(Color.wtSurface)
+        .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
+    }
+}
+
 // MARK: - Category Section
 
 private struct CategorySection: View {
@@ -155,10 +219,18 @@ private struct CategorySection: View {
     private var displayedSkills: [SkillDefinition] { selectedFilter == .all ? category.skills : filteredSkills }
     private var showSection: Bool { selectedFilter == .all || !filteredSkills.isEmpty }
 
+    // Skills grouped by subcategory, preserving subcategory order
+    private var groupedSkills: [(subcat: SkillSubcategoryDefinition, skills: [SkillDefinition])] {
+        category.subcategories.compactMap { subcat in
+            let skills = displayedSkills.filter { $0.subcategoryId == subcat.id }
+            return skills.isEmpty ? nil : (subcat: subcat, skills: skills)
+        }
+    }
+
     var body: some View {
         if showSection {
             VStack(alignment: .leading, spacing: 0) {
-                // Header — 整个区域可点击
+                // Header
                 Button {
                     withAnimation(.easeInOut(duration: 0.2)) { isExpanded.toggle() }
                 } label: {
@@ -201,17 +273,15 @@ private struct CategorySection: View {
 
                 if isExpanded {
                     Divider().background(Color.wtSurface2)
-                    ForEach(Array(displayedSkills.enumerated()), id: \.element.id) { index, skill in
-                        NavigationLink(destination: SkillDetailView(skill: skill)) {
-                            SkillRow(skill: skill, statusEntry: statusMap[skill.id], bestEntry: bestEntryMap[skill.id])
-                                .contentShape(Rectangle())
-                        }
-                        .buttonStyle(.plain)
-                        if index < displayedSkills.count - 1 {
-                            Divider()
-                                .background(Color.wtSurface2)
-                                .padding(.leading, WTSpacing.md)
-                        }
+
+                    ForEach(groupedSkills, id: \.subcat.id) { group in
+                        SubcategoryGroup(
+                            subcat: group.subcat,
+                            skills: group.skills,
+                            categoryColor: category.color,
+                            statusMap: statusMap,
+                            bestEntryMap: bestEntryMap
+                        )
                     }
                     .padding(.bottom, WTSpacing.xs)
                 }
@@ -219,6 +289,51 @@ private struct CategorySection: View {
             .background(Color.wtSurface)
             .clipShape(RoundedRectangle(cornerRadius: WTRadius.lg))
             .padding(.horizontal, WTSpacing.lg)
+        }
+    }
+}
+
+// MARK: - Subcategory Group
+
+private struct SubcategoryGroup: View {
+    let subcat: SkillSubcategoryDefinition
+    let skills: [SkillDefinition]
+    let categoryColor: Color
+    let statusMap: [String: SkillStatus]
+    let bestEntryMap: [String: SkillTrainingEntry]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            // Subcategory header
+            HStack(spacing: WTSpacing.xs) {
+                Text(subcat.name)
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(categoryColor)
+                Text("·")
+                    .font(.system(size: 11))
+                    .foregroundStyle(Color.wtTextDisabled)
+                Text("\(skills.count)")
+                    .font(.system(size: 11))
+                    .foregroundStyle(Color.wtTextDisabled)
+            }
+            .padding(.horizontal, WTSpacing.md)
+            .padding(.top, WTSpacing.sm)
+            .padding(.bottom, WTSpacing.xs)
+
+            ForEach(Array(skills.enumerated()), id: \.element.id) { index, skill in
+                NavigationLink(destination: SkillDetailView(skill: skill)) {
+                    SkillRow(skill: skill, statusEntry: statusMap[skill.id], bestEntry: bestEntryMap[skill.id])
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                if index < skills.count - 1 {
+                    Divider()
+                        .background(Color.wtSurface2)
+                        .padding(.leading, WTSpacing.md)
+                }
+            }
+
+            Divider().background(Color.wtSurface2)
         }
     }
 }
@@ -263,10 +378,10 @@ private struct SkillRow: View {
 
     private var statusIcon: (name: String, color: Color) {
         switch masteryStatus {
-        case .mastered: ("checkmark.circle.fill", Color.wtPrimary)
-        case .inProgress: ("moon.fill", Color(hex: "#5E81F4"))
-        case .wantToLearn: ("circle", Color.wtTextSecondary)
-        case .unmarked: ("circle", Color.wtTextDisabled)
+        case .mastered:    ("checkmark.circle.fill", Color.wtPrimary)
+        case .inProgress:  ("moon.fill",             Color(hex: "#5E81F4"))
+        case .wantToLearn: ("circle",                Color.wtTextSecondary)
+        case .unmarked:    ("circle",                Color.wtTextDisabled)
         }
     }
 
@@ -288,14 +403,18 @@ private struct SkillRow: View {
 
             Spacer()
 
+            Text(skill.tier.label)
+                .font(.system(size: 10, weight: .bold))
+                .foregroundStyle(skill.tier.color)
+                .padding(.horizontal, 6)
+                .padding(.vertical, 2)
+                .background(skill.tier.color.opacity(0.12))
+                .clipShape(Capsule())
+
             if let entry = bestEntry {
                 Text(entry.formattedValue)
                     .font(WTFont.caption)
                     .foregroundStyle(Color.wtTextSecondary)
-            } else {
-                Text("—")
-                    .font(WTFont.caption)
-                    .foregroundStyle(Color.wtTextDisabled)
             }
 
             Image(systemName: "chevron.right")
