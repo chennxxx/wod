@@ -126,8 +126,6 @@ private struct OverviewCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: WTSpacing.md) {
-            Text("训练概览")
-                .font(WTFont.title)
 
             HStack(spacing: WTSpacing.md) {
                 RecordStatBlock(icon: "flame.fill", value: "\(streakDays)", label: "连续打卡天数")
