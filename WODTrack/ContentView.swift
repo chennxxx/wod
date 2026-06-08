@@ -334,12 +334,12 @@ struct HistoryThumbnail: View {
 
     private var image: UIImage? {
         if let cardImagePath = record.cardImagePath,
-           let cardImage = UIImage(contentsOfFile: cardImagePath) {
+           let cardImage = ImagePathResolver.loadImage(from: cardImagePath) {
             return cardImage
         }
 
         if let firstPhotoPath = record.checkinPhotoURLs.first,
-           let checkinImage = UIImage(contentsOfFile: firstPhotoPath) {
+           let checkinImage = ImagePathResolver.loadImage(from: firstPhotoPath) {
             return checkinImage
         }
 

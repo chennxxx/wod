@@ -64,7 +64,7 @@ struct HistoryDetailView: View {
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: WTSpacing.sm) {
                                 ForEach(record.checkinPhotoURLs, id: \.self) { path in
-                                    if let image = UIImage(contentsOfFile: path) {
+                                    if let image = ImagePathResolver.loadImage(from: path) {
                                         Image(uiImage: image)
                                             .resizable()
                                             .scaledToFill()
@@ -118,7 +118,7 @@ private struct HistoryCardPreview: View {
     }
 
     private var aspectRatio: CGFloat {
-        if let image = UIImage(contentsOfFile: record.cardImagePath ?? "") {
+        if let image = ImagePathResolver.loadImage(from: record.cardImagePath ?? "") {
             return image.size.width / max(image.size.height, 1)
         }
         return CardRenderer.fallbackAspectRatio
@@ -175,7 +175,7 @@ private struct HistoryHero: View {
 
     private var cardImage: UIImage? {
         guard let path = record.cardImagePath else { return nil }
-        return UIImage(contentsOfFile: path)
+        return ImagePathResolver.loadImage(from: path)
     }
 }
 

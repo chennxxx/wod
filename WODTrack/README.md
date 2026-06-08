@@ -1,29 +1,36 @@
-# WODTrack iOS MVP Scaffold
+# WODTrack iOS App
 
-这个目录是按需求文档新增的 SwiftUI iOS MVP 源码骨架，和现有微信小程序目录并存，不互相覆盖。
+CrossFit 训练记录工具，支持白板 OCR 识别、训练卡片生成与历史记录管理。
 
-当前版本：`1.0版本`
+当前版本：`1.7.1`
 
 工程入口：
 
-- Xcode 工程：[WODTrack.xcodeproj](/Users/chen/Desktop/wod/WODTrack.xcodeproj)
+- Xcode 工程：`WODTrack.xcodeproj`
 - App target：`WODTrack`
-- Test target：`WODTrackTests`
+- 最低系统版本：iOS 17.0
 
-已落地内容：
+## 主要功能
 
-- `TabView` 三个页签：技能树、记录、我的
-- `RecordFlowViewModel` 多步骤录入状态机
-- 白板 OCR 服务协议与 URLSession 实现骨架
-- 卡片预览与 `ImageRenderer` 导出入口
-- `SwiftData` 模型、历史列表、个人页、登录引导占位
-- 深色主题、主按钮、输入框、Loading 组件
-- `Info.plist`、`Assets.xcassets`、shared scheme、单元测试 target
-- 最低系统版本已统一为 `iOS 17.0`
+- **白板 OCR**：拍摄训练白板，接入 Doubao 多模态大模型自动识别 WOD 内容
+- **训练卡片**：多套模板（训练日志、夜训卡片、大字报、数据仪表盘、胶片复古、极简白底、杂志封面），支持字体、字号、位置、透明度自定义，保存后自动写入系统相册
+- **历史记录**：SwiftData 持久化，支持打卡照片与成图预览，热力图按日期可视化训练频率
+- **技能树**：体操、举重、有氧三大类动作，按 T0/T1/T2 难度分组展示
+- **系统分享**：通过 Share Sheet 分享到微信、朋友圈、小红书等渠道
 
-当前限制：
+## 工程结构
 
-- 工作区里没有完整 Xcode 工程文件，且本机只有 Command Line Tools，没有完整 Xcode，所以这里先交付源码目录，未做本地编译验证
-- `WODTrack.xcodeproj/project.pbxproj` 已通过 `plutil -lint` 语法校验
-- 微信登录、CloudKit、相册写入、真实图片权限流仍是占位实现
-- OCR API 需要服务端可用后再填 `AppConfig`
+```
+WODTrack/
+├── Models/          # SwiftData 数据模型（WODRecord 等）
+├── ViewModels/      # 业务逻辑（RecordFlowViewModel 等）
+├── Views/           # SwiftUI 视图（History、Preview、SkillTree 等）
+├── Services/        # 外部服务（DoubaoLLMService、ImagePathResolver 等）
+├── Config/          # 模板配置（CardStyleConfig、AppConfig 等）
+└── Resources/       # 资源文件（Assets、Info.plist）
+```
+
+## 数据存储
+
+- **训练记录**：SwiftData（SQLite），数据库名 `WODTrackStore_v3`
+- **图片文件**：`Documents/WODTrackRecords/`，以文件名存储路径引用，兼容 App 版本更新

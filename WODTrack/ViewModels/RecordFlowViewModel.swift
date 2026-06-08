@@ -273,7 +273,7 @@ final class RecordFlowViewModel {
             let filename = "\(prefix)-\(UUID().uuidString).jpg"
             let url = directory.appendingPathComponent(filename)
             try data.write(to: url, options: .atomic)
-            return url.path
+            return filename
         } catch {
             return nil
         }
