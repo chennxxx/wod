@@ -332,8 +332,10 @@ private struct OCRResultStep: View {
             )
         case .failure(let message):
             RecordFlowStepPage(title: "识别失败", backAction: viewModel.goBack) {
-                VStack(alignment: .leading, spacing: WTSpacing.lg) {
-                    Text(message).font(WTFont.body)
+                VStack(alignment: .leading, spacing: WTSpacing.md) {
+                    Text(message)
+                        .font(WTFont.body)
+                        .foregroundStyle(Color.wtTextSecondary)
                     WTTextEditor(
                         title: "手动输入 WOD",
                         placeholder: """
@@ -345,8 +347,10 @@ A 热身/完成以下3轮
 20S原地高抬腿
 """,
                         text: $viewModel.wodContentText,
-                        minHeight: 280
+                        minHeight: 220
                     )
+                    CompletionTimeField(completionMinutes: $viewModel.completionMinutes)
+                    DifficultyRatingField(rating: $viewModel.difficultyRating)
                 }
                 .padding(WTSpacing.lg)
             } bottomBar: {
