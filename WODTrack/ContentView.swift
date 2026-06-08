@@ -146,7 +146,7 @@ private struct HeatmapGrid: View {
                             VStack(spacing: spacing) {
                                 ForEach(week) { day in
                                     RoundedRectangle(cornerRadius: 4)
-                                        .fill(day.didCheckIn ? Color.wtPrimary : Color.wtSurface2)
+                                        .fill(cellColor(for: day))
                                         .frame(width: cellSize, height: cellSize)
                                         .overlay {
                                             if Calendar.current.isDateInToday(day.date) {
@@ -155,6 +155,7 @@ private struct HeatmapGrid: View {
                                             }
                                         }
                                         .onTapGesture {
+                                            guard day.didCheckIn else { return }
                                             onDayTapped?(day.date)
                                         }
                                 }
@@ -181,7 +182,11 @@ private struct HeatmapGrid: View {
     private var heatmapDays: [HeatmapDay] {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: .now)
-        let uniqueDays = Set(records.map { calendar.startOfDay(for: $0.wodDate) })
+        var countByDay: [Date: Int] = [:]
+        for record in records {
+            let day = calendar.startOfDay(for: record.wodDate)
+            countByDay[day, default: 0] += 1
+        }
 
         let earliestDate = calendar.date(from: DateComponents(year: 2026, month: 1, day: 1))!
         let totalDays = calendar.dateComponents([.day], from: earliestDate, to: today).day ?? 0
@@ -189,7 +194,16 @@ private struct HeatmapGrid: View {
 
         return (0 ..< dayCount).reversed().compactMap { offset in
             guard let date = calendar.date(byAdding: .day, value: -offset, to: today) else { return nil }
-            return HeatmapDay(date: date, didCheckIn: uniqueDays.contains(date))
+            return HeatmapDay(date: date, count: countByDay[date] ?? 0)
+        }
+    }
+
+    private func cellColor(for day: HeatmapDay) -> Color {
+        switch day.count {
+        case 0: return Color.wtSurface2
+        case 1: return Color.wtPrimary.opacity(0.55)
+        case 2: return Color.wtPrimary.opacity(0.78)
+        default: return Color.wtPrimary
         }
     }
 
@@ -368,7 +382,8 @@ private struct EmptyRecordState: View {
 private struct HeatmapDay: Identifiable {
     let id = UUID()
     let date: Date
-    let didCheckIn: Bool
+    let count: Int
+    var didCheckIn: Bool { count > 0 }
 }
 
 private extension Array {
