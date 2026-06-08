@@ -86,7 +86,7 @@ private struct RecordHomeView: View {
                 .shadow(color: Color.wtPrimary.opacity(0.4), radius: 12, x: 0, y: 4)
             }
             .padding(.trailing, WTSpacing.lg)
-            .padding(.bottom, WTSpacing.lg)
+            .padding(.bottom, 36)
         }
         .navigationTitle("每一次进步都有迹可循")
         .navigationDestination(item: $historyScrollDate) { date in
