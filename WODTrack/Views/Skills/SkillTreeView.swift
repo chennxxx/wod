@@ -125,71 +125,53 @@ struct SkillTreeView: View {
 
     var body: some View {
         NavigationStack {
-            ZStack {
-                Color.wtBackground.ignoresSafeArea()
-                VStack(spacing: 0) {
-                    pageSwitcher
-                        .padding(.horizontal, WTSpacing.lg)
-                        .padding(.bottom, WTSpacing.sm)
+            ScrollView {
+                LazyVStack(spacing: WTSpacing.md, pinnedViews: [.sectionHeaders]) {
+                    Picker("视图", selection: $selectedPage.animation(.easeInOut(duration: 0.2))) {
+                        ForEach(SkillPage.allCases, id: \.self) { page in
+                            Text(page.label).tag(page)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    .padding(.horizontal, WTSpacing.lg)
+                    .padding(.top, WTSpacing.xs)
 
                     switch selectedPage {
-                    case .actions: actionsPage
-                    case .paths:   pathsPage
+                    case .actions: actionsContent
+                    case .paths:   pathsContent
                     }
                 }
+                .padding(.bottom, WTSpacing.md)
             }
+            .background(Color.wtBackground)
             .navigationTitle("技能树")
-            .navigationBarTitleDisplayMode(.large)
         }
     }
 
-    // MARK: Page Switcher
+    // MARK: Actions Content
 
-    private var pageSwitcher: some View {
-        HStack(spacing: WTSpacing.xs) {
-            ForEach(SkillPage.allCases, id: \.self) { page in
-                let isSelected = selectedPage == page
-                Button {
-                    withAnimation(.easeInOut(duration: 0.2)) { selectedPage = page }
-                } label: {
-                    Text(page.label)
-                        .font(WTFont.bodyBold)
-                        .foregroundStyle(isSelected ? Color.black : Color.wtTextSecondary)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 40)
-                        .background(isSelected ? Color.wtPrimary : Color.wtSurface)
-                        .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
+    @ViewBuilder private var actionsContent: some View {
+        Section {
+            if isSubFiltering {
+                flatSkillList
+            } else {
+                ForEach(SkillLibrary.categories) { category in
+                    CategorySection(
+                        category: category,
+                        selectedFilter: selectedFilter,
+                        statusMap: statusMap,
+                        bestEntryMap: bestEntryMap
+                    )
                 }
-                .buttonStyle(.plain)
             }
-        }
-        .padding(WTSpacing.xs)
-        .background(Color.wtSurface.opacity(0.5))
-        .clipShape(RoundedRectangle(cornerRadius: WTRadius.lg))
-    }
-
-    // MARK: Actions Page
-
-    private var actionsPage: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: WTSpacing.md) {
+        } header: {
+            VStack(spacing: WTSpacing.sm) {
                 statusFilterBar
                 secondaryFilters
-
-                if isSubFiltering {
-                    flatSkillList
-                } else {
-                    ForEach(SkillLibrary.categories) { category in
-                        CategorySection(
-                            category: category,
-                            selectedFilter: selectedFilter,
-                            statusMap: statusMap,
-                            bestEntryMap: bestEntryMap
-                        )
-                    }
-                }
             }
-            .padding(.vertical, WTSpacing.md)
+            .padding(.top, WTSpacing.sm)
+            .padding(.bottom, WTSpacing.sm)
+            .background(Color.wtBackground)
         }
     }
 
@@ -289,39 +271,35 @@ struct SkillTreeView: View {
         .padding(.horizontal, WTSpacing.lg)
     }
 
-    // MARK: Paths Page
+    // MARK: Paths Content
 
-    private var pathsPage: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: WTSpacing.lg) {
-                ForEach(SkillLibrary.categories) { category in
-                    let paths = ProgressionPathLibrary.all.filter { $0.categoryId == category.id }
-                    if !paths.isEmpty {
-                        VStack(alignment: .leading, spacing: WTSpacing.sm) {
-                            HStack(spacing: WTSpacing.xs) {
-                                Image(systemName: category.icon)
-                                    .font(.system(size: 13, weight: .semibold))
-                                    .foregroundStyle(category.color)
-                                Text("\(category.name) · \(paths.count) 条主线")
-                                    .font(WTFont.micro)
-                                    .foregroundStyle(Color.wtTextSecondary)
-                            }
-                            .padding(.horizontal, WTSpacing.lg)
+    @ViewBuilder private var pathsContent: some View {
+        ForEach(SkillLibrary.categories) { category in
+            let paths = ProgressionPathLibrary.all.filter { $0.categoryId == category.id }
+            if !paths.isEmpty {
+                VStack(alignment: .leading, spacing: WTSpacing.sm) {
+                    HStack(spacing: WTSpacing.xs) {
+                        Image(systemName: category.icon)
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(category.color)
+                        Text("\(category.name) · \(paths.count) 条主线")
+                            .font(WTFont.micro)
+                            .foregroundStyle(Color.wtTextSecondary)
+                    }
+                    .padding(.horizontal, WTSpacing.lg)
+                    .padding(.top, WTSpacing.sm)
 
-                            VStack(spacing: WTSpacing.sm) {
-                                ForEach(paths) { path in
-                                    NavigationLink(destination: ProgressionPathDetailView(path: path)) {
-                                        PathRowCard(path: path, color: category.color, statusMap: statusMap)
-                                    }
-                                    .buttonStyle(.plain)
-                                }
+                    VStack(spacing: WTSpacing.sm) {
+                        ForEach(paths) { path in
+                            NavigationLink(destination: ProgressionPathDetailView(path: path)) {
+                                PathRowCard(path: path, color: category.color, statusMap: statusMap)
                             }
-                            .padding(.horizontal, WTSpacing.lg)
+                            .buttonStyle(.plain)
                         }
                     }
+                    .padding(.horizontal, WTSpacing.lg)
                 }
             }
-            .padding(.vertical, WTSpacing.md)
         }
     }
 }
