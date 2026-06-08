@@ -273,63 +273,10 @@ private struct HistoryPreviewSection: View {
                     NavigationLink {
                         HistoryDetailView(record: record)
                     } label: {
-                        HistoryPreviewRow(record: record)
+                        HistoryRecordCard(record: record)
                     }
                     .buttonStyle(.plain)
                 }
-            }
-        }
-    }
-}
-
-private struct HistoryPreviewRow: View {
-    let record: WODRecord
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: WTSpacing.sm) {
-            HStack {
-                Text(record.wodDate.formatted(Date.FormatStyle().year().month().day()))
-                    .font(WTFont.bodyBold)
-                    .foregroundStyle(Color.wtPrimary)
-                Spacer(minLength: 0)
-                if let rating = record.difficultyRating {
-                    PreviewDifficultyStars(rating: rating)
-                }
-            }
-
-            HStack(alignment: .top, spacing: WTSpacing.md) {
-                HistoryThumbnail(record: record)
-                    .frame(width: 72, height: 72)
-                    .clipShape(RoundedRectangle(cornerRadius: WTRadius.sm))
-
-                Text(record.wodContent.prefix(2).joined(separator: "\n"))
-                    .font(WTFont.caption)
-                    .foregroundStyle(Color.wtTextSecondary)
-                    .lineLimit(2)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
-        }
-        .padding(WTSpacing.md)
-        .background(Color.wtSurface)
-        .clipShape(RoundedRectangle(cornerRadius: WTRadius.lg))
-        .overlay {
-            RoundedRectangle(cornerRadius: WTRadius.lg)
-                .stroke(Color.white.opacity(0.07), lineWidth: 1)
-        }
-        .shadow(color: Color.wtPrimary.opacity(0.08), radius: 10, x: 0, y: 2)
-        .shadow(color: Color.black.opacity(0.4), radius: 6, x: 0, y: 3)
-    }
-}
-
-private struct PreviewDifficultyStars: View {
-    let rating: Int
-
-    var body: some View {
-        HStack(spacing: 2) {
-            ForEach(1 ... 5, id: \.self) { i in
-                Image(systemName: i <= rating ? "star.fill" : "star")
-                    .font(.system(size: 10))
-                    .foregroundStyle(i <= rating ? Color.wtPrimary : Color.wtTextSecondary.opacity(0.5))
             }
         }
     }

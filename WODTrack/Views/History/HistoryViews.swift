@@ -125,7 +125,7 @@ private struct HistoryCardPreview: View {
     }
 }
 
-private struct HistoryRecordCard: View {
+struct HistoryRecordCard: View {
     let record: WODRecord
 
     var body: some View {
@@ -164,7 +164,7 @@ private struct HistoryRecordCard: View {
     }
 }
 
-private struct DifficultyStars: View {
+struct DifficultyStars: View {
     let rating: Int
 
     var body: some View {
