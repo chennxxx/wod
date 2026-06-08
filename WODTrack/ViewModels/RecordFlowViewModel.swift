@@ -59,6 +59,7 @@ final class RecordFlowViewModel {
         entryMode = .photoOCR
         selectedWhiteboardImage = image
         networkRetryCount = 0
+        wodContentText = ""          // 清空上次 OCR 残留内容
         ocrState = .processing
         step = .ocrResult
         performOCR(image: image)
@@ -101,7 +102,7 @@ final class RecordFlowViewModel {
                             performOCR(image: image)
                         }
                     } else {
-                        ocrState = .failure(error.localizedDescription)
+                        ocrState = .failure(localizedOCRError(error, isNetworkError: isNetworkError))
                     }
                 }
             }
@@ -303,6 +304,32 @@ final class RecordFlowViewModel {
             style: CardStyleConfig.style(for: selectedStyleId),
             preferredSize: textLayout.fontSize
         )
+    }
+
+    private func localizedOCRError(_ error: Error, isNetworkError: Bool) -> String {
+        if isNetworkError {
+            if let urlError = error as? URLError {
+                switch urlError.code {
+                case .notConnectedToInternet, .networkConnectionLost:
+                    return "网络未连接，请检查网络后重试"
+                case .timedOut:
+                    return "请求超时，请稍后重试"
+                default:
+                    return "网络异常，请检查网络连接后重试"
+                }
+            }
+            return "网络异常，请检查网络连接后重试"
+        }
+        switch error {
+        case OCRError.invalidImage:
+            return "图片格式有误，请重新拍摄"
+        case OCRError.serviceUnavailable:
+            return "识别服务暂时不可用，请稍后重试"
+        case OCRError.parseError:
+            return "内容解析失败，请手动输入训练内容"
+        default:
+            return "识别失败，你可以手动输入今日训练内容"
+        }
     }
 
     private func persistImage(_ image: UIImage, prefix: String) -> String? {
