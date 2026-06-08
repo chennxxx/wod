@@ -53,45 +53,41 @@ struct HistoryListView: View {
         return date.formatted(.dateTime.year().month(.wide))
     }
 
+    private var visibleCount: Int {
+        groupedByMonth.reduce(0) { $0 + $1.records.count }
+    }
+
     var body: some View {
         ScrollView {
-            LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
+            LazyVStack(spacing: WTSpacing.md) {
                 ForEach(groupedByMonth, id: \.key) { group in
-                    Section {
-                        VStack(spacing: WTSpacing.md) {
-                            ForEach(group.records) { record in
-                                NavigationLink {
-                                    HistoryDetailView(record: record)
-                                } label: {
-                                    HistoryRecordCard(record: record)
-                                }
-                                .buttonStyle(.plain)
-                                .id(record.id)
-                            }
+                    ForEach(group.records) { record in
+                        NavigationLink {
+                            HistoryDetailView(record: record)
+                        } label: {
+                            HistoryRecordCard(record: record)
                         }
-                        .padding(.horizontal, WTSpacing.lg)
-                        .padding(.bottom, WTSpacing.lg)
-                    } header: {
-                        HStack {
-                            Text(sectionTitle(from: group.key))
-                                .font(WTFont.caption)
-                                .foregroundStyle(Color.wtTextSecondary)
-                            Spacer()
-                            Text("\(group.records.count) 条")
-                                .font(WTFont.micro)
-                                .foregroundStyle(Color.wtTextSecondary.opacity(0.6))
-                        }
-                        .padding(.horizontal, WTSpacing.lg)
-                        .padding(.vertical, WTSpacing.sm)
-                        .background(Color.wtBackground.opacity(0.95))
+                        .buttonStyle(.plain)
+                        .id(record.id)
                     }
                 }
             }
+            .padding(WTSpacing.lg)
         }
         .scrollPosition(id: $scrollPosition)
         .background(Color.wtBackground)
-        .navigationTitle("历史记录")
+        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
+            ToolbarItem(placement: .principal) {
+                HStack(spacing: WTSpacing.xs) {
+                    Text("历史记录")
+                        .font(WTFont.bodyBold)
+                        .foregroundStyle(Color.wtTextPrimary)
+                    Text("\(visibleCount)")
+                        .font(WTFont.caption)
+                        .foregroundStyle(Color.wtTextSecondary)
+                }
+            }
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
                     Button {
