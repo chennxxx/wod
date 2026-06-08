@@ -88,7 +88,7 @@ private struct RecordHomeView: View {
             .padding(.trailing, WTSpacing.lg)
             .padding(.bottom, 36)
         }
-        .navigationTitle("每一次进步都有迹可循")
+        .navigationTitle("每一次进步，都有迹可循")
         .navigationDestination(item: $historyScrollDate) { date in
             HistoryListView(scrollToDate: date)
         }
