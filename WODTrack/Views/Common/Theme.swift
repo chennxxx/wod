@@ -1,7 +1,7 @@
 import SwiftUI
 
 extension Color {
-    static let wtPrimary = Color(hex: "#F5C518")
+    static let wtPrimary = Color(hex: "#5BE88F")
     static let wtBackground = Color(hex: "#0D0D0D")
     static let wtSurface = Color(hex: "#1A1A1A")
     static let wtSurface2 = Color(hex: "#2A2A2A")
