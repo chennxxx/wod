@@ -232,21 +232,21 @@ struct HistoryRecordCard: View {
     }()
 
     var body: some View {
-        VStack(alignment: .leading, spacing: WTSpacing.sm) {
-            HStack {
-                Text(Self.dateFormatter.string(from: record.wodDate))
-                    .font(WTFont.bodyBold)
-                    .foregroundStyle(Color.wtPrimary)
-                Spacer(minLength: 0)
-                if let rating = record.difficultyRating {
-                    DifficultyStars(rating: rating)
-                }
-            }
+        HStack(alignment: .top, spacing: WTSpacing.md) {
+            HistoryThumbnail(record: record)
+                .frame(width: 72, height: 72)
+                .clipShape(RoundedRectangle(cornerRadius: WTRadius.sm))
 
-            HStack(alignment: .top, spacing: WTSpacing.md) {
-                HistoryThumbnail(record: record)
-                    .frame(width: 72, height: 72)
-                    .clipShape(RoundedRectangle(cornerRadius: WTRadius.sm))
+            VStack(alignment: .leading, spacing: WTSpacing.sm) {
+                HStack {
+                    Text(Self.dateFormatter.string(from: record.wodDate))
+                        .font(WTFont.bodyBold)
+                        .foregroundStyle(Color.wtTextPrimary)
+                    Spacer(minLength: 0)
+                    if let rating = record.difficultyRating {
+                        DifficultyStars(rating: rating)
+                    }
+                }
 
                 Text(record.wodContent.prefix(2).joined(separator: "\n"))
                     .font(WTFont.caption)
