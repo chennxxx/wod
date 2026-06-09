@@ -128,8 +128,11 @@ private struct OverviewCard: View {
         VStack(alignment: .leading, spacing: WTSpacing.md) {
 
             HStack(spacing: WTSpacing.md) {
-                RecordStatBlock(icon: "flame.fill", value: "\(streakDays)", label: "连续打卡天数")
-                RecordStatBlock(icon: "calendar", value: "\(checkinDaysCount)", label: "累计打卡天数")
+                RecordStatBlock(icon: "flame.fill", value: "\(streakDays)", label: "连续打卡")
+                StatDivider()
+                RecordStatBlock(icon: "calendar", value: "\(checkinDaysCount)", label: "累计打卡")
+                StatDivider()
+                RecordStatBlock(icon: "dumbbell.fill", value: "\(records.count)", label: "训练次数")
             }
 
             HeatmapGrid(records: records, onDayTapped: onDayTapped)
@@ -242,27 +245,28 @@ private struct RecordStatBlock: View {
     let label: String
 
     var body: some View {
-        HStack(spacing: WTSpacing.sm) {
-            Image(systemName: icon)
-                .font(.system(size: 20))
+        VStack(alignment: .leading, spacing: WTSpacing.xs) {
+            Text(value)
+                .font(.system(size: 22, weight: .bold))
                 .foregroundStyle(Color.wtPrimary)
-                .frame(width: 28)
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(value)
-                    .font(.system(size: 22, weight: .bold))
-                    .foregroundStyle(Color.wtPrimary)
+            HStack(spacing: WTSpacing.xs) {
+                Image(systemName: icon)
+                    .font(.system(size: 12))
+                    .foregroundStyle(Color.wtTextSecondary)
                 Text(label)
                     .font(WTFont.caption)
                     .foregroundStyle(Color.wtTextSecondary)
             }
-
-            Spacer(minLength: 0)
         }
-        .padding(WTSpacing.sm)
-        .background(Color.black.opacity(0.18))
-        .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
-        .frame(maxWidth: .infinity)
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+private struct StatDivider: View {
+    var body: some View {
+        Rectangle()
+            .fill(Color.white.opacity(0.12))
+            .frame(width: 1, height: 28)
     }
 }
 
