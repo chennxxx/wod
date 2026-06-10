@@ -30,6 +30,14 @@ struct ContentView: View {
             .tag(2)
         }
         .tint(.wtPrimary)
+        .wtToast(message: $appState.toastMessage)
+        .task {
+            await appState.verifyCredentialOnLaunch()
+        }
+        .fullScreenCover(isPresented: $appState.showLoginPage) {
+            LoginView(appState: appState)
+                .preferredColorScheme(.dark)
+        }
         .fullScreenCover(isPresented: $isShowingRecordFlow) {
             RecordFlowCoordinator(
                 appState: appState,
