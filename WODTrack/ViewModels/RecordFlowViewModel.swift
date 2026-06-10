@@ -189,8 +189,10 @@ final class RecordFlowViewModel {
         previewRecord.completionMinutes = completionMinutes
         previewRecord.cardStyleId = selectedStyleId
         previewRecord.textLayout = textLayout
-        if let renderedCardImage {
-            previewRecord.cardImagePath = persistImage(renderedCardImage, prefix: "card")
+        if let renderedCardImage, let jpegData = renderedCardImage.jpegData(compressionQuality: 0.9) {
+            // 双写：文件供本地快速读取，cardImageData 随 iCloud 同步到其他设备
+            previewRecord.cardImagePath = persistImageData(jpegData, prefix: "card")
+            previewRecord.cardImageData = jpegData
         }
         return previewRecord
     }
@@ -317,8 +319,7 @@ final class RecordFlowViewModel {
         }
     }
 
-    private func persistImage(_ image: UIImage, prefix: String) -> String? {
-        guard let data = image.jpegData(compressionQuality: 0.9) else { return nil }
+    private func persistImageData(_ data: Data, prefix: String) -> String? {
         let directory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?
             .appendingPathComponent("WODTrackRecords", isDirectory: true)
         guard let directory else { return nil }

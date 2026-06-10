@@ -268,8 +268,7 @@ struct HistoryDetailView: View {
 
     @MainActor
     private func loadOrRenderCardImage() async -> UIImage? {
-        if let path = record.cardImagePath,
-           let image = ImagePathResolver.loadImage(from: path) {
+        if let image = ImagePathResolver.loadCardImage(for: record) {
             return image
         }
         let checkinImages = record.checkinPhotoURLs.compactMap { ImagePathResolver.loadImage(from: $0) }
@@ -378,7 +377,7 @@ private struct HistoryCardPreview: View {
     }
 
     private var aspectRatio: CGFloat {
-        if let image = ImagePathResolver.loadImage(from: record.cardImagePath ?? "") {
+        if let image = ImagePathResolver.loadCardImage(for: record) {
             return image.size.width / max(image.size.height, 1)
         }
         return CardRenderer.fallbackAspectRatio
@@ -459,7 +458,6 @@ private struct HistoryHero: View {
     }
 
     private var cardImage: UIImage? {
-        guard let path = record.cardImagePath else { return nil }
-        return ImagePathResolver.loadImage(from: path)
+        ImagePathResolver.loadCardImage(for: record)
     }
 }

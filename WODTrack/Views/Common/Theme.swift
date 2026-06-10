@@ -10,7 +10,6 @@ extension Color {
     static let wtTextDisabled = Color(hex: "#444444")
     static let wtSuccess = Color(hex: "#34C759")
     static let wtDanger = Color(hex: "#FF3B30")
-    static let wtWechatGreen = Color(hex: "#07C160")
 }
 
 enum WTFont {
@@ -152,6 +151,47 @@ struct WTTextEditor: View {
                     .stroke(Color.wtSurface2, lineWidth: 1)
             )
         }
+    }
+}
+
+struct WTToastModifier: ViewModifier {
+    @Binding var message: String?
+
+    func body(content: Content) -> some View {
+        content
+            .overlay(alignment: .bottom) {
+                if let message {
+                    HStack(spacing: WTSpacing.sm) {
+                        Image(systemName: "checkmark.circle")
+                            .foregroundStyle(Color.wtPrimary)
+                        Text(message)
+                            .font(WTFont.bodyBold)
+                            .foregroundStyle(Color.wtTextPrimary)
+                    }
+                    .padding(.horizontal, WTSpacing.md + 2)
+                    .padding(.vertical, 11)
+                    .background(Color.wtSurface2.opacity(0.96))
+                    .overlay(
+                        Capsule().stroke(Color.white.opacity(0.08), lineWidth: 1)
+                    )
+                    .clipShape(Capsule())
+                    .shadow(color: .black.opacity(0.5), radius: 12, y: 4)
+                    .padding(.bottom, 80)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
+            }
+            .animation(.spring(duration: 0.3), value: message)
+            .task(id: message) {
+                guard message != nil else { return }
+                try? await Task.sleep(for: .seconds(2))
+                message = nil
+            }
+    }
+}
+
+extension View {
+    func wtToast(message: Binding<String?>) -> some View {
+        modifier(WTToastModifier(message: message))
     }
 }
 

@@ -1,21 +1,25 @@
 import Foundation
 import SwiftData
 
+// CloudKit 约束：不得用 @Attribute(.unique)（唯一性由 SyncDedupService 应用层保证）；
+// 非可选属性必须有声明处完全限定默认值（不能写前导点简写）。
 @Model
 final class WODRecord {
-    @Attribute(.unique) var id: UUID
+    var id: UUID = UUID()
     var userId: String?
-    var createdAt: Date
-    var wodDate: Date
-    var wodContent: [String]
+    var createdAt: Date = Date.now
+    var wodDate: Date = Date.now
+    var wodContent: [String] = []
     var difficultyRating: Int?
-    var checkinPhotoURLs: [String]
-    var cardStyleId: String
-    var textLayout: TextLayout
+    var checkinPhotoURLs: [String] = []
+    var cardStyleId: String = "style_mono_overlay"
+    var textLayout: TextLayout = TextLayout()
     var cardImagePath: String?
     var boxId: String?
     var wodName: String?
     var completionMinutes: Int?
+    /// 合成卡片图字节，随 iCloud 同步；本地读取仍优先走 cardImagePath 文件
+    @Attribute(.externalStorage) var cardImageData: Data?
 
     init(wodDate: Date = .now) {
         self.id = UUID()

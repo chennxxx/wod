@@ -3,13 +3,14 @@ import SwiftUI
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.scenePhase) private var scenePhase
     @Query(sort: \WODRecord.createdAt, order: .reverse) private var records: [WODRecord]
-    @State private var selectedTab = 1
     @State private var isShowingRecordFlow = false
-    @State private var appState = AppState()
+    @Bindable var appState: AppState
+    @Bindable var syncManager: CloudSyncManager
 
     var body: some View {
-        TabView(selection: $selectedTab) {
+        TabView(selection: $appState.selectedTab) {
             SkillTreeView()
                 .tabItem { Label("技能树", systemImage: "sparkles.rectangle.stack") }
                 .tag(0)
@@ -24,12 +25,27 @@ struct ContentView: View {
             .tag(1)
 
             NavigationStack {
-                ProfileView(appState: appState)
+                ProfileView(appState: appState, syncManager: syncManager)
             }
             .tabItem { Label("我的", systemImage: "person.crop.circle") }
             .tag(2)
         }
         .tint(.wtPrimary)
+        .wtToast(message: $appState.toastMessage)
+        .task {
+            await appState.verifyCredentialOnLaunch()
+            appState.reconcileProfile(context: modelContext)
+        }
+        .onChange(of: scenePhase) {
+            if scenePhase == .active {
+                syncManager.sceneBecameActive(syncActive: syncManager.isSyncEnabled && appState.profile.isLoggedIn)
+                appState.reconcileProfile(context: modelContext)
+            }
+        }
+        .fullScreenCover(isPresented: $appState.showLoginPage) {
+            LoginView(appState: appState)
+                .preferredColorScheme(.dark)
+        }
         .fullScreenCover(isPresented: $isShowingRecordFlow) {
             RecordFlowCoordinator(
                 appState: appState,
@@ -322,8 +338,7 @@ struct HistoryThumbnail: View {
     }
 
     private var image: UIImage? {
-        if let cardImagePath = record.cardImagePath,
-           let cardImage = ImagePathResolver.loadImage(from: cardImagePath) {
+        if let cardImage = ImagePathResolver.loadCardImage(for: record) {
             return cardImage
         }
 

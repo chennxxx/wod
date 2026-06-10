@@ -1,5 +1,42 @@
 # 维护更新记录
 
+## 1.8.1版本（续2） - 2026-06-10
+
+**头像与昵称随 iCloud 同步**
+
+- 新增 `SyncedProfile` @Model（昵称 + 头像选择 + 自定义头像图 externalStorage），随现有 SwiftData+CloudKit 镜像上传/拉取，受同一个「iCloud 同步」开关与登录态门控。
+- 本地权威不变（UserDefaults + avatar.jpg），模型仅作云端载体：资料编辑时写穿入库并记录 `wt.profileUpdatedAt`；启动、回前台、容器重建时按 last-writer-wins 调和（云端较新→应用并落地头像文件；本地较新→写回云端行）。
+- 自定义头像跨设备落地：字节未到且本地无文件时暂降级默认头像，下次调和自动补上。
+- 多设备各建过资料行时由 SyncDedupService 保留 updatedAt 最新的一条（singleton 去重）。
+- 首次升级自动把现有本地昵称/头像迁移入库；schema 为增量变更，CloudKit Development 环境自动出现 `CD_SyncedProfile`，上架前随整体 schema 一起部署 Production。
+
+## 1.8.1版本（续） - 2026-06-10
+
+**iCloud 同步（SwiftData + CloudKit 私有库镜像）**
+
+- 「我的 → iCloud 同步」新增详情页：开关 + 系统 iCloud 账号状态 + 本地数据概览（记录条目 / 占用空间 / 导出占位）。开启后本地全部数据（打卡记录+合成卡片图、技能状态、技能训练记录）自动上传用户私人 iCloud，多设备并集合并；数据不经过开发者服务器。
+- 三道门：App 登录（未登录点行→登录页，登录成功后直接进同步详情页）；系统 iCloud 账号（不可用时开关禁用并引导去系统设置）；网络（CloudKit 自动排队重试）。
+- 模型 CloudKit 化：移除全部 `@Attribute(.unique)`（改由 SyncDedupService 应用层去重：SkillStatus 按 skillId 留最新、WODRecord 按 id、SkillTrainingEntry 按新增 entryId）；非可选属性补声明处默认值；WODRecord 新增 `cardImageData`（externalStorage）。同店名 WODTrackStore_v3 轻量迁移，存量数据无损。
+- 卡片图同步：保存时文件+Data 双写；跨设备文件缺失时从云端 Data 重建并落地（`ImagePathResolver.loadCardImage`）；开启同步时后台回填旧记录。打卡照片原图不进云。
+- 运行时开关：重建 ModelContainer 切换 `.private`/`.none`（无需重启），ContentView 按容器代数整树重建；同步默认关闭，开关仅在 accountStatus 可用时可开（规避无 entitlement 异步崩溃陷阱）。
+- 退出登录 = 同步暂停（意图保留，重新登录自动恢复）；关闭开关需二次确认，明确不删本机与云端数据。
+- 登录后未开同步时「我的」页显示虚线邀请卡（立即开启 / 以后再说-本会话隐藏）。
+- 工程：entitlements 新增 CloudKit + 容器 `iCloud.com.chenxi.WODTrack` + aps-environment；Info.plist 新增 remote-notification 后台模式。真机同步需在 Xcode 切付费团队并确认 iCloud/Push capability；上架前在 CloudKit Console 将 schema 部署到 Production。
+
+## 1.8.1版本 - 2026-06-10
+
+**登录流程 + 「我的」页重建**
+
+- 新增独立全屏登录页：深色背景 + 顶部绿色辉光，Logo「迹」+「迹录 WOD」+ slogan；仅支持 Sign in with Apple（系统原生授权，scope 仅姓名不取邮箱）；协议勾选为前置条件（未勾选点登录会拦截并提示）；支持「暂不登录」与左上角关闭退出。
+- 「我的」页整体重建：未登录顶卡为登录入口（「登录迹录」+ 副标题 + chevron）；已登录顶卡显示头像（相机角标）+ 昵称大标题，右上铅笔进入编辑。
+- 头像：内置 2 个默认头像（杠铃 / 奖杯，2 选 1）+ 支持相册上传自定义头像（方形裁剪压缩后存本地）；昵称默认取 Apple 姓名（仅首次授权返回），可在编辑面板修改；昵称、头像均存本地，仅登录后可编辑。
+- 登录态持久化：Apple 用户标识存 Keychain（卸载重装可恢复）；启动时校验凭证，仅被撤销（revoked）时自动登出；运行中收到系统撤销通知同样登出；底部新增红色「退出登录」行（带确认弹窗，退出不清训练数据）。
+- 记录保存后的登录引导改为弹出新全屏登录页（替换原微信登录占位 sheet，微信相关代码与 `wtWechatGreen` 移除）。
+- 「我的」页分组：数据（iCloud 同步——未登录显示「未登录」点击跳登录、已登录显示「未开启」占位，本期不做 iCloud 对接；本地数据备份——占位「即将推出」）；其他（关于我们、反馈——占位「即将推出」、隐私协议）。偏好设置与 PRO 会员整组本期隐藏。
+- 新增「关于我们」页（Logo + 版本号）与本地静态《用户协议》《隐私政策》文本页。
+- 新增全局 toast 组件（`wtToast`），登录成功等轻提示统一样式。
+- 工程：新增 Sign in with Apple entitlement（真机如签名失败需在 Xcode → Signing & Capabilities 确认 capability 已注册）。
+
 ## 1.7.8版本 - 2026-06-10
 
 **历史记录：删除功能 + 详情页重构**

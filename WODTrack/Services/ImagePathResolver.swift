@@ -24,7 +24,27 @@ enum ImagePathResolver {
         UIImage(contentsOfFile: resolve(stored))
     }
 
-    private static var recordsDirectory: URL {
+    /// 卡片图读取：优先本地文件；文件缺失（如 iCloud 同步到新设备）时用 cardImageData
+    /// 重建图片并落地回文件，下次直接走文件。
+    static func loadCardImage(for record: WODRecord) -> UIImage? {
+        if let path = record.cardImagePath, let image = loadImage(from: path) {
+            return image
+        }
+        guard let data = record.cardImageData, let image = UIImage(data: data) else { return nil }
+
+        let filename: String
+        if let path = record.cardImagePath {
+            filename = URL(fileURLWithPath: resolve(path)).lastPathComponent
+        } else {
+            filename = "card-\(record.id.uuidString).jpg"
+            record.cardImagePath = filename
+        }
+        try? FileManager.default.createDirectory(at: recordsDirectory, withIntermediateDirectories: true)
+        try? data.write(to: recordsDirectory.appendingPathComponent(filename), options: .atomic)
+        return image
+    }
+
+    static var recordsDirectory: URL {
         FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("WODTrackRecords", isDirectory: true)
     }
