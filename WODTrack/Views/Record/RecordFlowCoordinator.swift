@@ -13,7 +13,7 @@ struct RecordFlowCoordinator: View {
     init(appState: AppState, onSaved: @escaping (WODRecord) -> Void) {
         self.appState = appState
         self.onSaved = onSaved
-        let service: OCRServicing = AppConfig.useMockOCR ? PreviewOCRService() : DoubaoLLMService.shared
+        let service: OCRServicing = AppConfig.useMockOCR ? PreviewOCRService() : OCRService.shared
         _viewModel = State(initialValue: RecordFlowViewModel(ocrService: service))
     }
 

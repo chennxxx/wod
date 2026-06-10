@@ -25,7 +25,7 @@ WODTrack/
 ├── Models/          # SwiftData 数据模型（WODRecord 等）
 ├── ViewModels/      # 业务逻辑（RecordFlowViewModel 等）
 ├── Views/           # SwiftUI 视图（History、Preview、SkillTree 等）
-├── Services/        # 外部服务（DoubaoLLMService、ImagePathResolver 等）
+├── Services/        # 外部服务（OCRService、ImagePathResolver 等）
 ├── Config/          # 模板配置（CardStyleConfig、AppConfig 等）
 └── Resources/       # 资源文件（Assets、Info.plist）
 ```
