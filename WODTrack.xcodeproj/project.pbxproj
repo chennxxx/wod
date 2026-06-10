@@ -29,6 +29,8 @@
 		A000000000000000000014 /* WODTrackTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000115 /* WODTrackTests.swift */; };
 		A000000000000000000020 /* DoubaoLLMService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000120 /* DoubaoLLMService.swift */; };
 		A000000000000000000030 /* ImagePathResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000130 /* ImagePathResolver.swift */; };
+		A000000000000000000047 /* RecordDeletionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000147 /* RecordDeletionService.swift */; };
+		A000000000000000000048 /* PhotoLibraryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000148 /* PhotoLibraryService.swift */; };
 		A000000000000000000040 /* SkillStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000140 /* SkillStatus.swift */; };
 		A000000000000000000044 /* SkillData.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000144 /* SkillData.swift */; };
 		A000000000000000000043 /* SkillDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000143 /* SkillDetailView.swift */; };
@@ -72,6 +74,8 @@
 		A000000000000000000117 /* WODTrackTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WODTrackTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A000000000000000000120 /* DoubaoLLMService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoubaoLLMService.swift; sourceTree = "<group>"; };
 		A000000000000000000130 /* ImagePathResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePathResolver.swift; sourceTree = "<group>"; };
+		A000000000000000000147 /* RecordDeletionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordDeletionService.swift; sourceTree = "<group>"; };
+		A000000000000000000148 /* PhotoLibraryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLibraryService.swift; sourceTree = "<group>"; };
 		A000000000000000000140 /* SkillStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillStatus.swift; sourceTree = "<group>"; };
 		A000000000000000000144 /* SkillData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillData.swift; sourceTree = "<group>"; };
 		A000000000000000000143 /* SkillDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillDetailView.swift; sourceTree = "<group>"; };
@@ -157,6 +161,8 @@
 				A000000000000000000109 /* OCRService.swift */,
 				A000000000000000000120 /* DoubaoLLMService.swift */,
 				A000000000000000000130 /* ImagePathResolver.swift */,
+				A000000000000000000147 /* RecordDeletionService.swift */,
+				A000000000000000000148 /* PhotoLibraryService.swift */,
 				A00000000000000000010A /* CardRenderer.swift */,
 			);
 			path = Services;
@@ -365,6 +371,8 @@
 				A000000000000000000009 /* OCRService.swift in Sources */,
 				A000000000000000000020 /* DoubaoLLMService.swift in Sources */,
 				A000000000000000000030 /* ImagePathResolver.swift in Sources */,
+				A000000000000000000047 /* RecordDeletionService.swift in Sources */,
+				A000000000000000000048 /* PhotoLibraryService.swift in Sources */,
 				A00000000000000000000A /* CardRenderer.swift in Sources */,
 				A00000000000000000000B /* Theme.swift in Sources */,
 				A00000000000000000000C /* CardView.swift in Sources */,

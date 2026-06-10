@@ -200,9 +200,6 @@ final class RecordFlowViewModel {
         if let renderedCardImage {
             previewRecord.cardImagePath = persistImage(renderedCardImage, prefix: "card")
         }
-        if !selectedCheckinImages.isEmpty {
-            previewRecord.checkinPhotoURLs = persistImages(selectedCheckinImages, prefix: "checkin")
-        }
         return previewRecord
     }
 
@@ -290,10 +287,6 @@ final class RecordFlowViewModel {
             .split(whereSeparator: \.isNewline)
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
             .filter { !$0.isEmpty }
-    }
-
-    private func persistImages(_ images: [UIImage], prefix: String) -> [String] {
-        images.compactMap { persistImage($0, prefix: prefix) }
     }
 
     private func applySuggestedFontSizeIfNeeded() {

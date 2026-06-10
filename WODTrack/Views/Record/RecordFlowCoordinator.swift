@@ -1,5 +1,4 @@
 import PhotosUI
-import Photos
 import Observation
 import SwiftUI
 import UIKit
@@ -1020,18 +1019,9 @@ private struct CardPreviewStep: View {
             await viewModel.buildPreview(isPro: appState.isPro)
             isSaving = false
             if let cardImage = viewModel.renderedCardImage {
-                saveImageToPhotoLibrary(cardImage)
+                PhotoLibraryService.save(cardImage)
             }
             onSaved()
-        }
-    }
-
-    private func saveImageToPhotoLibrary(_ image: UIImage) {
-        PHPhotoLibrary.requestAuthorization(for: .addOnly) { status in
-            guard status == .authorized || status == .limited else { return }
-            PHPhotoLibrary.shared().performChanges {
-                PHAssetChangeRequest.creationRequestForAsset(from: image)
-            }
         }
     }
 
