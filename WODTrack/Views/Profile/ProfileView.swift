@@ -141,22 +141,21 @@ struct ProfileView: View {
                 .lineLimit(1)
 
             Spacer()
-        }
-        .padding(WTSpacing.md + 2)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.wtSurface)
-        .clipShape(RoundedRectangle(cornerRadius: 18))
-        .overlay(alignment: .topTrailing) {
+
             Button {
                 showEditSheet = true
             } label: {
                 Image(systemName: "pencil")
                     .font(.system(size: 15, weight: .medium))
                     .foregroundStyle(Color.wtPrimary)
-                    .padding(WTSpacing.md)
+                    .padding(WTSpacing.sm)
             }
             .buttonStyle(.plain)
         }
+        .padding(WTSpacing.md + 2)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.wtSurface)
+        .clipShape(RoundedRectangle(cornerRadius: 18))
     }
 
     private var signOutCard: some View {
