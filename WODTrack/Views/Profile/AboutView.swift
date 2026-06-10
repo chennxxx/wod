@@ -5,22 +5,12 @@ struct AboutView: View {
         VStack(spacing: WTSpacing.lg) {
             Spacer()
 
-            ZStack {
-                RoundedRectangle(cornerRadius: 22)
-                    .fill(
-                        LinearGradient(
-                            colors: [Color(hex: "#6CF09C"), Color(hex: "#2FB866")],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .frame(width: 84, height: 84)
-                    .shadow(color: Color.wtPrimary.opacity(0.3), radius: 16, y: 10)
-
-                Text("迹")
-                    .font(.system(size: 44, weight: .black))
-                    .foregroundStyle(Color(hex: "#07301C"))
-            }
+            Image("AppLogo")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 84, height: 84)
+                .clipShape(RoundedRectangle(cornerRadius: 19))
+                .shadow(color: Color.wtPrimary.opacity(0.3), radius: 16, y: 10)
 
             VStack(spacing: WTSpacing.sm) {
                 HStack(spacing: 6) {

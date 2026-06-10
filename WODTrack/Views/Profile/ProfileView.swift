@@ -66,7 +66,7 @@ struct ProfileView: View {
             ProfileEditSheet(appState: appState)
                 .preferredColorScheme(.dark)
         }
-        .confirmationDialog("确定退出登录？", isPresented: $showSignOutDialog, titleVisibility: .visible) {
+        .alert("确定退出登录？", isPresented: $showSignOutDialog) {
             Button("退出登录", role: .destructive) {
                 appState.signOut()
             }
@@ -98,7 +98,7 @@ struct ProfileView: View {
                     Text("登录迹录")
                         .font(.system(size: 18, weight: .bold))
                         .foregroundStyle(Color.wtTextPrimary)
-                    Text("登录后可同步进度、跨设备使用")
+                    Text("登录后可显示你的昵称和头像")
                         .font(WTFont.caption)
                         .foregroundStyle(Color.wtTextSecondary)
                 }

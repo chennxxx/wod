@@ -15,9 +15,11 @@ struct LoginView: View {
             background
 
             VStack(spacing: 0) {
-                closeBar
+                topBar
                 Spacer()
                 brandLock
+                // 下方双 Spacer 让品牌区整体上移，避免视觉重心偏低
+                Spacer()
                 Spacer()
                 footer
             }
@@ -44,19 +46,20 @@ struct LoginView: View {
         }
     }
 
-    private var closeBar: some View {
+    private var topBar: some View {
         HStack {
+            Spacer()
             Button {
                 dismiss()
             } label: {
-                Image(systemName: "xmark")
-                    .font(.system(size: 14, weight: .semibold))
+                Text("暂不登录")
+                    .font(.system(size: 14, weight: .medium))
                     .foregroundStyle(Color.wtTextSecondary)
-                    .frame(width: 32, height: 32)
+                    .padding(.horizontal, WTSpacing.md - 2)
+                    .padding(.vertical, 7)
                     .background(Color.white.opacity(0.07))
-                    .clipShape(Circle())
+                    .clipShape(Capsule())
             }
-            Spacer()
         }
         .padding(.horizontal, WTSpacing.md + 2)
         .padding(.top, WTSpacing.sm)
@@ -64,22 +67,12 @@ struct LoginView: View {
 
     private var brandLock: some View {
         VStack(spacing: WTSpacing.lg) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 26)
-                    .fill(
-                        LinearGradient(
-                            colors: [Color(hex: "#6CF09C"), Color(hex: "#2FB866")],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .frame(width: 96, height: 96)
-                    .shadow(color: Color.wtPrimary.opacity(0.32), radius: 20, y: 14)
-
-                Text("迹")
-                    .font(.system(size: 50, weight: .black))
-                    .foregroundStyle(Color(hex: "#07301C"))
-            }
+            Image("AppLogo")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 96, height: 96)
+                .clipShape(RoundedRectangle(cornerRadius: 22))
+                .shadow(color: Color.wtPrimary.opacity(0.32), radius: 20, y: 14)
 
             VStack(spacing: WTSpacing.md - 4) {
                 HStack(spacing: 6) {
@@ -101,18 +94,9 @@ struct LoginView: View {
         VStack(spacing: WTSpacing.md) {
             appleButton
             agreementRow
-
-            Button {
-                dismiss()
-            } label: {
-                Text("暂不登录")
-                    .font(.system(size: 15, weight: .medium))
-                    .foregroundStyle(Color.wtTextSecondary)
-                    .padding(WTSpacing.xs)
-            }
         }
         .padding(.horizontal, WTSpacing.lg)
-        .padding(.bottom, WTSpacing.lg)
+        .padding(.bottom, WTSpacing.lg + 4)
     }
 
     private var appleButton: some View {
@@ -122,8 +106,7 @@ struct LoginView: View {
             handleAppleResult(result)
         }
         .signInWithAppleButtonStyle(.white)
-        .frame(height: 52)
-        .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
+        .frame(height: 50)
         .overlay {
             // 未勾选协议时拦截点击，不唤起系统授权
             if !agreed {
