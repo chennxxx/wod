@@ -39,7 +39,9 @@ actor OCRService: OCRServicing {
         request.httpMethod = "POST"
         request.timeoutInterval = AppConfig.requestTimeout
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("Bearer \(AppConfig.appToken)", forHTTPHeaderField: "Authorization")
+        if !AppConfig.appToken.isEmpty {
+            request.setValue(AppConfig.appToken, forHTTPHeaderField: "X-App-Secret")
+        }
         request.httpBody = try JSONEncoder().encode(["image_base64": payload])
 
         do {

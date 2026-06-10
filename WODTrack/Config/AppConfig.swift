@@ -1,16 +1,12 @@
 import Foundation
 
 enum AppConfig {
-    // Legacy OCR (unused)
-    static let apiBaseURL = URL(string: "https://api.wodtrack.app/v1")!
+    // OCR 代理（自建 Serverless，服务端持有火山方舟 Key 与 prompt）
+    static let apiBaseURL = URL(string: "https://sd8khut1pqtoq9lj35dcg.apigateway-cn-beijing.volceapi.com")!
     static let ocrPath = "ocr"
-    static let appToken = "REPLACE_WITH_SERVER_ISSUED_APP_TOKEN"
+    // 代理当前未设置 APP_SHARED_SECRET，暂无校验；开启后填入同一 secret，OCRService 会以 X-App-Secret 发送
+    static let appToken = ""
     static let requestTimeout: TimeInterval = 30
-
-    // Doubao LLM
-    static let doubaoAPIURL = URL(string: "https://ark.cn-beijing.volces.com/api/v3/chat/completions")!
-    static let doubaoAPIKey = "191e3914-44e1-4f95-b6b4-d33126e7f4fd"
-    static let doubaoModel = "doubao-seed-2-0-mini-260428"
 
     static let useMockOCR = false
 }
