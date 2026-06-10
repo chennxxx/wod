@@ -19,6 +19,8 @@ final class AppState {
     var profile: UserProfile
     var showLoginPage = false
     var toastMessage: String?
+    /// 放在 AppState 而非 ContentView：iCloud 容器切换会整树重建，tab 位置需跨重建保留
+    var selectedTab = 1
 
     @ObservationIgnored private var revokeObserver: NSObjectProtocol?
 

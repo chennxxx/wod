@@ -14,10 +14,11 @@ enum SkillMasteryStatus: String, Codable {
     }
 }
 
+// CloudKit 约束：去 .unique（skillId 唯一性由 SyncDedupService 去重）；非可选需声明处默认值。
 @Model final class SkillStatus {
-    @Attribute(.unique) var skillId: String
-    var statusRaw: String
-    var updatedAt: Date
+    var skillId: String = ""
+    var statusRaw: String = "unmarked"
+    var updatedAt: Date = Date.now
 
     init(skillId: String, status: SkillMasteryStatus = .unmarked) {
         self.skillId = skillId
@@ -32,13 +33,16 @@ enum SkillMasteryStatus: String, Codable {
 }
 
 @Model final class SkillTrainingEntry {
-    var skillId: String
-    var date: Date
-    var value: Double
-    var unit: String   // "kg" | "lb" | "reps" | "seconds"
+    /// 去重身份键（CloudKit 不支持 unique，合并后按它识别同一条目）
+    var entryId: UUID = UUID()
+    var skillId: String = ""
+    var date: Date = Date.now
+    var value: Double = 0
+    var unit: String = ""   // "kg" | "lb" | "reps" | "seconds"
     var notes: String?
 
     init(skillId: String, date: Date = Date(), value: Double, unit: String, notes: String? = nil) {
+        self.entryId = UUID()
         self.skillId = skillId
         self.date = date
         self.value = value

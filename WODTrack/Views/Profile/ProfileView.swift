@@ -3,9 +3,13 @@ import SwiftUI
 
 struct ProfileView: View {
     @Bindable var appState: AppState
+    @Bindable var syncManager: CloudSyncManager
 
     @State private var showEditSheet = false
     @State private var showSignOutDialog = false
+    @State private var navigateToSyncSettings = false
+    /// 从 iCloud 行进登录页的意图：登录成功后直接进同步详情页，不回「我的」根
+    @State private var pendingSyncNavigation = false
 
     var body: some View {
         ScrollView {
@@ -16,14 +20,31 @@ struct ProfileView: View {
                     loginEntryCard
                 }
 
+                if showsInviteBanner {
+                    syncInviteBanner
+                }
+
                 rowGroup(label: "数据") {
-                    ProfileRow(
-                        icon: "icloud",
-                        iconTint: Color(hex: "#6EA2FF"),
-                        title: "iCloud 同步",
-                        value: appState.profile.isLoggedIn ? "未开启" : "未登录"
-                    ) {
-                        if !appState.profile.isLoggedIn {
+                    if appState.profile.isLoggedIn {
+                        NavigationLink {
+                            ICloudSyncSettingsView(appState: appState, syncManager: syncManager)
+                        } label: {
+                            ProfileRowLabel(
+                                icon: "icloud",
+                                iconTint: Color(hex: "#6EA2FF"),
+                                title: "iCloud 同步",
+                                value: syncManager.isSyncEnabled ? "已开启" : "未开启"
+                            )
+                        }
+                        .buttonStyle(.plain)
+                    } else {
+                        ProfileRow(
+                            icon: "icloud",
+                            iconTint: Color(hex: "#6EA2FF"),
+                            title: "iCloud 同步",
+                            value: "未登录"
+                        ) {
+                            pendingSyncNavigation = true
                             appState.showLoginPage = true
                         }
                     }
@@ -62,6 +83,17 @@ struct ProfileView: View {
         }
         .background(Color.wtBackground)
         .navigationTitle("我的")
+        .navigationDestination(isPresented: $navigateToSyncSettings) {
+            ICloudSyncSettingsView(appState: appState, syncManager: syncManager)
+        }
+        .onChange(of: appState.profile.isLoggedIn) {
+            if appState.profile.isLoggedIn, pendingSyncNavigation {
+                pendingSyncNavigation = false
+                navigateToSyncSettings = true
+            } else if !appState.profile.isLoggedIn {
+                pendingSyncNavigation = false
+            }
+        }
         .sheet(isPresented: $showEditSheet) {
             ProfileEditSheet(appState: appState)
                 .preferredColorScheme(.dark)
@@ -72,7 +104,9 @@ struct ProfileView: View {
             }
             Button("取消", role: .cancel) {}
         } message: {
-            Text("退出后本机的训练数据仍会保留。")
+            Text(syncManager.isSyncEnabled
+                ? "iCloud 同步将暂停，本机与云端数据都保留，重新登录后可恢复同步。"
+                : "退出后本机的训练数据仍会保留。")
         }
     }
 
@@ -158,6 +192,78 @@ struct ProfileView: View {
         .clipShape(RoundedRectangle(cornerRadius: 18))
     }
 
+    // MARK: - iCloud 同步邀请卡
+
+    private var showsInviteBanner: Bool {
+        appState.profile.isLoggedIn
+            && !syncManager.isSyncEnabled
+            && !syncManager.inviteBannerDismissedThisSession
+    }
+
+    private var syncInviteBanner: some View {
+        VStack(alignment: .leading, spacing: WTSpacing.md - 4) {
+            HStack(alignment: .top, spacing: WTSpacing.md - 4) {
+                Image(systemName: "icloud")
+                    .font(.system(size: 17))
+                    .foregroundStyle(Color.wtPrimary)
+                    .frame(width: 36, height: 36)
+                    .background(Color.wtPrimary.opacity(0.18))
+                    .clipShape(RoundedRectangle(cornerRadius: 11))
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("开启 iCloud 同步")
+                        .font(.system(size: 15, weight: .bold))
+                        .foregroundStyle(Color.wtTextPrimary)
+                    Text("让记录在你的 iPhone、iPad 间自动同步，换机也不丢。")
+                        .font(.system(size: 12.5))
+                        .foregroundStyle(Color.wtTextSecondary)
+                        .lineSpacing(2)
+                }
+            }
+
+            HStack(spacing: WTSpacing.sm + 1) {
+                Button {
+                    navigateToSyncSettings = true
+                } label: {
+                    Text("立即开启")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundStyle(Color(hex: "#07301C"))
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 38)
+                        .background(Color.wtPrimary)
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                }
+                .buttonStyle(.plain)
+
+                Button {
+                    syncManager.inviteBannerDismissedThisSession = true
+                } label: {
+                    Text("以后再说")
+                        .font(.system(size: 14))
+                        .foregroundStyle(Color.wtTextSecondary)
+                        .padding(.horizontal, WTSpacing.md)
+                        .frame(height: 38)
+                        .background(Color.white.opacity(0.06))
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(15)
+        .background(
+            LinearGradient(
+                colors: [Color.wtPrimary.opacity(0.16), Color.wtPrimary.opacity(0.05)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        )
+        .clipShape(RoundedRectangle(cornerRadius: WTRadius.lg))
+        .overlay(
+            RoundedRectangle(cornerRadius: WTRadius.lg)
+                .stroke(Color.wtPrimary.opacity(0.45), style: StrokeStyle(lineWidth: 1, dash: [5, 4]))
+        )
+    }
+
     private var signOutCard: some View {
         Button {
             showSignOutDialog = true
@@ -203,6 +309,7 @@ struct ProfileView: View {
 
 private struct ProfileRowLabel: View {
     let icon: String
+    var iconTint: Color?
     let title: String
     var value: String?
 
@@ -210,9 +317,10 @@ private struct ProfileRowLabel: View {
         HStack(spacing: WTSpacing.md - 3) {
             Image(systemName: icon)
                 .font(.system(size: 15))
-                .foregroundStyle(Color.wtTextSecondary)
+                .foregroundStyle(iconTint ?? Color.wtTextSecondary)
                 .frame(width: 30, height: 30)
-                .background(Color.wtSurface2)
+                .background((iconTint ?? Color.clear).opacity(iconTint == nil ? 0 : 0.16))
+                .background(iconTint == nil ? Color.wtSurface2 : Color.clear)
                 .clipShape(RoundedRectangle(cornerRadius: 9))
 
             Text(title)
@@ -246,7 +354,7 @@ private struct ProfileRow: View {
 
     var body: some View {
         Button(action: action) {
-            ProfileRowLabel(icon: icon, title: title, value: value)
+            ProfileRowLabel(icon: icon, iconTint: iconTint, title: title, value: value)
         }
         .buttonStyle(.plain)
     }

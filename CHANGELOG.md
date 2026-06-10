@@ -1,5 +1,18 @@
 # 维护更新记录
 
+## 1.8.1版本（续） - 2026-06-10
+
+**iCloud 同步（SwiftData + CloudKit 私有库镜像）**
+
+- 「我的 → iCloud 同步」新增详情页：开关 + 系统 iCloud 账号状态 + 本地数据概览（记录条目 / 占用空间 / 导出占位）。开启后本地全部数据（打卡记录+合成卡片图、技能状态、技能训练记录）自动上传用户私人 iCloud，多设备并集合并；数据不经过开发者服务器。
+- 三道门：App 登录（未登录点行→登录页，登录成功后直接进同步详情页）；系统 iCloud 账号（不可用时开关禁用并引导去系统设置）；网络（CloudKit 自动排队重试）。
+- 模型 CloudKit 化：移除全部 `@Attribute(.unique)`（改由 SyncDedupService 应用层去重：SkillStatus 按 skillId 留最新、WODRecord 按 id、SkillTrainingEntry 按新增 entryId）；非可选属性补声明处默认值；WODRecord 新增 `cardImageData`（externalStorage）。同店名 WODTrackStore_v3 轻量迁移，存量数据无损。
+- 卡片图同步：保存时文件+Data 双写；跨设备文件缺失时从云端 Data 重建并落地（`ImagePathResolver.loadCardImage`）；开启同步时后台回填旧记录。打卡照片原图不进云。
+- 运行时开关：重建 ModelContainer 切换 `.private`/`.none`（无需重启），ContentView 按容器代数整树重建；同步默认关闭，开关仅在 accountStatus 可用时可开（规避无 entitlement 异步崩溃陷阱）。
+- 退出登录 = 同步暂停（意图保留，重新登录自动恢复）；关闭开关需二次确认，明确不删本机与云端数据。
+- 登录后未开同步时「我的」页显示虚线邀请卡（立即开启 / 以后再说-本会话隐藏）。
+- 工程：entitlements 新增 CloudKit + 容器 `iCloud.com.chenxi.WODTrack` + aps-environment；Info.plist 新增 remote-notification 后台模式。真机同步需在 Xcode 切付费团队并确认 iCloud/Push capability；上架前在 CloudKit Console 将 schema 部署到 Production。
+
 ## 1.8.1版本 - 2026-06-10
 
 **登录流程 + 「我的」页重建**
