@@ -1,5 +1,14 @@
 # 维护更新记录
 
+## 1.8.1版本（续3） - 2026-06-11
+
+**图片识别改走自建 Serverless 代理**
+
+- 白板 OCR 不再由 App 直连火山方舟（豆包），改为调用自建 Serverless 代理（火山 API Gateway，`POST /ocr`）；火山 API Key、system prompt、模型参数全部收归服务端，客户端不再持有任何密钥。
+- 装配从 `DoubaoLLMService.shared` 切到既有的 `OCRService.shared`：发送 `{image_base64}`、解析代理返回的结构化 JSON `{wod_type, wod_content, confidence}`（非流式）；UI、ViewModel、`OCRResult` 与 `OCRServicing` 协议均不变。
+- 鉴权预留：`OCRService` 改为可选 `X-App-Secret` 头（仅当 `AppConfig.appToken` 非空时发送），代理当前未启用校验，后续开启 `APP_SHARED_SECRET` 后填同值即可。
+- 删除 `DoubaoLLMService.swift` 及客户端硬编码的火山 Key。⚠️ 已泄露的旧 Key 需在火山控制台单独吊销轮换（历史包仍含旧 Key）。
+
 ## 1.8.1版本（续2） - 2026-06-10
 
 **头像与昵称随 iCloud 同步**
