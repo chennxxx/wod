@@ -11,9 +11,11 @@ struct WODTrackApp: App {
         let appState = AppState()
         let syncManager = CloudSyncManager()
         let syncActive = syncManager.isSyncEnabled && appState.profile.isLoggedIn
+        let container = Self.makeContainer(syncEnabled: syncActive)
+        appState.modelContainer = container
         _appState = State(initialValue: appState)
         _syncManager = State(initialValue: syncManager)
-        _container = State(initialValue: Self.makeContainer(syncEnabled: syncActive))
+        _container = State(initialValue: container)
     }
 
     /// 有效同步态：开关开 且 App 已登录（退出登录 = 同步暂停，意图保留）。
@@ -23,7 +25,7 @@ struct WODTrackApp: App {
 
     /// 同一存储文件在 .none ↔ .private 间交替创建受支持（CloudKit 镜像元数据存于 store）。
     static func makeContainer(syncEnabled: Bool) -> ModelContainer {
-        let schema = Schema([WODRecord.self, SkillStatus.self, SkillTrainingEntry.self])
+        let schema = Schema([WODRecord.self, SkillStatus.self, SkillTrainingEntry.self, SyncedProfile.self])
         do {
             let configuration = ModelConfiguration(
                 "WODTrackStore_v3",
@@ -54,10 +56,13 @@ struct WODTrackApp: App {
         .modelContainer(container)
     }
 
+    @MainActor
     private func rebuildContainer() {
         syncManager.prepareForContainerSwap()
         container = Self.makeContainer(syncEnabled: syncActive)
+        appState.modelContainer = container
         syncManager.containerGeneration += 1
         syncManager.onContainerRebuilt(container, syncActive: syncActive)
+        appState.reconcileProfile(context: container.mainContext)
     }
 }

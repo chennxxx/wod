@@ -1,5 +1,15 @@
 # 维护更新记录
 
+## 1.8.1版本（续2） - 2026-06-10
+
+**头像与昵称随 iCloud 同步**
+
+- 新增 `SyncedProfile` @Model（昵称 + 头像选择 + 自定义头像图 externalStorage），随现有 SwiftData+CloudKit 镜像上传/拉取，受同一个「iCloud 同步」开关与登录态门控。
+- 本地权威不变（UserDefaults + avatar.jpg），模型仅作云端载体：资料编辑时写穿入库并记录 `wt.profileUpdatedAt`；启动、回前台、容器重建时按 last-writer-wins 调和（云端较新→应用并落地头像文件；本地较新→写回云端行）。
+- 自定义头像跨设备落地：字节未到且本地无文件时暂降级默认头像，下次调和自动补上。
+- 多设备各建过资料行时由 SyncDedupService 保留 updatedAt 最新的一条（singleton 去重）。
+- 首次升级自动把现有本地昵称/头像迁移入库；schema 为增量变更，CloudKit Development 环境自动出现 `CD_SyncedProfile`，上架前随整体 schema 一起部署 Production。
+
 ## 1.8.1版本（续） - 2026-06-10
 
 **iCloud 同步（SwiftData + CloudKit 私有库镜像）**

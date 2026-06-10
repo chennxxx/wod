@@ -34,10 +34,12 @@ struct ContentView: View {
         .wtToast(message: $appState.toastMessage)
         .task {
             await appState.verifyCredentialOnLaunch()
+            appState.reconcileProfile(context: modelContext)
         }
         .onChange(of: scenePhase) {
             if scenePhase == .active {
                 syncManager.sceneBecameActive(syncActive: syncManager.isSyncEnabled && appState.profile.isLoggedIn)
+                appState.reconcileProfile(context: modelContext)
             }
         }
         .fullScreenCover(isPresented: $appState.showLoginPage) {

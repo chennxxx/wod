@@ -1,6 +1,7 @@
 import AuthenticationServices
 import Foundation
 import Observation
+import SwiftData
 import UIKit
 
 @Observable
@@ -9,6 +10,7 @@ final class AppState {
         static let nickname = "wt.nickname"
         static let avatarChoice = "wt.avatarChoice"
         static let lastLoginPromptDate = "wt.lastLoginPromptDate"
+        static let profileUpdatedAt = "wt.profileUpdatedAt"
     }
 
     /// 保存记录后自动弹登录页的冷却期
@@ -21,6 +23,9 @@ final class AppState {
     var toastMessage: String?
     /// 放在 AppState 而非 ContentView：iCloud 容器切换会整树重建，tab 位置需跨重建保留
     var selectedTab = 1
+
+    /// 资料写穿到 SwiftData 用（iCloud 容器切换时由 WODTrackApp 更新）
+    @ObservationIgnored weak var modelContainer: ModelContainer?
 
     @ObservationIgnored private var revokeObserver: NSObjectProtocol?
 
@@ -66,6 +71,7 @@ final class AppState {
             if !formatted.isEmpty {
                 UserDefaults.standard.set(formatted, forKey: DefaultsKey.nickname)
                 profile.nickname = formatted
+                touchProfileEdited()
             }
         }
 
@@ -97,12 +103,14 @@ final class AppState {
         guard !trimmed.isEmpty else { return }
         UserDefaults.standard.set(trimmed, forKey: DefaultsKey.nickname)
         profile.nickname = trimmed
+        touchProfileEdited()
     }
 
     func updateAvatar(_ choice: AvatarChoice) {
         guard choice != .custom else { return }
         UserDefaults.standard.set(choice.rawValue, forKey: DefaultsKey.avatarChoice)
         profile.avatar = choice
+        touchProfileEdited()
     }
 
     func setCustomAvatar(imageData: Data) {
@@ -118,6 +126,7 @@ final class AppState {
             try jpegData.write(to: Self.customAvatarURL, options: .atomic)
             UserDefaults.standard.set(AvatarChoice.custom.rawValue, forKey: DefaultsKey.avatarChoice)
             profile.avatar = .custom
+            touchProfileEdited()
         } catch {
             showToast("头像设置失败，请重试")
         }
@@ -144,6 +153,94 @@ final class AppState {
         return renderer.image { _ in
             image.draw(in: CGRect(origin: origin, size: scaledSize))
         }
+    }
+
+    // MARK: - 资料 iCloud 同步（SyncedProfile 镜像）
+
+    /// 资料编辑后记录本地时间戳并写穿到 SwiftData（与同步开关无关；开关开启时由 CloudKit 自动上传）。
+    private func touchProfileEdited() {
+        let now = Date.now
+        UserDefaults.standard.set(now, forKey: DefaultsKey.profileUpdatedAt)
+        Task { @MainActor [weak self] in
+            guard let self, let context = self.modelContainer?.mainContext else { return }
+            self.persistProfileToStore(updatedAt: now, context: context)
+        }
+    }
+
+    /// 启动、回前台、容器重建后调和：云端行更新时间晚于本地 → 应用云端资料；本地更新 → 写回云端行。
+    @MainActor
+    func reconcileProfile(context: ModelContext) {
+        let defaults = UserDefaults.standard
+        let localUpdatedAt = defaults.object(forKey: DefaultsKey.profileUpdatedAt) as? Date
+
+        guard let remote = newestStoredProfile(context: context) else {
+            // 店内尚无资料行：首次迁移，把本地资料灌入（无时间戳则以当前时间起记）
+            let stamp = localUpdatedAt ?? .now
+            if localUpdatedAt == nil {
+                defaults.set(stamp, forKey: DefaultsKey.profileUpdatedAt)
+            }
+            persistProfileToStore(updatedAt: stamp, context: context)
+            return
+        }
+
+        let local = localUpdatedAt ?? .distantPast
+        if remote.updatedAt > local {
+            applyRemoteProfile(remote)
+        } else if local > remote.updatedAt {
+            persistProfileToStore(updatedAt: local, context: context)
+        }
+    }
+
+    @MainActor
+    private func persistProfileToStore(updatedAt: Date, context: ModelContext) {
+        let record: SyncedProfile
+        if let existing = newestStoredProfile(context: context) {
+            record = existing
+        } else {
+            record = SyncedProfile()
+            context.insert(record)
+        }
+        record.nickname = profile.nickname
+        record.avatarChoiceRaw = profile.avatar.rawValue
+        record.avatarImageData = profile.avatar == .custom
+            ? try? Data(contentsOf: Self.customAvatarURL)
+            : nil
+        record.updatedAt = updatedAt
+        try? context.save()
+    }
+
+    @MainActor
+    private func applyRemoteProfile(_ remote: SyncedProfile) {
+        let defaults = UserDefaults.standard
+
+        let trimmed = remote.nickname.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !trimmed.isEmpty {
+            defaults.set(trimmed, forKey: DefaultsKey.nickname)
+            profile.nickname = trimmed
+        }
+
+        var choice = AvatarChoice(rawValue: remote.avatarChoiceRaw) ?? .default1
+        if choice == .custom {
+            if let data = remote.avatarImageData {
+                let directory = Self.customAvatarURL.deletingLastPathComponent()
+                try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+                try? data.write(to: Self.customAvatarURL, options: .atomic)
+            } else if Self.loadCustomAvatar() == nil {
+                // 自定义头像字节未到且本地无文件：先降级默认头像，等下次调和补上
+                choice = .default1
+            }
+        }
+        defaults.set(choice.rawValue, forKey: DefaultsKey.avatarChoice)
+        profile.avatar = choice
+
+        defaults.set(remote.updatedAt, forKey: DefaultsKey.profileUpdatedAt)
+    }
+
+    /// 多设备合并可能出现多行，取 updatedAt 最新（其余由 SyncDedupService 清理）。
+    @MainActor
+    private func newestStoredProfile(context: ModelContext) -> SyncedProfile? {
+        (try? context.fetch(FetchDescriptor<SyncedProfile>()))?
+            .max { $0.updatedAt < $1.updatedAt }
     }
 
     // MARK: - Toast 与登录引导

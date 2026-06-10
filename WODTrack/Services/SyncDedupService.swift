@@ -8,7 +8,17 @@ enum SyncDedupService {
         dedupSkillStatuses(context: context)
         dedupWODRecords(context: context)
         dedupTrainingEntries(context: context)
+        dedupSyncedProfiles(context: context)
         try? context.save()
+    }
+
+    /// 资料行是 singleton：两台设备各建过一行时留 updatedAt 最新。
+    private static func dedupSyncedProfiles(context: ModelContext) {
+        guard let profiles = try? context.fetch(FetchDescriptor<SyncedProfile>()), profiles.count > 1 else { return }
+        let sorted = profiles.sorted { $0.updatedAt > $1.updatedAt }
+        for duplicate in sorted.dropFirst() {
+            context.delete(duplicate)
+        }
     }
 
     /// 同一技能两台设备各建过一条状态：留 updatedAt 最新。
