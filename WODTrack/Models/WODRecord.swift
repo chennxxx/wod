@@ -7,9 +7,7 @@ final class WODRecord {
     var userId: String?
     var createdAt: Date
     var wodDate: Date
-    var wodType: WODType
     var wodContent: [String]
-    var completionStatus: CompletionStatus
     var difficultyRating: Int?
     var checkinPhotoURLs: [String]
     var cardStyleId: String
@@ -24,9 +22,7 @@ final class WODRecord {
         self.userId = nil
         self.createdAt = .now
         self.wodDate = wodDate
-        self.wodType = .other
         self.wodContent = []
-        self.completionStatus = .completed
         self.difficultyRating = nil
         self.checkinPhotoURLs = []
         self.cardStyleId = "style_mono_overlay"
@@ -64,28 +60,6 @@ enum WODType: String, Codable, CaseIterable, Identifiable {
         case .emom: "完成 / 第 X 组未完成"
         case .maxLoad: "例如 100 kg"
         case .other: "自由填写成绩"
-        }
-    }
-}
-
-enum ScoreType: String, Codable {
-    case time
-    case rounds
-    case weight
-    case completion
-    case freeText
-}
-
-enum CompletionStatus: String, Codable, CaseIterable, Identifiable {
-    case completed
-    case notCompleted
-
-    var id: String { rawValue }
-
-    var label: String {
-        switch self {
-        case .completed: "已完成"
-        case .notCompleted: "未完成"
         }
     }
 }

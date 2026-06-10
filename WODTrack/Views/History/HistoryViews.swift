@@ -4,9 +4,11 @@ import UIKit
 
 struct HistoryListView: View {
     @Query(sort: \WODRecord.createdAt, order: .reverse) private var records: [WODRecord]
+    @Environment(\.modelContext) private var modelContext
     var scrollToDate: Date? = nil
-    @State private var scrollPosition: UUID?
     @State private var selectedMonth: String? = nil
+    @State private var recordPendingDelete: WODRecord?
+    @State private var showDeleteConfirm = false
 
     private var allMonthKeys: [String] {
         let calendar = Calendar.current
@@ -58,24 +60,65 @@ struct HistoryListView: View {
     }
 
     var body: some View {
-        ScrollView {
-            LazyVStack(spacing: WTSpacing.md) {
+        ScrollViewReader { proxy in
+            List {
                 ForEach(groupedByMonth, id: \.key) { group in
                     ForEach(group.records) { record in
-                        NavigationLink {
-                            HistoryDetailView(record: record)
-                        } label: {
-                            HistoryRecordCard(record: record)
-                        }
-                        .buttonStyle(.plain)
-                        .id(record.id)
+                        HistoryRecordCard(record: record)
+                            .background {
+                                NavigationLink("") {
+                                    HistoryDetailView(record: record)
+                                }
+                                .opacity(0)
+                            }
+                            .id(record.id)
+                            .listRowBackground(Color.clear)
+                            .listRowSeparator(.hidden)
+                            .listRowInsets(EdgeInsets(
+                                top: WTSpacing.md / 2,
+                                leading: WTSpacing.lg,
+                                bottom: WTSpacing.md / 2,
+                                trailing: WTSpacing.lg
+                            ))
+                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                Button {
+                                    recordPendingDelete = record
+                                    showDeleteConfirm = true
+                                } label: {
+                                    Image(systemName: "trash")
+                                }
+                                .tint(Color.wtDanger)
+                            }
                     }
                 }
             }
-            .padding(WTSpacing.lg)
+            .listStyle(.plain)
+            .scrollContentBackground(.hidden)
+            .contentMargins(.vertical, WTSpacing.md / 2, for: .scrollContent)
+            .onAppear {
+                guard let targetDate = scrollToDate else { return }
+                let calendar = Calendar.current
+                let target = calendar.startOfDay(for: targetDate)
+                guard let match = records.first(where: { calendar.startOfDay(for: $0.wodDate) <= target }) else { return }
+                DispatchQueue.main.async {
+                    proxy.scrollTo(match.id, anchor: .top)
+                }
+            }
         }
-        .scrollPosition(id: $scrollPosition)
         .background(Color.wtBackground)
+        .alert("删除这条记录", isPresented: $showDeleteConfirm) {
+            Button("删除", role: .destructive) {
+                if let record = recordPendingDelete {
+                    RecordDeletionService.delete(record, context: modelContext)
+                }
+                recordPendingDelete = nil
+            }
+            Button("取消", role: .cancel) {
+                recordPendingDelete = nil
+            }
+        } message: {
+            Text("记录删除后，训练记录和图片将从本机删除，不可恢复")
+        }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .principal) {
@@ -122,57 +165,28 @@ struct HistoryListView: View {
                 }
             }
         }
-        .onAppear {
-            guard let targetDate = scrollToDate else { return }
-            let calendar = Calendar.current
-            let target = calendar.startOfDay(for: targetDate)
-            let match = records.first { calendar.startOfDay(for: $0.wodDate) <= target }
-            scrollPosition = match?.id
-        }
     }
 }
 
 struct HistoryDetailView: View {
     let record: WODRecord
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
+    @State private var saveState: SaveState = .idle
+    @State private var showDeleteConfirm = false
+
+    private enum SaveState {
+        case idle, saving, saved, failed
+    }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: WTSpacing.md) {
                 HistoryCardPreview(record: record)
 
-                VStack(alignment: .leading, spacing: WTSpacing.sm) {
-                    Text(record.wodDate.formatted(.dateTime.year().month().day().weekday(.wide)))
-                        .font(WTFont.title)
+                saveImageButton
 
-                    HStack(spacing: WTSpacing.sm) {
-                        HistoryMetaBadge(title: record.completionStatus.label, isPrimary: record.completionStatus == .completed)
-                        if let difficultyRating = record.difficultyRating {
-                            HistoryMetaBadge(title: "难度 \(difficultyRating)/5")
-                        }
-                    }
-                }
-
-                if !record.checkinPhotoURLs.isEmpty {
-                    VStack(alignment: .leading, spacing: WTSpacing.sm) {
-                        Text("训练照片")
-                            .font(WTFont.caption)
-                            .foregroundStyle(Color.wtTextSecondary)
-
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: WTSpacing.sm) {
-                                ForEach(record.checkinPhotoURLs, id: \.self) { path in
-                                    if let image = ImagePathResolver.loadImage(from: path) {
-                                        Image(uiImage: image)
-                                            .resizable()
-                                            .scaledToFill()
-                                            .frame(width: 120, height: 120)
-                                            .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+                infoSection
 
                 VStack(alignment: .leading, spacing: WTSpacing.sm) {
                     Text("WOD 内容")
@@ -191,12 +205,161 @@ struct HistoryDetailView: View {
                     .background(Color.wtSurface)
                     .clipShape(RoundedRectangle(cornerRadius: WTRadius.lg))
                 }
+
+                deleteButton
             }
             .padding(WTSpacing.lg)
         }
         .background(Color.wtBackground)
         .navigationTitle("记录详情")
         .navigationBarTitleDisplayMode(.inline)
+        .alert("删除这条记录", isPresented: $showDeleteConfirm) {
+            Button("删除", role: .destructive) {
+                RecordDeletionService.delete(record, context: modelContext)
+                dismiss()
+            }
+            Button("取消", role: .cancel) {}
+        } message: {
+            Text("记录删除后，训练记录和图片将从本机删除，不可恢复")
+        }
+    }
+
+    // MARK: - 保存图片
+
+    private var saveImageButton: some View {
+        Button(action: saveCardImage) {
+            HStack(spacing: WTSpacing.xs) {
+                Image(systemName: saveState == .saved ? "checkmark" : "square.and.arrow.down")
+                Text(saveButtonTitle)
+            }
+            .font(WTFont.bodyBold)
+            .foregroundStyle(saveState == .saved ? Color.black : Color.wtTextPrimary)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, WTSpacing.md)
+            .background(saveState == .saved ? Color.wtPrimary : Color.wtSurface)
+            .clipShape(RoundedRectangle(cornerRadius: WTRadius.lg))
+        }
+        .buttonStyle(.plain)
+        .disabled(saveState == .saving)
+    }
+
+    private var saveButtonTitle: String {
+        switch saveState {
+        case .idle: "保存图片到相册"
+        case .saving: "保存中…"
+        case .saved: "已保存"
+        case .failed: "保存失败"
+        }
+    }
+
+    private func saveCardImage() {
+        guard saveState == .idle || saveState == .failed else { return }
+        saveState = .saving
+        Task { @MainActor in
+            guard let image = await loadOrRenderCardImage() else {
+                finishSave(success: false)
+                return
+            }
+            PhotoLibraryService.save(image) { success in
+                finishSave(success: success)
+            }
+        }
+    }
+
+    @MainActor
+    private func loadOrRenderCardImage() async -> UIImage? {
+        if let path = record.cardImagePath,
+           let image = ImagePathResolver.loadImage(from: path) {
+            return image
+        }
+        let checkinImages = record.checkinPhotoURLs.compactMap { ImagePathResolver.loadImage(from: $0) }
+        return try? await CardRenderer.render(
+            record: record,
+            style: CardStyleConfig.style(for: record.cardStyleId),
+            isPro: false,
+            checkinImages: checkinImages
+        )
+    }
+
+    private func finishSave(success: Bool) {
+        saveState = success ? .saved : .failed
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(2))
+            if saveState != .saving {
+                saveState = .idle
+            }
+        }
+    }
+
+    // MARK: - 信息区
+
+    private var infoSection: some View {
+        VStack(alignment: .leading, spacing: WTSpacing.sm) {
+            Text(record.wodDate.formatted(.dateTime.year().month().day().weekday(.wide)))
+                .font(WTFont.title)
+                .foregroundStyle(Color.wtTextPrimary)
+
+            VStack(spacing: 0) {
+                if let rating = record.difficultyRating {
+                    HistoryInfoRow(label: "难度") {
+                        DifficultyStars(rating: rating)
+                    }
+                }
+                if let minutes = record.completionMinutes {
+                    HistoryInfoRow(label: "训练用时") {
+                        Text("\(minutes) 分钟")
+                            .font(WTFont.body)
+                            .foregroundStyle(Color.wtTextPrimary)
+                    }
+                }
+                HistoryInfoRow(label: "打卡时间") {
+                    Text(record.createdAt.formatted(date: .numeric, time: .shortened))
+                        .font(WTFont.body)
+                        .foregroundStyle(Color.wtTextPrimary)
+                }
+            }
+            .padding(.horizontal, WTSpacing.md)
+            .padding(.vertical, WTSpacing.xs)
+            .background(Color.wtSurface)
+            .clipShape(RoundedRectangle(cornerRadius: WTRadius.lg))
+        }
+    }
+
+    // MARK: - 删除
+
+    private var deleteButton: some View {
+        Button {
+            showDeleteConfirm = true
+        } label: {
+            HStack(spacing: WTSpacing.xs) {
+                Image(systemName: "trash")
+                Text("删除记录")
+            }
+            .font(WTFont.bodyBold)
+            .foregroundStyle(Color.wtDanger)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, WTSpacing.md)
+            .background(Color.wtSurface)
+            .clipShape(RoundedRectangle(cornerRadius: WTRadius.lg))
+        }
+        .buttonStyle(.plain)
+        .padding(.top, WTSpacing.sm)
+    }
+}
+
+private struct HistoryInfoRow<Value: View>: View {
+    let label: String
+    @ViewBuilder var value: Value
+
+    var body: some View {
+        HStack {
+            Text(label)
+                .font(WTFont.caption)
+                .foregroundStyle(Color.wtTextSecondary)
+            Spacer(minLength: WTSpacing.md)
+            value
+        }
+        .padding(.vertical, WTSpacing.sm)
     }
 }
 
@@ -298,20 +461,5 @@ private struct HistoryHero: View {
     private var cardImage: UIImage? {
         guard let path = record.cardImagePath else { return nil }
         return ImagePathResolver.loadImage(from: path)
-    }
-}
-
-private struct HistoryMetaBadge: View {
-    let title: String
-    var isPrimary = false
-
-    var body: some View {
-        Text(title)
-            .font(WTFont.micro)
-            .foregroundStyle(isPrimary ? Color.black : Color.wtTextPrimary)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 5)
-            .background(isPrimary ? Color.wtPrimary : Color.wtSurface2)
-            .clipShape(Capsule())
     }
 }
