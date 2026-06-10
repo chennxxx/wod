@@ -31,9 +31,7 @@ final class RecordFlowViewModel {
     var step: RecordStep = .whiteboard
     var selectedWhiteboardImage: UIImage?
     var selectedCheckinImages: [UIImage] = []
-    var wodType: WODType = .other
     var wodContentText = ""
-    var completionStatus: CompletionStatus = .completed
     var difficultyRating = 3
     var completionMinutes: Int? = nil
     var selectedStyleId = "style_mono_overlay"
@@ -87,7 +85,6 @@ final class RecordFlowViewModel {
                 guard !Task.isCancelled else { return }
                 await MainActor.run {
                     ocrState = .success(result)
-                    wodType = result.wodType
                     wodContentText = result.wodContent.joined(separator: "\n")
                 }
             } catch {
@@ -113,7 +110,6 @@ final class RecordFlowViewModel {
     func startManualEntry() {
         entryMode = .manual
         selectedWhiteboardImage = nil
-        wodType = .other
         wodContentText = ""
         ocrState = .success(OCRResult(wodType: .other, wodContent: [], confidence: 1))
         step = .ocrResult
@@ -168,9 +164,7 @@ final class RecordFlowViewModel {
         defer { isRendering = false }
 
         let record = WODRecord()
-        record.wodType = wodType
         record.wodContent = wodLines
-        record.completionStatus = completionStatus
         record.difficultyRating = difficultyRating
         record.cardStyleId = selectedStyleId
         record.textLayout = textLayout
@@ -190,9 +184,7 @@ final class RecordFlowViewModel {
     }
 
     func finalizeRecord() -> WODRecord {
-        previewRecord.wodType = wodType
         previewRecord.wodContent = wodLines
-        previewRecord.completionStatus = completionStatus
         previewRecord.difficultyRating = difficultyRating
         previewRecord.completionMinutes = completionMinutes
         previewRecord.cardStyleId = selectedStyleId

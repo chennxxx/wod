@@ -106,7 +106,7 @@ struct HistoryListView: View {
             }
         }
         .background(Color.wtBackground)
-        .confirmationDialog("删除这条记录？", isPresented: $showDeleteConfirm, titleVisibility: .visible) {
+        .alert("删除这条记录", isPresented: $showDeleteConfirm) {
             Button("删除", role: .destructive) {
                 if let record = recordPendingDelete {
                     RecordDeletionService.delete(record, context: modelContext)
@@ -117,7 +117,7 @@ struct HistoryListView: View {
                 recordPendingDelete = nil
             }
         } message: {
-            Text("记录和卡片图片将一并删除，不可恢复")
+            Text("记录删除后，训练记录和图片将从本机删除，不可恢复")
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -213,14 +213,14 @@ struct HistoryDetailView: View {
         .background(Color.wtBackground)
         .navigationTitle("记录详情")
         .navigationBarTitleDisplayMode(.inline)
-        .confirmationDialog("删除这条记录？", isPresented: $showDeleteConfirm, titleVisibility: .visible) {
+        .alert("删除这条记录", isPresented: $showDeleteConfirm) {
             Button("删除", role: .destructive) {
                 RecordDeletionService.delete(record, context: modelContext)
                 dismiss()
             }
             Button("取消", role: .cancel) {}
         } message: {
-            Text("记录和卡片图片将一并删除，不可恢复")
+            Text("记录删除后，训练记录和图片将从本机删除，不可恢复")
         }
     }
 
@@ -300,14 +300,6 @@ struct HistoryDetailView: View {
                 .foregroundStyle(Color.wtTextPrimary)
 
             VStack(spacing: 0) {
-                HistoryInfoRow(label: "训练类型") {
-                    Text(record.wodType.displayName)
-                        .font(WTFont.body)
-                        .foregroundStyle(Color.wtTextPrimary)
-                }
-                HistoryInfoRow(label: "完成状态") {
-                    HistoryMetaBadge(title: record.completionStatus.label, isPrimary: record.completionStatus == .completed)
-                }
                 if let rating = record.difficultyRating {
                     HistoryInfoRow(label: "难度") {
                         DifficultyStars(rating: rating)
@@ -321,7 +313,7 @@ struct HistoryDetailView: View {
                     }
                 }
                 HistoryInfoRow(label: "打卡时间") {
-                    Text(record.createdAt.formatted(date: .omitted, time: .shortened))
+                    Text(record.createdAt.formatted(date: .numeric, time: .shortened))
                         .font(WTFont.body)
                         .foregroundStyle(Color.wtTextPrimary)
                 }
@@ -469,20 +461,5 @@ private struct HistoryHero: View {
     private var cardImage: UIImage? {
         guard let path = record.cardImagePath else { return nil }
         return ImagePathResolver.loadImage(from: path)
-    }
-}
-
-private struct HistoryMetaBadge: View {
-    let title: String
-    var isPrimary = false
-
-    var body: some View {
-        Text(title)
-            .font(WTFont.micro)
-            .foregroundStyle(isPrimary ? Color.black : Color.wtTextPrimary)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 5)
-            .background(isPrimary ? Color.wtPrimary : Color.wtSurface2)
-            .clipShape(Capsule())
     }
 }

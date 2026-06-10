@@ -760,9 +760,7 @@ private struct CardPreviewStep: View {
 
     private var previewRecord: WODRecord {
         let record = WODRecord()
-        record.wodType = viewModel.wodType
         record.wodContent = viewModel.wodLines
-        record.completionStatus = viewModel.completionStatus
         record.difficultyRating = viewModel.difficultyRating
         record.cardStyleId = viewModel.selectedStyleId
         record.textLayout = viewModel.textLayout

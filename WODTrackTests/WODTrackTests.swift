@@ -11,7 +11,6 @@ final class WODTrackTests: XCTestCase {
     func testDefaultRecordUsesFreeStyle() {
         let record = WODRecord()
         XCTAssertEqual(record.cardStyleId, "style_basic_dark")
-        XCTAssertEqual(record.wodType, .other)
     }
 
     func testRecordFlowStartsAtOCRStepAfterSelectingWhiteboard() {
