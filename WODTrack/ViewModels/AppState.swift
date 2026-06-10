@@ -8,7 +8,11 @@ final class AppState {
     private enum DefaultsKey {
         static let nickname = "wt.nickname"
         static let avatarChoice = "wt.avatarChoice"
+        static let lastLoginPromptDate = "wt.lastLoginPromptDate"
     }
+
+    /// 保存记录后自动弹登录页的冷却期
+    private static let loginPromptCooldown: TimeInterval = 7 * 24 * 3600
 
     private static let defaultNickname = "迹录用户"
 
@@ -147,6 +151,15 @@ final class AppState {
     }
 
     func triggerLoginPromptAfterSave() {
+        guard !profile.isLoggedIn else { return }
+
+        let defaults = UserDefaults.standard
+        if let lastPrompt = defaults.object(forKey: DefaultsKey.lastLoginPromptDate) as? Date,
+           Date.now.timeIntervalSince(lastPrompt) < Self.loginPromptCooldown {
+            return
+        }
+
+        defaults.set(Date.now, forKey: DefaultsKey.lastLoginPromptDate)
         Task { @MainActor in
             try? await Task.sleep(for: .milliseconds(500))
             if !profile.isLoggedIn {
