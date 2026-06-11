@@ -18,7 +18,6 @@ enum OCRError: LocalizedError {
 }
 
 struct OCRResult: Codable, Equatable {
-    var wodType: WODType
     var wodContent: [String]
     var confidence: Double
 }
@@ -55,7 +54,6 @@ actor OCRService: OCRServicing {
 
             let decoded = try JSONDecoder().decode(OCRAPIResponse.self, from: data)
             return OCRResult(
-                wodType: WODType(rawValue: decoded.wodType) ?? .other,
                 wodContent: decoded.wodContent,
                 confidence: decoded.confidence
             )
@@ -74,7 +72,6 @@ struct PreviewOCRService: OCRServicing {
     func recognize(image: UIImage) async throws -> OCRResult {
         try await Task.sleep(for: .seconds(2))
         return OCRResult(
-            wodType: .forTime,
             wodContent: ["21-15-9", "Thruster 43kg", "Pull-up"],
             confidence: 0.92
         )
@@ -82,12 +79,10 @@ struct PreviewOCRService: OCRServicing {
 }
 
 private struct OCRAPIResponse: Codable {
-    let wodType: String
     let wodContent: [String]
     let confidence: Double
 
     enum CodingKeys: String, CodingKey {
-        case wodType = "wod_type"
         case wodContent = "wod_content"
         case confidence
     }

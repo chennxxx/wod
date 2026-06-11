@@ -352,6 +352,8 @@ private struct OCRResultStep: View {
                             .foregroundStyle(Color.wtTextSecondary)
                     }
 
+                    RecordDateField(wodDate: $viewModel.wodDate)
+
                     WTTextEditor(
                         title: "WOD 内容",
                         placeholder: """
@@ -368,12 +370,16 @@ C WOD/任务计时/7轮
 100M
 """,
                         text: $viewModel.wodContentText,
-                        minHeight: 280
+                        minHeight: 320
                     )
 
-                    CompletionTimeField(completionMinutes: $viewModel.completionMinutes)
+                    WODTypeField(scoreType: $viewModel.scoreType)
 
-                    DifficultyRatingField(rating: $viewModel.difficultyRating)
+                    ScoreField(viewModel: viewModel)
+
+                    IntensityField(level: $viewModel.difficultyLevel)
+
+                    NoteField(note: $viewModel.note)
                 }
                 .padding(WTSpacing.lg)
             } bottomBar: {
@@ -458,123 +464,308 @@ private struct RecordFlowBottomBar<Content: View>: View {
     }
 }
 
-private struct CompletionTimeField: View {
-    @Binding var completionMinutes: Int?
-    @State private var customText = ""
-    @State private var isCustom = false
-
-    private let presets = [45, 60]
+/// 训练强度：4 级抽象（轻松 / 适中 / 困难 / 挑战），emoji + 淡色区分
+private struct IntensityField: View {
+    @Binding var level: DifficultyLevel
 
     var body: some View {
         VStack(alignment: .leading, spacing: WTSpacing.sm) {
-            Text("完成时间")
+            HStack(spacing: 6) {
+                Text("强度")
+                    .font(WTFont.caption)
+                    .foregroundStyle(Color.wtTextSecondary)
+                Text("(RPE)")
+                    .font(WTFont.micro)
+                    .foregroundStyle(Color.wtTextSecondary.opacity(0.7))
+                Spacer()
+                Text(level.rpeHint)
+                    .font(WTFont.micro)
+                    .foregroundStyle(Color.wtTextSecondary)
+            }
+
+            HStack(spacing: WTSpacing.sm) {
+                ForEach(DifficultyLevel.allCases) { option in
+                    let isOn = level == option
+                    Button {
+                        level = option
+                    } label: {
+                        VStack(spacing: 3) {
+                            Text(option.emoji)
+                                .font(.system(size: 18))
+                            Text(option.label)
+                                .font(.system(size: 12, weight: .bold))
+                                .foregroundStyle(isOn ? Self.tint(option) : Color.wtTextPrimary)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 52)
+                        .background(isOn ? Self.tint(option).opacity(0.18) : Color.wtSurface)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: WTRadius.md)
+                                .stroke(isOn ? Self.tint(option) : Color.clear, lineWidth: 1.5)
+                        )
+                        .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
+                        .contentShape(RoundedRectangle(cornerRadius: WTRadius.md))
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("强度 \(option.label)")
+                    .accessibilityAddTraits(isOn ? .isSelected : [])
+                }
+            }
+        }
+    }
+
+    private static func tint(_ level: DifficultyLevel) -> Color {
+        switch level {
+        case .easy: Color(red: 0.30, green: 0.74, blue: 0.46)
+        case .moderate: Color(red: 0.27, green: 0.62, blue: 0.86)
+        case .hard: Color(red: 0.93, green: 0.60, blue: 0.20)
+        case .challenge: Color(red: 0.90, green: 0.33, blue: 0.30)
+        }
+    }
+}
+
+/// 统一的「选中=淡色填充+描边」样式，降低整页绿色锚点，保持选中效果一致
+private extension View {
+    func selectableChip(isOn: Bool, cornerRadius: CGFloat = WTRadius.md) -> some View {
+        background(isOn ? Color.wtPrimary.opacity(0.15) : Color.wtSurface)
+            .overlay(
+                RoundedRectangle(cornerRadius: cornerRadius)
+                    .stroke(isOn ? Color.wtPrimary : Color.clear, lineWidth: 1.5)
+            )
+            .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
+            .contentShape(RoundedRectangle(cornerRadius: cornerRadius))
+    }
+}
+
+/// WOD 类型选择：For Time / AMRAP / EMOM / Max Load
+private struct WODTypeField: View {
+    @Binding var scoreType: WODType
+
+    private let options: [WODType] = [.forTime, .amrap, .emom, .maxLoad]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: WTSpacing.sm) {
+            Text("WOD 类型")
                 .font(WTFont.caption)
                 .foregroundStyle(Color.wtTextSecondary)
 
             HStack(spacing: WTSpacing.sm) {
-                ForEach(presets, id: \.self) { minutes in
+                ForEach(options) { option in
+                    let isOn = scoreType == option
                     Button {
-                        isCustom = false
-                        customText = ""
-                        completionMinutes = completionMinutes == minutes ? nil : minutes
+                        scoreType = option
                     } label: {
-                        Text("\(minutes) 分钟")
-                            .font(WTFont.bodyBold)
-                            .foregroundStyle((!isCustom && completionMinutes == minutes) ? Color.black : Color.wtTextPrimary)
+                        Text(option.displayName)
+                            .font(.system(size: 13, weight: .bold))
+                            .foregroundStyle(isOn ? Color.wtPrimary : Color.wtTextPrimary)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
                             .frame(maxWidth: .infinity)
                             .frame(height: 40)
-                            .background((!isCustom && completionMinutes == minutes) ? Color.wtPrimary : Color.wtSurface)
-                            .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
-                            .contentShape(RoundedRectangle(cornerRadius: WTRadius.md))
+                            .selectableChip(isOn: isOn)
                     }
                     .buttonStyle(.plain)
-                }
-
-                Button {
-                    isCustom.toggle()
-                    if !isCustom {
-                        completionMinutes = Int(customText)
-                    }
-                } label: {
-                    Text("自定义")
-                        .font(WTFont.bodyBold)
-                        .foregroundStyle(isCustom ? Color.black : Color.wtTextPrimary)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 40)
-                        .background(isCustom ? Color.wtPrimary : Color.wtSurface)
-                        .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
-                        .contentShape(RoundedRectangle(cornerRadius: WTRadius.md))
-                }
-                .buttonStyle(.plain)
-            }
-
-            if isCustom {
-                HStack(spacing: WTSpacing.sm) {
-                    TextField("输入分钟数", text: $customText)
-                        .keyboardType(.numberPad)
-                        .font(WTFont.body)
-                        .foregroundStyle(Color.wtTextPrimary)
-                        .padding(.horizontal, WTSpacing.md)
-                        .frame(height: 40)
-                        .background(Color.wtSurface)
-                        .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
-                        .onChange(of: customText) { _, new in
-                            completionMinutes = Int(new)
-                        }
-
-                    Text("分钟")
-                        .font(WTFont.caption)
-                        .foregroundStyle(Color.wtTextSecondary)
                 }
             }
         }
     }
 }
 
-private struct DifficultyRatingField: View {
-    @Binding var rating: Int
+/// 成绩录入：输入随 WOD 类型变样 + RX/SC/未标记 标记
+private struct ScoreField: View {
+    @Bindable var viewModel: RecordFlowViewModel
 
     var body: some View {
         VStack(alignment: .leading, spacing: WTSpacing.sm) {
-            HStack {
-                Text("今日难度")
-                    .font(WTFont.caption)
-                    .foregroundStyle(Color.wtTextSecondary)
-                Spacer()
-                Text("\(clampedRating)/5")
-                    .font(WTFont.bodyBold)
-            }
+            Text("成绩")
+                .font(WTFont.caption)
+                .foregroundStyle(Color.wtTextSecondary)
 
-            HStack(spacing: WTSpacing.sm) {
-                ForEach(1 ... 5, id: \.self) { value in
-                    Button {
-                        rating = value
-                    } label: {
-                        Image(systemName: value <= clampedRating ? "star.fill" : "star")
-                            .font(.system(size: 26, weight: .semibold))
-                            .foregroundStyle(value <= clampedRating ? Color.wtPrimary : Color.wtTextDisabled)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 40)
-                            .contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel("难度 \(value) 星")
-                    .accessibilityAddTraits(value == clampedRating ? .isSelected : [])
-                }
-            }
-            .padding(.horizontal, WTSpacing.xs)
-            .padding(.vertical, WTSpacing.sm)
-            .background(Color.wtSurface)
-            .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
-            .overlay(
-                RoundedRectangle(cornerRadius: WTRadius.md)
-                    .stroke(Color.wtSurface2, lineWidth: 1)
-            )
+            scoreInput
+
+            scalingPicker
         }
     }
 
-    private var clampedRating: Int {
-        min(max(rating, 1), 5)
+    @ViewBuilder private var scoreInput: some View {
+        switch viewModel.scoreType {
+        case .forTime, .other:
+            HStack(spacing: WTSpacing.sm) {
+                scoreTextField(text: $viewModel.scoreMinutes, placeholder: "分", keyboard: .numberPad)
+                unitLabel("分")
+                Text(":")
+                    .font(.system(size: 18, weight: .bold, design: .monospaced))
+                    .foregroundStyle(Color.wtTextSecondary)
+                scoreTextField(text: $viewModel.scoreSeconds, placeholder: "秒", keyboard: .numberPad)
+                unitLabel("秒")
+            }
+        case .amrap:
+            HStack(spacing: WTSpacing.sm) {
+                scoreTextField(text: $viewModel.amrapReps, placeholder: "完成次数", keyboard: .numberPad)
+                unitLabel("次")
+            }
+        case .emom:
+            HStack(spacing: WTSpacing.sm) {
+                scoreTextField(text: $viewModel.emomRounds, placeholder: "轮次", keyboard: .numberPad)
+                unitLabel("轮")
+                Button {
+                    viewModel.emomSign.toggle()
+                } label: {
+                    Text(viewModel.emomSign ? "+" : "−")
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundStyle(Color.wtPrimary)
+                        .frame(width: 44, height: 44)
+                        .selectableChip(isOn: true)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(viewModel.emomSign ? "加" : "减")
+                scoreTextField(text: $viewModel.emomRepsDelta, placeholder: "reps", keyboard: .numberPad)
+                unitLabel("reps")
+            }
+        case .maxLoad:
+            HStack(spacing: WTSpacing.sm) {
+                scoreTextField(text: $viewModel.maxLoadText, placeholder: "重量", keyboard: .decimalPad)
+                unitToggle
+            }
+        }
+    }
+
+    /// Max Load 单位切换：kg / lb（与强度一致，仅勾出外框）
+    private var unitToggle: some View {
+        HStack(spacing: WTSpacing.xs) {
+            ForEach([true, false], id: \.self) { isKg in
+                let on = viewModel.maxLoadIsKg == isKg
+                Button {
+                    viewModel.maxLoadIsKg = isKg
+                } label: {
+                    Text(isKg ? "kg" : "lb")
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundStyle(on ? Color.wtPrimary : Color.wtTextSecondary)
+                        .frame(width: 42, height: 44)
+                        .selectableChip(isOn: on)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .fixedSize()
+    }
+
+    private var scalingPicker: some View {
+        HStack(spacing: WTSpacing.sm) {
+            scalingChip(title: "RX", isOn: viewModel.scoreScaling == .rx) {
+                viewModel.scoreScaling = viewModel.scoreScaling == .rx ? nil : .rx
+            }
+            scalingChip(title: "SC", isOn: viewModel.scoreScaling == .sc) {
+                viewModel.scoreScaling = viewModel.scoreScaling == .sc ? nil : .sc
+            }
+        }
+    }
+
+    private func scalingChip(title: String, isOn: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(title)
+                .font(.system(size: 13, weight: .bold))
+                .foregroundStyle(isOn ? Color.wtPrimary : Color.wtTextSecondary)
+                .frame(maxWidth: .infinity)
+                .frame(height: 36)
+                .selectableChip(isOn: isOn)
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func scoreTextField(text: Binding<String>, placeholder: String, keyboard: UIKeyboardType) -> some View {
+        TextField(placeholder, text: text)
+            .keyboardType(keyboard)
+            .font(WTFont.body)
+            .foregroundStyle(Color.wtTextPrimary)
+            .padding(.horizontal, WTSpacing.md)
+            .frame(height: 44)
+            .frame(maxWidth: .infinity)
+            .background(Color.wtSurface)
+            .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
+    }
+
+    private func unitLabel(_ text: String) -> some View {
+        Text(text)
+            .font(WTFont.caption)
+            .foregroundStyle(Color.wtTextSecondary)
+            .fixedSize()
+    }
+}
+
+/// 备注：可选自由文本
+private struct NoteField: View {
+    @Binding var note: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: WTSpacing.sm) {
+            Text("备注")
+                .font(WTFont.caption)
+                .foregroundStyle(Color.wtTextSecondary)
+
+            TextField("可选，记录今天的感受或细节", text: $note, axis: .vertical)
+                .lineLimit(2 ... 4)
+                .font(WTFont.body)
+                .foregroundStyle(Color.wtTextPrimary)
+                .padding(WTSpacing.md)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color.wtSurface)
+                .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
+        }
+    }
+}
+
+/// 训练日期：点按展开原生日历（与技能树「我的数据」一致），支持补录前几天（禁选未来）
+private struct RecordDateField: View {
+    @Binding var wodDate: Date
+    @State private var showCalendar = false
+
+    private static let displayFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "yyyy.MM.dd"
+        return f
+    }()
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: WTSpacing.sm) {
+            Text("时间")
+                .font(WTFont.caption)
+                .foregroundStyle(Color.wtTextSecondary)
+
+            Button {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    showCalendar.toggle()
+                }
+            } label: {
+                HStack {
+                    Text(Self.displayFormatter.string(from: wodDate))
+                        .font(WTFont.bodyBold)
+                        .foregroundStyle(Color.wtTextPrimary)
+                    Spacer()
+                    Image(systemName: showCalendar ? "chevron.up" : "chevron.down")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(Color.wtTextSecondary)
+                }
+                .padding(WTSpacing.md)
+                .background(Color.wtSurface)
+                .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+
+            if showCalendar {
+                DatePicker("", selection: $wodDate, in: ...Date.now, displayedComponents: .date)
+                    .datePickerStyle(.graphical)
+                    .tint(Color.wtPrimary)
+                    .background(Color.wtSurface)
+                    .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
+                    .onChange(of: wodDate) { _, _ in
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            showCalendar = false
+                        }
+                    }
+            }
+        }
     }
 }
 
@@ -760,8 +951,9 @@ private struct CardPreviewStep: View {
 
     private var previewRecord: WODRecord {
         let record = WODRecord()
+        record.wodDate = viewModel.wodDate
         record.wodContent = viewModel.wodLines
-        record.difficultyRating = viewModel.difficultyRating
+        record.difficultyRating = viewModel.difficultyLevel.rawValue
         record.cardStyleId = viewModel.selectedStyleId
         record.textLayout = viewModel.textLayout
         return record

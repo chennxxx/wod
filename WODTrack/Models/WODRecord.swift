@@ -18,6 +18,14 @@ final class WODRecord {
     var boxId: String?
     var wodName: String?
     var completionMinutes: Int?
+    /// WOD 类型（WODType.rawValue：for_time / amrap / emom / max_load）
+    var scoreType: String?
+    /// 已格式化的成绩展示串，如 "04:32"、"135 reps"、"12 轮 +6 reps"、"100 kg"
+    var scoreValue: String?
+    /// 成绩标准：ScoreScaling.rawValue（rx / sc），nil 表示未标记
+    var scoreScaling: String?
+    /// 自由备注
+    var note: String?
     /// 合成卡片图字节，随 iCloud 同步；本地读取仍优先走 cardImagePath 文件
     @Attribute(.externalStorage) var cardImageData: Data?
 
@@ -35,6 +43,73 @@ final class WODRecord {
         self.boxId = nil
         self.wodName = nil
         self.completionMinutes = nil
+        self.scoreType = nil
+        self.scoreValue = nil
+        self.scoreScaling = nil
+        self.note = nil
+    }
+}
+
+/// 训练强度（4 级抽象，对应 RPE 每 25% 一档）。底层复用 WODRecord.difficultyRating 存 1–4。
+enum DifficultyLevel: Int, CaseIterable, Identifiable {
+    case easy = 1
+    case moderate = 2
+    case hard = 3
+    case challenge = 4
+
+    var id: Int { rawValue }
+
+    var label: String {
+        switch self {
+        case .easy: "轻松"
+        case .moderate: "适中"
+        case .hard: "困难"
+        case .challenge: "挑战"
+        }
+    }
+
+    var emoji: String {
+        switch self {
+        case .easy: "😌"
+        case .moderate: "🙂"
+        case .hard: "😤"
+        case .challenge: "🔥"
+        }
+    }
+
+    /// 大致对应的 RPE 区间文案
+    var rpeHint: String {
+        switch self {
+        case .easy: "RPE 1–3"
+        case .moderate: "RPE 4–5"
+        case .hard: "RPE 6–8"
+        case .challenge: "RPE 9–10"
+        }
+    }
+
+    /// 把任意已存值（含历史 1–5 星）映射到 4 级展示。
+    static func from(stored rating: Int) -> DifficultyLevel {
+        switch rating {
+        case ..<2: return .easy
+        case 2: return .moderate
+        case 3: return .hard
+        default: return .challenge
+        }
+    }
+}
+
+/// 成绩标准：RX（标准）/ SC（降级）。未标记用 nil 表示。
+enum ScoreScaling: String, CaseIterable, Identifiable {
+    case rx
+    case sc
+
+    var id: String { rawValue }
+
+    var label: String {
+        switch self {
+        case .rx: "RX"
+        case .sc: "SC"
+        }
     }
 }
 

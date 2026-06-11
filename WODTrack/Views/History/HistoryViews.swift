@@ -299,9 +299,19 @@ struct HistoryDetailView: View {
                 .foregroundStyle(Color.wtTextPrimary)
 
             VStack(spacing: 0) {
+                if let score = scoreDisplay {
+                    HistoryInfoRow(label: "成绩") {
+                        Text(score)
+                            .font(WTFont.body)
+                            .foregroundStyle(Color.wtTextPrimary)
+                            .multilineTextAlignment(.trailing)
+                    }
+                }
                 if let rating = record.difficultyRating {
-                    HistoryInfoRow(label: "难度") {
-                        DifficultyStars(rating: rating)
+                    HistoryInfoRow(label: "强度") {
+                        Text(DifficultyLevel.from(stored: rating).label)
+                            .font(WTFont.body)
+                            .foregroundStyle(Color.wtTextPrimary)
                     }
                 }
                 if let minutes = record.completionMinutes {
@@ -309,6 +319,14 @@ struct HistoryDetailView: View {
                         Text("\(minutes) 分钟")
                             .font(WTFont.body)
                             .foregroundStyle(Color.wtTextPrimary)
+                    }
+                }
+                if let note = record.note, !note.isEmpty {
+                    HistoryInfoRow(label: "备注") {
+                        Text(note)
+                            .font(WTFont.body)
+                            .foregroundStyle(Color.wtTextPrimary)
+                            .multilineTextAlignment(.trailing)
                     }
                 }
                 HistoryInfoRow(label: "打卡时间") {
@@ -322,6 +340,19 @@ struct HistoryDetailView: View {
             .background(Color.wtSurface)
             .clipShape(RoundedRectangle(cornerRadius: WTRadius.lg))
         }
+    }
+
+    /// 成绩展示串：类型 + 值 + RX/SC（无成绩时返回 nil）
+    private var scoreDisplay: String? {
+        guard let value = record.scoreValue, !value.isEmpty else { return nil }
+        var text = value
+        if let typeRaw = record.scoreType, let type = WODType(rawValue: typeRaw) {
+            text = "\(type.displayName) \(value)"
+        }
+        if let scalingRaw = record.scoreScaling, let scaling = ScoreScaling(rawValue: scalingRaw) {
+            text += " · \(scaling.label)"
+        }
+        return text
     }
 
     // MARK: - 删除
