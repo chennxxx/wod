@@ -4,7 +4,7 @@ import SwiftUI
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.scenePhase) private var scenePhase
-    @Query(sort: \WODRecord.createdAt, order: .reverse) private var records: [WODRecord]
+    @Query(sort: \WODRecord.wodDate, order: .reverse) private var records: [WODRecord]
     @State private var isShowingRecordFlow = false
     @Bindable var appState: AppState
     @Bindable var syncManager: CloudSyncManager
@@ -80,7 +80,7 @@ private struct RecordHomeView: View {
                     if records.isEmpty {
                         EmptyRecordState()
                     } else {
-                        HistoryPreviewSection(records: Array(records.prefix(7)))
+                        HistoryPreviewSection(records: Array(records.prefix(12)))
                     }
                 }
                 .padding(WTSpacing.lg)
@@ -289,11 +289,22 @@ private struct StatDivider: View {
 private struct HistoryPreviewSection: View {
     let records: [WODRecord]
 
+    /// 一屏约露 3.5 张卡片，露边提示可横滑
+    private var cardWidth: CGFloat {
+        (UIScreen.main.bounds.width - WTSpacing.lg * 2) / 3.5
+    }
+
+    /// 两行之间的间距：给足上下错位 + 倾斜的溢出空间，避免重叠
+    private let rowSpacing: CGFloat = 16.8
+
+    private var topRow: [WODRecord] { Array(records.prefix(6)) }
+    private var bottomRow: [WODRecord] { Array(records.dropFirst(6).prefix(6)) }
+
     var body: some View {
         VStack(alignment: .leading, spacing: WTSpacing.md) {
             NavigationLink(destination: HistoryListView()) {
                 HStack {
-                    Text("历史记录")
+                    Text("训练时刻")
                         .font(WTFont.title)
                         .foregroundStyle(Color.wtTextPrimary)
                     Spacer()
@@ -304,17 +315,123 @@ private struct HistoryPreviewSection: View {
             }
             .buttonStyle(.plain)
 
-            VStack(spacing: WTSpacing.md) {
-                ForEach(records) { record in
-                    NavigationLink {
-                        HistoryDetailView(record: record)
-                    } label: {
-                        HistoryRecordCard(record: record)
+            ScrollView(.horizontal, showsIndicators: false) {
+                // 两行各自独立排布、共享同一横向滚动；上下不强制对齐 → 更灵动
+                VStack(alignment: .leading, spacing: rowSpacing) {
+                    photoRow(topRow, indexOffset: 0)
+                    if !bottomRow.isEmpty {
+                        photoRow(bottomRow, indexOffset: topRow.count)
                     }
-                    .buttonStyle(.plain)
+                }
+                .padding(.horizontal, WTSpacing.lg)
+                // 给倾斜 + 上下错位留出溢出空间，避免被裁切
+                .padding(.vertical, 14)
+            }
+            // 抵消父级 lg 边距，让图片流贴近屏幕两侧、滑动时露出下一张
+            .padding(.horizontal, -WTSpacing.lg)
+        }
+    }
+
+    private func photoRow(_ rowRecords: [WODRecord], indexOffset: Int) -> some View {
+        LazyHStack(spacing: WTSpacing.md) {
+            ForEach(Array(rowRecords.enumerated()), id: \.element.id) { i, record in
+                let globalIndex = indexOffset + i
+                NavigationLink {
+                    HistoryDetailView(record: record)
+                } label: {
+                    HistoryPhotoCard(record: record, width: cardWidth)
+                        .rotationEffect(.degrees(HistoryPhotoCard.tilt(at: globalIndex)))
+                        .offset(
+                            x: HistoryPhotoCard.xOffset(at: globalIndex),
+                            y: HistoryPhotoCard.yOffset(at: globalIndex)
+                        )
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+}
+
+/// 首页历史记录图片流卡片：统一竖图比例 + 底部信息条，灵动倾斜/错位由外层应用。
+private struct HistoryPhotoCard: View {
+    let record: WODRecord
+    let width: CGFloat
+
+    /// 灵动感参数（先做轻微，后续可整体调大）。
+    /// 表长取 7（与每行 6 张错开），避免上下两行同列出现镜像/对齐的呆板感。
+    private static let tilts: [Double] = [-2.5, 1.8, 2.4, -1.5, 2.2, -2.0, 1.2]
+    private static let xOffsets: [CGFloat] = [0, 5, -4, 3, -5, 4, -2]
+    private static let yOffsets: [CGFloat] = [5, -4, 6, -3, 4, -6, 3]
+
+    static func tilt(at index: Int) -> Double { tilts[index % tilts.count] }
+    static func xOffset(at index: Int) -> CGFloat { xOffsets[index % xOffsets.count] }
+    static func yOffset(at index: Int) -> CGFloat { yOffsets[index % yOffsets.count] }
+
+    private static let dateFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "MM.dd"
+        return f
+    }()
+
+    private var difficultyEmoji: String? {
+        guard let rating = record.difficultyRating else { return nil }
+        return DifficultyLevel.from(stored: rating).emoji
+    }
+
+    private var height: CGFloat { width * 4 / 3 }
+
+    var body: some View {
+        ZStack(alignment: .bottomLeading) {
+            HistoryThumbnail(record: record)
+                .frame(width: width, height: height)
+                .clipped()
+                // 轻微去饱和，收敛色彩、避免与记录 WOD 按钮抢眼（仍保留质感）
+                .saturation(0.8)
+
+            infoBar
+        }
+        .frame(width: width, height: height)
+        .clipShape(RoundedRectangle(cornerRadius: WTRadius.lg))
+        .overlay {
+            // 中性色细边框（绿色让位给按钮，仅勾出边界）
+            RoundedRectangle(cornerRadius: WTRadius.lg)
+                .stroke(Color.white.opacity(0.15), lineWidth: 1)
+        }
+        // 中性白色微发光（y=0 均匀环绕勾边）+ 黑色投影做层次
+        .shadow(color: Color.white.opacity(0.15), radius: 5, x: 0, y: 0)
+        .shadow(color: Color.black.opacity(0.4), radius: 6, x: 0, y: 3)
+    }
+
+    private var infoBar: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            if let score = record.scoreValue, !score.isEmpty {
+                Text(score)
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+            }
+            HStack(spacing: 4) {
+                Text(Self.dateFormatter.string(from: record.wodDate))
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(.white.opacity(0.85))
+                if let difficultyEmoji {
+                    Text(difficultyEmoji)
+                        .font(.system(size: 12))
                 }
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, WTSpacing.sm)
+        .padding(.bottom, WTSpacing.sm)
+        .padding(.top, WTSpacing.lg)
+        .background(
+            LinearGradient(
+                colors: [.clear, .black.opacity(0.7)],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        )
     }
 }
 
