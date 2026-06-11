@@ -32,8 +32,21 @@ final class RecordFlowViewModel {
     var selectedWhiteboardImage: UIImage?
     var selectedCheckinImages: [UIImage] = []
     var wodContentText = ""
-    var difficultyRating = 3
+    var wodDate: Date = .now
+    var difficultyLevel: DifficultyLevel = .moderate
     var completionMinutes: Int? = nil
+    var note = ""
+    // 成绩录入：类型 + 随类型变样的输入 + RX/SC 标记
+    var scoreType: WODType = .forTime
+    var scoreMinutes = ""           // For Time：分
+    var scoreSeconds = ""           // For Time：秒
+    var amrapReps = ""              // AMRAP：总完成次数
+    var emomRounds = ""             // EMOM：轮次
+    var emomRepsDelta = ""          // EMOM：加/减 reps 数量
+    var emomSign = true             // EMOM：true=加，false=减
+    var maxLoadText = ""            // Max Load：重量
+    var maxLoadIsKg = true          // Max Load：true=kg，false=lb
+    var scoreScaling: ScoreScaling? = .rx
     var selectedStyleId = "style_mono_overlay"
     var textLayout = TextLayout()
     var ocrState: OCRState = .idle
@@ -58,9 +71,57 @@ final class RecordFlowViewModel {
         selectedWhiteboardImage = image
         networkRetryCount = 0
         wodContentText = ""          // 清空上次 OCR 残留内容
+        resetRecordFields()
         ocrState = .processing
         step = .ocrResult
         performOCR(image: image)
+    }
+
+    /// 重置本次录入的结构化字段（日期 / 类型 / 成绩 / 强度 / 备注）
+    private func resetRecordFields() {
+        wodDate = .now
+        difficultyLevel = .moderate
+        completionMinutes = nil
+        note = ""
+        scoreType = .forTime
+        scoreMinutes = ""
+        scoreSeconds = ""
+        amrapReps = ""
+        emomRounds = ""
+        emomRepsDelta = ""
+        emomSign = true
+        maxLoadText = ""
+        maxLoadIsKg = true
+        scoreScaling = .rx
+    }
+
+    /// 按当前类型组装格式化成绩串；信息不足时返回 nil
+    var formattedScore: String? {
+        func clean(_ s: String) -> String? {
+            let t = s.trimmingCharacters(in: .whitespaces)
+            return t.isEmpty ? nil : t
+        }
+        switch scoreType {
+        case .forTime, .other:
+            let m = clean(scoreMinutes)
+            let s = clean(scoreSeconds)
+            guard m != nil || s != nil else { return nil }
+            let mm = String(format: "%02d", max(0, Int(m ?? "0") ?? 0))
+            let ss = String(format: "%02d", max(0, Int(s ?? "0") ?? 0))
+            return "\(mm):\(ss)"
+        case .amrap:
+            guard let reps = clean(amrapReps) else { return nil }
+            return "\(reps) reps"
+        case .emom:
+            guard let rounds = clean(emomRounds) else { return nil }
+            if let delta = clean(emomRepsDelta) {
+                return "\(rounds) 轮 \(emomSign ? "+" : "-")\(delta) reps"
+            }
+            return "\(rounds) 轮"
+        case .maxLoad:
+            guard let load = clean(maxLoadText) else { return nil }
+            return "\(load) \(maxLoadIsKg ? "kg" : "lb")"
+        }
     }
 
     private func performOCR(image: UIImage) {
@@ -111,7 +172,8 @@ final class RecordFlowViewModel {
         entryMode = .manual
         selectedWhiteboardImage = nil
         wodContentText = ""
-        ocrState = .success(OCRResult(wodType: .other, wodContent: [], confidence: 1))
+        resetRecordFields()
+        ocrState = .success(OCRResult(wodContent: [], confidence: 1))
         step = .ocrResult
     }
 
@@ -164,8 +226,14 @@ final class RecordFlowViewModel {
         defer { isRendering = false }
 
         let record = WODRecord()
+        record.wodDate = wodDate
         record.wodContent = wodLines
-        record.difficultyRating = difficultyRating
+        record.difficultyRating = difficultyLevel.rawValue
+        record.completionMinutes = completionMinutes
+        record.scoreType = scoreType.rawValue
+        record.scoreValue = formattedScore
+        record.scoreScaling = scoreScaling?.rawValue
+        record.note = note.isEmpty ? nil : note
         record.cardStyleId = selectedStyleId
         record.textLayout = textLayout
         previewRecord = record
@@ -184,9 +252,14 @@ final class RecordFlowViewModel {
     }
 
     func finalizeRecord() -> WODRecord {
+        previewRecord.wodDate = wodDate
         previewRecord.wodContent = wodLines
-        previewRecord.difficultyRating = difficultyRating
+        previewRecord.difficultyRating = difficultyLevel.rawValue
         previewRecord.completionMinutes = completionMinutes
+        previewRecord.scoreType = scoreType.rawValue
+        previewRecord.scoreValue = formattedScore
+        previewRecord.scoreScaling = scoreScaling?.rawValue
+        previewRecord.note = note.isEmpty ? nil : note
         previewRecord.cardStyleId = selectedStyleId
         previewRecord.textLayout = textLayout
         if let renderedCardImage, let jpegData = renderedCardImage.jpegData(compressionQuality: 0.9) {
