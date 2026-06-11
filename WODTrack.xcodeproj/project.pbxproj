@@ -15,6 +15,7 @@
 		A000000000000000000006 /* RecordFlowViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000106 /* RecordFlowViewModel.swift */; };
 		A000000000000000000007 /* AppConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000107 /* AppConfig.swift */; };
 		A000000000000000000008 /* CardStyleConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000108 /* CardStyleConfig.swift */; };
+		A0000000000000000000F0 /* ColorThemeConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000001F0 /* ColorThemeConfig.swift */; };
 		A000000000000000000009 /* OCRService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000109 /* OCRService.swift */; };
 		A00000000000000000000A /* CardRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000010A /* CardRenderer.swift */; };
 		A00000000000000000000B /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000010B /* Theme.swift */; };
@@ -62,6 +63,7 @@
 		A000000000000000000106 /* RecordFlowViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordFlowViewModel.swift; sourceTree = "<group>"; };
 		A000000000000000000107 /* AppConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfig.swift; sourceTree = "<group>"; };
 		A000000000000000000108 /* CardStyleConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardStyleConfig.swift; sourceTree = "<group>"; };
+		A0000000000000000001F0 /* ColorThemeConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorThemeConfig.swift; sourceTree = "<group>"; };
 		A000000000000000000109 /* OCRService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OCRService.swift; sourceTree = "<group>"; };
 		A00000000000000000010A /* CardRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardRenderer.swift; sourceTree = "<group>"; };
 		A00000000000000000010B /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
@@ -161,6 +163,7 @@
 			children = (
 				A000000000000000000107 /* AppConfig.swift */,
 				A000000000000000000108 /* CardStyleConfig.swift */,
+				A0000000000000000001F0 /* ColorThemeConfig.swift */,
 				A000000000000000000144 /* SkillData.swift */,
 				A000000000000000000145 /* ProgressionPathData.swift */,
 			);
@@ -386,6 +389,7 @@
 				A000000000000000000006 /* RecordFlowViewModel.swift in Sources */,
 				A000000000000000000007 /* AppConfig.swift in Sources */,
 				A000000000000000000008 /* CardStyleConfig.swift in Sources */,
+				A0000000000000000000F0 /* ColorThemeConfig.swift in Sources */,
 				A000000000000000000009 /* OCRService.swift in Sources */,
 				A000000000000000000030 /* ImagePathResolver.swift in Sources */,
 				A000000000000000000047 /* RecordDeletionService.swift in Sources */,

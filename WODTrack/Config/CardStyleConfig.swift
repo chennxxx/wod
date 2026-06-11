@@ -62,6 +62,10 @@ struct CardStyle: Identifiable, Hashable {
         case heroTitle
         case dataDashboard
         case retroFilm
+        /// 边框画布版（方向 C）：照片不满铺，装进有色画布，底部留白印数据。
+        case framedBottom
+        /// 拍立得：照片四周等宽留边 + 底部窄栏，经典宝丽来。
+        case framedPolaroid
     }
 }
 
@@ -71,13 +75,13 @@ enum CardStyleConfig {
 
     static let freeStyles: [CardStyle] = [
         .init(
-            id: "style_basic_dark",
-            name: "夜训卡片",
-            summary: "底部信息卡，适合内容多的 WOD",
-            overlay: .dark,
-            layout: .bottomCard,
+            id: "style_framed_bottom",
+            name: "边框留白",
+            summary: "照片装进色框、四周留白，数据压在照片上",
+            overlay: .plain,
+            layout: .framedBottom,
             isPro: false,
-            supportedModules: allModules
+            supportedModules: [.date, .score, .difficulty, .wodContent]
         ),
         .init(
             id: "style_mono_overlay",
@@ -85,6 +89,15 @@ enum CardStyleConfig {
             summary: "直接压字到图片上，参考你发的样式",
             overlay: .soft,
             layout: .rightOverlayMono,
+            isPro: false,
+            supportedModules: allModules
+        ),
+        .init(
+            id: "style_basic_dark",
+            name: "夜训卡片",
+            summary: "底部信息卡，适合内容多的 WOD",
+            overlay: .dark,
+            layout: .bottomCard,
             isPro: false,
             supportedModules: allModules
         ),
@@ -126,17 +139,7 @@ enum CardStyleConfig {
         )
     ]
 
-    static let proStyles: [CardStyle] = [
-        .init(
-            id: "style_plain_pro",
-            name: "杂志封面",
-            summary: "顶部排版，适合更强的海报感",
-            overlay: .plain,
-            layout: .editorialTop,
-            isPro: true,
-            supportedModules: allModules
-        )
-    ]
+    static let proStyles: [CardStyle] = []
 
     static let all = freeStyles + proStyles
 

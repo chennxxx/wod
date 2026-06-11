@@ -9,8 +9,12 @@ struct CardView: View {
     var body: some View {
         GeometryReader { proxy in
             ZStack {
-                backgroundLayer(proxy: proxy)
-                    .overlay(backgroundOverlay)
+                if isFramedLayout {
+                    theme.matteColor
+                } else {
+                    backgroundLayer(proxy: proxy)
+                        .overlay(backgroundOverlay)
+                }
 
                 switch style.layout {
                 case .bottomCard:
@@ -27,9 +31,16 @@ struct CardView: View {
                     dataDashboardLayout(proxy: proxy)
                 case .retroFilm:
                     retroFilmLayout(proxy: proxy)
+                case .framedBottom:
+                    framedLayout(proxy: proxy, polaroid: false)
+                case .framedPolaroid:
+                    framedLayout(proxy: proxy, polaroid: true)
                 }
             }
             .frame(width: proxy.size.width, height: proxy.size.height)
+            .overlay(alignment: .bottomTrailing) {
+                if !isPro && !isFramedLayout { watermarkView }
+            }
             .clipped()
         }
     }
@@ -105,7 +116,7 @@ struct CardView: View {
                 .padding(16)
                 .background(
                     RoundedRectangle(cornerRadius: 18)
-                        .fill(Color.black.opacity(0.55))
+                        .fill(theme.matteColor.opacity(0.9))
                 )
         }
     }
@@ -120,7 +131,7 @@ struct CardView: View {
                 .padding(16)
                 .background(
                     RoundedRectangle(cornerRadius: 18)
-                        .fill(Color.white.opacity(0.9))
+                        .fill(theme.matteColor.opacity(0.9))
                 )
         }
     }
@@ -187,10 +198,10 @@ struct CardView: View {
                 .padding(18)
                 .background(
                     RoundedRectangle(cornerRadius: 8)
-                        .fill(Color.black.opacity(0.72))
+                        .fill(theme.matteColor.opacity(0.85))
                         .overlay(
                             RoundedRectangle(cornerRadius: 8)
-                                .stroke(textColor.opacity(0.22), lineWidth: 1)
+                                .stroke(accentColor.opacity(0.3), lineWidth: 1)
                         )
                 )
         }
@@ -230,6 +241,62 @@ struct CardView: View {
             .frame(width: proxy.size.width, height: proxy.size.height, alignment: Alignment(horizontal: isTrailing ? .trailing : .leading, vertical: .bottom))
         }
         .frame(width: proxy.size.width, height: proxy.size.height)
+    }
+
+    /// 边框画布版（方向 C）：照片缩成圆角块、四周留出有色边框（卡底=主题色），
+    /// 数据仍压在照片上（带暗角，不挤进留白），所以不必担心文字溢出。
+    /// polaroid = 四周等宽 + 底边更厚的宝丽来风；framedBottom = 四周窄边。
+    private func framedLayout(proxy: GeometryProxy, polaroid: Bool) -> some View {
+        let border: CGFloat = polaroid
+            ? max(14, proxy.size.width * 0.07)
+            : max(10, proxy.size.width * 0.05)
+        let bottomBorder: CGFloat = polaroid ? border * 2.1 : border
+        let corner: CGFloat = polaroid ? 2 : 6
+        let textSize = CGFloat(record.textLayout.fontSize)
+        let lineSpacing = adaptiveLineSpacing(for: textSize, defaultSpacing: 6)
+
+        return framedPhoto
+            .overlay(framedPhotoOverlay(textSize: textSize, lineSpacing: lineSpacing))
+            .clipShape(RoundedRectangle(cornerRadius: corner))
+            .padding(EdgeInsets(top: border, leading: border, bottom: bottomBorder, trailing: border))
+            .frame(width: proxy.size.width, height: proxy.size.height)
+    }
+
+    @ViewBuilder private var framedPhoto: some View {
+        if let image = checkinImages.first {
+            Image(uiImage: image)
+                .resizable()
+                .scaledToFill()
+        } else {
+            LinearGradient(colors: [Color.wtSurface2, Color.black], startPoint: .top, endPoint: .bottom)
+        }
+    }
+
+    /// 压在边框版照片上的内容：暗角 + 模块按固定位置锚定，水印也叠在照片内（保证可读）。
+    private func framedPhotoOverlay(textSize: CGFloat, lineSpacing: CGFloat) -> some View {
+        ZStack {
+            LinearGradient(
+                colors: [Color.clear, Color.black.opacity(0.12), Color.black.opacity(0.58)],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            moduleStack(textSize: textSize, lineSpacing: lineSpacing, alignment: horizontalTextAlignment)
+                .padding(14)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: cardAlignment)
+        }
+        .overlay(alignment: .bottomTrailing) {
+            if !isPro { watermarkView }
+        }
+    }
+
+    /// 「@迹录 WOD」水印——免费用户保留、Pro 去除；压在照片上用浅色 + 阴影，贴紧右下角。
+    private var watermarkView: some View {
+        Text("@迹录 WOD")
+            .font(.system(size: 8.5, weight: .bold))
+            .foregroundStyle(Color.white.opacity(0.85))
+            .shadow(color: .black.opacity(0.5), radius: 2, x: 0, y: 1)
+            .padding(.trailing, 7)
+            .padding(.bottom, 6)
     }
 
     private func editorialTopLayout(proxy: GeometryProxy) -> some View {
@@ -310,9 +377,13 @@ struct CardView: View {
     }
 
     private func dateLine(accented: Bool) -> some View {
-        Text(record.wodDate.formatted(.dateTime.year().month().day()))
-            .font(accented ? .system(size: 14, weight: .bold, design: .monospaced) : WTFont.caption)
-            .foregroundStyle(accented ? Color.wtPrimary : Color.wtTextSecondary)
+        // 边框版：日期与下方 WOD 内容同字体同颜色（白色实心），避免灰字在留白上看不清
+        let framed = isFramedLayout
+        return Text(record.wodDate.formatted(.dateTime.year().month().day()))
+            .font(framed
+                ? font(for: CGFloat(record.textLayout.fontSize), weight: .bold)
+                : (accented ? .system(size: 14, weight: .bold, design: .monospaced) : WTFont.caption))
+            .foregroundStyle(framed ? textColor : (accented ? accentColor : textColor.opacity(0.7)))
     }
 
     // MARK: - 内容模块（成绩 / 难度 / 完成时间）
@@ -383,15 +454,15 @@ struct CardView: View {
                     if let typeName = scoreTypeLabel {
                         Text(typeName.uppercased())
                             .font(.system(size: max(9, size * 0.5), weight: .bold, design: .monospaced))
-                            .foregroundStyle(Color.wtPrimary)
+                            .foregroundStyle(accentColor)
                     }
                     if let scaling = scoreScalingLabel {
                         Text(scaling)
                             .font(.system(size: max(8, size * 0.42), weight: .heavy))
                             .padding(.horizontal, 5)
                             .padding(.vertical, 1)
-                            .background(Color.wtPrimary.opacity(0.9))
-                            .foregroundStyle(.black)
+                            .background(accentColor.opacity(0.9))
+                            .foregroundStyle(theme.matteColor)
                             .clipShape(Capsule())
                     }
                 }
@@ -412,7 +483,7 @@ struct CardView: View {
                 HStack(spacing: 3) {
                     ForEach(1 ... 4, id: \.self) { index in
                         RoundedRectangle(cornerRadius: 1)
-                            .fill(index <= level.rawValue ? Color.wtPrimary : textColor.opacity(0.25))
+                            .fill(index <= level.rawValue ? accentColor : textColor.opacity(0.25))
                             .frame(width: max(8, size * 0.5), height: max(4, size * 0.28))
                     }
                 }
@@ -472,8 +543,33 @@ struct CardView: View {
 
     private var textAlignmentValue: TextAlignment { isTrailing ? .trailing : .leading }
 
+    private var theme: CardColorTheme {
+        CardColorTheme.theme(for: record.colorThemeId)
+    }
+
+    private var isFramedLayout: Bool {
+        style.layout == .framedBottom || style.layout == .framedPolaroid
+    }
+
+    /// 文字坐落在「实色卡底」上的面板型布局；其余直接压在照片上（含边框版）。
+    private var isOnMatte: Bool {
+        switch style.layout {
+        case .bottomCard, .bottomCardLight, .dataDashboard:
+            return true
+        case .editorialTop, .rightOverlayMono, .heroTitle, .retroFilm, .framedBottom, .framedPolaroid:
+            return false
+        }
+    }
+
+    /// 主文字色：面板型用 matte 文字色；边框版印在照片上固定浅色 + 暗角保证可读；其余满铺用主题文字色。
     private var textColor: Color {
-        Color(hex: record.textLayout.textColor)
+        if isFramedLayout { return .white }
+        return isOnMatte ? theme.matteTextColor : theme.textColor
+    }
+
+    /// 强调色（成绩类型标签 / 难度条等），跟随配色主题。
+    private var accentColor: Color {
+        theme.accentColor
     }
 
     private var cardVerticalAlignment: Alignment {

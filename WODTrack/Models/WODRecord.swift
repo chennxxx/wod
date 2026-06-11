@@ -28,6 +28,10 @@ final class WODRecord {
     var note: String?
     /// 卡片上已开启的内容模块（CardModule.rawValue 集合）。非可选，CloudKit 增量字段。
     var enabledModules: [String] = ["date", "score", "difficulty", "wodContent"]
+    /// 配色主题（CardColorTheme.rawValue）。决定文字色 + 卡底/留白色 + 强调色。
+    /// 顶层非可选 + 默认值 → SwiftData 轻量迁移安全（同 enabledModules）；不放进 TextLayout 内，
+    /// 否则会被展开成 WODRecord 的复合属性、缺省值不被迁移识别而报 134110。
+    var colorThemeId: String = "dark"
     /// 合成卡片图字节，随 iCloud 同步；本地读取仍优先走 cardImagePath 文件
     @Attribute(.externalStorage) var cardImageData: Data?
 
@@ -50,6 +54,7 @@ final class WODRecord {
         self.scoreScaling = nil
         self.note = nil
         self.enabledModules = ["date", "score", "difficulty", "wodContent"]
+        self.colorThemeId = "dark"
     }
 }
 
