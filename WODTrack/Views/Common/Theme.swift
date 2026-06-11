@@ -118,6 +118,10 @@ struct WTTextEditor: View {
     let placeholder: String
     @Binding var text: String
     var minHeight: CGFloat = 220
+    /// 输入框内部底部的附件（如「自动识别」按钮）
+    var bottomAccessory: AnyView? = nil
+
+    private var bottomInset: CGFloat { bottomAccessory == nil ? 8 : 62 }
 
     var body: some View {
         VStack(alignment: .leading, spacing: WTSpacing.xs) {
@@ -134,7 +138,7 @@ struct WTTextEditor: View {
                         .font(WTFont.body)
                         .foregroundStyle(Color.wtTextDisabled)
                         .padding(.horizontal, 16)
-                        .padding(.vertical, 14)
+                        .padding(.top, 14)
                 }
 
                 TextEditor(text: $text)
@@ -142,10 +146,15 @@ struct WTTextEditor: View {
                     .font(WTFont.body)
                     .foregroundStyle(Color.wtTextPrimary)
                     .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
+                    .padding(.top, 8)
+                    .padding(.bottom, bottomInset)
                     .background(Color.clear)
             }
             .frame(minHeight: minHeight)
+            .overlay(alignment: .bottom) {
+                bottomAccessory
+            }
+            .clipShape(RoundedRectangle(cornerRadius: 10))
             .overlay(
                 RoundedRectangle(cornerRadius: 10)
                     .stroke(Color.wtSurface2, lineWidth: 1)

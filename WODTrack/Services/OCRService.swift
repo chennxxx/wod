@@ -59,10 +59,10 @@ actor OCRService: OCRServicing {
             )
         } catch is DecodingError {
             throw OCRError.parseError
+        } catch let urlError as URLError {
+            // 网络类错误（未联网 / 连接丢失 / 超时等）原样抛出，交由上层判定为网络问题
+            throw urlError
         } catch {
-            if (error as NSError).code == NSURLErrorTimedOut {
-                throw OCRError.networkTimeout
-            }
             throw OCRError.serviceUnavailable
         }
     }

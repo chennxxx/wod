@@ -22,12 +22,10 @@ struct RecordFlowCoordinator: View {
             Color.wtBackground.ignoresSafeArea()
 
             switch viewModel.step {
-            case .whiteboard:
-                WhiteboardStep(viewModel: viewModel, dismiss: dismiss.callAsFunction)
             case .checkinPhotos:
                 CheckinPhotosStep(viewModel: viewModel)
             case .ocrResult:
-                OCRResultStep(viewModel: viewModel)
+                OCRResultStep(viewModel: viewModel, dismiss: dismiss.callAsFunction)
             case .scoreInput:
                 CheckinPhotosStep(viewModel: viewModel)
             case .cardEditor:
@@ -47,94 +45,6 @@ struct RecordFlowCoordinator: View {
             }
         }
         .navigationBarBackButtonHidden()
-    }
-}
-
-private struct WhiteboardStep: View {
-    @Bindable var viewModel: RecordFlowViewModel
-    let dismiss: () -> Void
-    @State private var pickerItem: PhotosPickerItem?
-    @State private var showSourceDialog = false
-    @State private var showPhotoPicker = false
-    @State private var showCamera = false
-    @State private var showCameraUnavailable = false
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: WTSpacing.lg) {
-            HStack(spacing: WTSpacing.sm) {
-                Button(action: dismiss) {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 17, weight: .semibold))
-                        .foregroundStyle(Color.wtPrimary)
-                        .frame(width: 36, height: 36)
-                        .background(Color.wtSurface)
-                        .clipShape(Circle())
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("关闭")
-
-                Text("记录今日 WOD")
-                    .font(WTFont.title)
-
-                Spacer()
-            }
-
-            Text("你可以拍摄白板、从相册导入，或者直接手动输入今日训练内容。")
-                .font(WTFont.caption)
-                .foregroundStyle(Color.wtTextSecondary)
-
-            VStack(spacing: WTSpacing.md) {
-                Button {
-                    showSourceDialog = true
-                } label: {
-                    WhiteboardActionCard(title: "拍摄或从相册选取", icon: "camera.on.rectangle.fill", subtitle: "识别白板上的 WOD 内容")
-                }
-                .buttonStyle(.plain)
-
-                Button {
-                    viewModel.startManualEntry()
-                } label: {
-                    WhiteboardActionCard(title: "手动输入", icon: "keyboard.fill", subtitle: "直接录入今日 WOD 文本")
-                }
-                .buttonStyle(.plain)
-            }
-
-            Spacer()
-        }
-        .padding(WTSpacing.lg)
-        .confirmationDialog("导入方式", isPresented: $showSourceDialog, titleVisibility: .visible) {
-            Button("立即拍摄") {
-                if UIImagePickerController.isSourceTypeAvailable(.camera) {
-                    showCamera = true
-                } else {
-                    showCameraUnavailable = true
-                }
-            }
-            Button("从相册选取") {
-                showPhotoPicker = true
-            }
-            Button("取消", role: .cancel) {}
-        }
-        .photosPicker(isPresented: $showPhotoPicker, selection: $pickerItem, matching: .images)
-        .fullScreenCover(isPresented: $showCamera) {
-            CameraPickerView { image in
-                showCamera = false
-                viewModel.startFlow(with: image)
-            } onCancel: {
-                showCamera = false
-            }
-            .ignoresSafeArea()
-        }
-        .alert("相机不可用", isPresented: $showCameraUnavailable) {
-            Button("知道了", role: .cancel) {}
-        } message: {
-            Text("当前设备不支持相机拍摄，请使用相册导入。")
-        }
-        .task(id: pickerItem) {
-            guard let data = try? await pickerItem?.loadTransferable(type: Data.self),
-                  let image = UIImage(data: data) else { return }
-            viewModel.startFlow(with: image)
-        }
     }
 }
 
@@ -314,6 +224,13 @@ private struct OCRLoadingView: View {
 
 private struct OCRResultStep: View {
     @Bindable var viewModel: RecordFlowViewModel
+    let dismiss: () -> Void
+
+    @State private var pickerItem: PhotosPickerItem?
+    @State private var showSourceDialog = false
+    @State private var showPhotoPicker = false
+    @State private var showCamera = false
+    @State private var showCameraUnavailable = false
 
     /// 是否处于"需要展示内容页"的状态（包括失败、成功、手动输入）
     private var isContentReady: Bool {
@@ -331,32 +248,38 @@ private struct OCRResultStep: View {
 
     var body: some View {
         if isContentReady {
-            RecordFlowStepPage(title: "今日 WOD 内容", backAction: viewModel.goBack) {
-                VStack(alignment: .leading, spacing: WTSpacing.md) {
-                    // 错误 banner（仅识别失败时显示）
-                    if let errorMessage {
-                        HStack(spacing: WTSpacing.sm) {
-                            Image(systemName: "exclamationmark.triangle.fill")
-                                .foregroundStyle(Color.wtDanger)
-                            Text(errorMessage)
-                                .font(WTFont.caption)
-                                .foregroundStyle(Color.wtTextPrimary)
-                            Spacer()
-                        }
-                        .padding(WTSpacing.md)
-                        .background(Color.wtDanger.opacity(0.12))
-                        .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
-                    } else {
-                        Text(viewModel.entryMode == .manual ? "直接输入今天的训练内容。" : "识别完成，请在这里确认和修改内容。")
+            contentPage
+        } else {
+            // loading / timeout
+            OCRLoadingView(
+                isTimeout: viewModel.ocrState == .timeout,
+                onRetry: viewModel.retryOCR,
+                onBack: viewModel.cancelRecognition
+            )
+        }
+    }
+
+    private var contentPage: some View {
+        RecordFlowStepPage(title: "记录 WOD", backAction: dismiss) {
+            VStack(alignment: .leading, spacing: WTSpacing.md) {
+                // 错误 banner（仅识别失败时显示）
+                if let errorMessage {
+                    HStack(spacing: WTSpacing.sm) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundStyle(Color.wtDanger)
+                        Text(errorMessage)
                             .font(WTFont.caption)
-                            .foregroundStyle(Color.wtTextSecondary)
+                            .foregroundStyle(Color.wtTextPrimary)
+                        Spacer()
                     }
+                    .padding(WTSpacing.md)
+                    .background(Color.wtDanger.opacity(0.12))
+                    .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
+                }
 
-                    RecordDateField(wodDate: $viewModel.wodDate)
-
-                    WTTextEditor(
-                        title: "WOD 内容",
-                        placeholder: """
+                WTTextEditor(
+                    title: "WOD 内容",
+                    placeholder: """
 A 热身/完成以下3轮
 10空杆早安式
 20S原地高抬腿
@@ -369,33 +292,91 @@ C WOD/任务计时/7轮
 11自重硬拉
 100M
 """,
-                        text: $viewModel.wodContentText,
-                        minHeight: 320
-                    )
+                    text: $viewModel.wodContentText,
+                    minHeight: 320,
+                    bottomAccessory: AnyView(autoRecognizeButton)
+                )
 
-                    WODTypeField(scoreType: $viewModel.scoreType)
+                RecordDateField(wodDate: $viewModel.wodDate)
 
-                    ScoreField(viewModel: viewModel)
+                WODTypeField(scoreType: $viewModel.scoreType)
 
-                    IntensityField(level: $viewModel.difficultyLevel)
+                ScoreField(viewModel: viewModel)
 
-                    NoteField(note: $viewModel.note)
-                }
-                .padding(WTSpacing.lg)
-            } bottomBar: {
-                if errorMessage != nil {
-                    WTButton(title: "重试", style: .secondary, action: viewModel.retryOCR)
-                }
-                WTButton(title: "下一步：选择训练照", isEnabled: !viewModel.wodLines.isEmpty, action: viewModel.goToCheckinPhotos)
+                IntensityField(level: $viewModel.difficultyLevel)
+
+                NoteField(note: $viewModel.note)
             }
-        } else {
-            // loading / timeout
-            OCRLoadingView(
-                isTimeout: viewModel.ocrState == .timeout,
-                onRetry: viewModel.retryOCR,
-                onBack: viewModel.goBack
-            )
+            .padding(WTSpacing.lg)
+        } bottomBar: {
+            if errorMessage != nil {
+                WTButton(title: "重试", style: .secondary, action: viewModel.retryOCR)
+            }
+            WTButton(title: "下一步：选择训练照", isEnabled: !viewModel.wodLines.isEmpty, action: viewModel.goToCheckinPhotos)
         }
+        .confirmationDialog("导入方式", isPresented: $showSourceDialog, titleVisibility: .visible) {
+            Button("立即拍摄") {
+                if UIImagePickerController.isSourceTypeAvailable(.camera) {
+                    showCamera = true
+                } else {
+                    showCameraUnavailable = true
+                }
+            }
+            Button("从相册选取") {
+                showPhotoPicker = true
+            }
+            Button("取消", role: .cancel) {}
+        }
+        .photosPicker(isPresented: $showPhotoPicker, selection: $pickerItem, matching: .images)
+        .fullScreenCover(isPresented: $showCamera) {
+            CameraPickerView { image in
+                showCamera = false
+                viewModel.recognizeWODContent(from: image)
+            } onCancel: {
+                showCamera = false
+            }
+            .ignoresSafeArea()
+        }
+        .alert("相机不可用", isPresented: $showCameraUnavailable) {
+            Button("知道了", role: .cancel) {}
+        } message: {
+            Text("当前设备不支持相机拍摄，请使用相册导入。")
+        }
+        .task(id: pickerItem) {
+            guard let item = pickerItem,
+                  let data = try? await item.loadTransferable(type: Data.self),
+                  let image = UIImage(data: data) else { return }
+            pickerItem = nil
+            viewModel.recognizeWODContent(from: image)
+        }
+    }
+
+    /// WOD 内容输入框内部底部的「自动识别」虚线按钮：四周留等距 padding，浮在框内底部
+    private var autoRecognizeButton: some View {
+        Button {
+            showSourceDialog = true
+        } label: {
+            HStack(spacing: 6) {
+                Image(systemName: "camera.fill")
+                    .font(.system(size: 15, weight: .semibold))
+                Text("自动识别 WOD 内容")
+                    .font(WTFont.bodyBold)
+            }
+            .foregroundStyle(Color.wtPrimary)
+            .frame(maxWidth: .infinity)
+            .frame(height: 42)
+            .background(Color.wtPrimary.opacity(0.12))
+            .overlay(
+                RoundedRectangle(cornerRadius: WTRadius.md)
+                    .stroke(Color.wtPrimary, style: StrokeStyle(lineWidth: 1.5, dash: [5, 4]))
+            )
+            .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
+            .contentShape(RoundedRectangle(cornerRadius: WTRadius.md))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("自动识别 WOD 内容")
+        .padding(.horizontal, 10)
+        .padding(.bottom, 10)
     }
 }
 
@@ -1290,42 +1271,6 @@ private struct CardPreviewStep: View {
             case .position: "slider.horizontal.3"
             }
         }
-    }
-}
-
-private struct WhiteboardActionCard: View {
-    let title: String
-    let icon: String
-    let subtitle: String
-
-    var body: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: WTRadius.lg)
-                .fill(Color.wtSurface)
-                .overlay(
-                    RoundedRectangle(cornerRadius: WTRadius.lg)
-                        .stroke(Color.wtSurface2, lineWidth: 1)
-                )
-
-            // 右下角装饰图标
-            Image(systemName: icon)
-                .font(.system(size: 64, weight: .semibold))
-                .foregroundStyle(Color.wtPrimary.opacity(0.06))
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
-                .padding(WTSpacing.sm)
-                .clipped()
-
-            VStack(spacing: WTSpacing.sm) {
-                Image(systemName: icon)
-                    .font(.system(size: 28))
-                    .foregroundStyle(Color.wtPrimary)
-                Text(title).font(WTFont.bodyBold)
-                Text(subtitle).font(WTFont.micro).foregroundStyle(Color.wtTextSecondary)
-            }
-            .padding(WTSpacing.md)
-        }
-        .frame(maxWidth: .infinity, minHeight: 96)
-        .contentShape(RoundedRectangle(cornerRadius: WTRadius.lg))
     }
 }
 
