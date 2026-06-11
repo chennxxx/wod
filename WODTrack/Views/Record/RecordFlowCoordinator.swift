@@ -925,10 +925,11 @@ private struct CardPreviewStep: View {
 
     @ViewBuilder private var panelContent: some View {
         switch selectedTab {
-        case .template: templatePanel
-        case .modules:  modulesPanel
-        case .text:     textPanel
-        case .position: positionPanel
+        case .template:   templatePanel
+        case .modules:    modulesPanel
+        case .text:       textPanel
+        case .colorTheme: colorThemePanel
+        case .position:   positionPanel
         }
     }
 
@@ -947,6 +948,7 @@ private struct CardPreviewStep: View {
         record.cardStyleId = viewModel.selectedStyleId
         record.textLayout = viewModel.textLayout
         record.enabledModules = viewModel.enabledModules
+        record.colorThemeId = viewModel.colorThemeId
         return record
     }
 
@@ -1061,6 +1063,58 @@ private struct CardPreviewStep: View {
         .disabled(!isSupported)
         .accessibilityLabel("\(module.label) 模块")
         .accessibilityAddTraits(isOn ? .isSelected : [])
+    }
+
+    // MARK: - 配色面板
+
+    private var colorThemePanel: some View {
+        let currentId = viewModel.colorThemeId
+        return ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: WTSpacing.md) {
+                ForEach(CardColorTheme.allCases) { theme in
+                    let isSelected = theme.rawValue == currentId
+                    Button {
+                        viewModel.applyColorTheme(theme)
+                    } label: {
+                        VStack(spacing: WTSpacing.xs) {
+                            RoundedRectangle(cornerRadius: WTRadius.sm)
+                                .fill(
+                                    LinearGradient(
+                                        colors: theme.swatchColors,
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+                                .frame(width: 52, height: 52)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: WTRadius.sm)
+                                        .stroke(isSelected ? Color.wtPrimary : Color.wtSurface2, lineWidth: isSelected ? 2.5 : 1)
+                                )
+                                .overlay(alignment: .topTrailing) {
+                                    if isSelected {
+                                        Image(systemName: "checkmark.circle.fill")
+                                            .font(.system(size: 15, weight: .bold))
+                                            .foregroundStyle(Color.wtPrimary, Color.wtBackground)
+                                            .offset(x: 5, y: -5)
+                                    }
+                                }
+
+                            Text(theme.label)
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundStyle(isSelected ? Color.wtPrimary : Color.wtTextPrimary)
+                                .lineLimit(1)
+                        }
+                        .frame(width: 64, height: 84, alignment: .top)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("\(theme.label) 配色")
+                    .accessibilityAddTraits(isSelected ? .isSelected : [])
+                }
+            }
+            .padding(.horizontal, WTSpacing.lg)
+            .padding(.vertical, WTSpacing.sm)
+        }
     }
 
     // MARK: - 文字面板
@@ -1276,6 +1330,8 @@ private struct CardPreviewStep: View {
         case .heroTitle: "textformat.size.larger"
         case .dataDashboard: "chart.bar.fill"
         case .retroFilm: "film.fill"
+        case .framedBottom: "rectangle.inset.filled"
+        case .framedPolaroid: "camera.fill"
         }
     }
 
@@ -1285,25 +1341,28 @@ private struct CardPreviewStep: View {
         case template
         case modules
         case text
+        case colorTheme
         case position
 
         var id: String { rawValue }
 
         var label: String {
             switch self {
-            case .template: "模板"
-            case .modules:  "模块"
-            case .text:     "文字"
-            case .position: "位置"
+            case .template:   "模板"
+            case .modules:    "模块"
+            case .text:       "文字"
+            case .colorTheme: "配色"
+            case .position:   "位置"
             }
         }
 
         var icon: String {
             switch self {
-            case .template: "square.grid.2x2.fill"
-            case .modules:  "checklist"
-            case .text:     "textformat.size"
-            case .position: "slider.horizontal.3"
+            case .template:   "square.grid.2x2.fill"
+            case .modules:    "checklist"
+            case .text:       "textformat.size"
+            case .colorTheme: "paintpalette.fill"
+            case .position:   "slider.horizontal.3"
             }
         }
     }

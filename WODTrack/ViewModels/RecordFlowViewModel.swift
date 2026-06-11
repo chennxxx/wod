@@ -48,6 +48,8 @@ final class RecordFlowViewModel {
     var scoreScaling: ScoreScaling? = .rx
     var selectedStyleId = "style_mono_overlay"
     var textLayout = TextLayout()
+    /// 配色主题（CardColorTheme.rawValue）。顶层字段，最终写入 WODRecord.colorThemeId。
+    var colorThemeId: String = CardColorTheme.dark.rawValue
     /// 卡片上已开启的内容模块（CardModule.rawValue）。固定顺序由 CardModule.allCases 决定。
     var enabledModules: [String] = CardModule.defaultEnabledRawValues
     // 进入即停留在内容表单（manual 默认），点击「自动识别」才进入 OCR loading
@@ -64,8 +66,18 @@ final class RecordFlowViewModel {
     private var ocrTask: Task<Void, Never>?
     private let ocrTimeoutSeconds: Double = 10
 
+    /// 每次进入应用随机选一个初始模板（训练日志 / 边框留白 / 数据仪表盘）。
+    /// 用静态 let：每个进程只求值一次，本次启动内所有录入流程共用同一初始模板。
+    static let launchDefaultStyleId: String = [
+        "style_framed_bottom",
+        "style_mono_overlay",
+        "style_data_dashboard"
+    ].randomElement() ?? "style_mono_overlay"
+
     init(ocrService: OCRServicing = PreviewOCRService()) {
         self.ocrService = ocrService
+        selectedStyleId = Self.launchDefaultStyleId
+        applyTemplate(CardStyleConfig.style(for: selectedStyleId))
     }
 
     /// 在「记录 WOD」页内自动识别 WOD 内容：弹出 loading，完成后仅回填内容，
@@ -230,6 +242,7 @@ final class RecordFlowViewModel {
         record.cardStyleId = selectedStyleId
         record.textLayout = textLayout
         record.enabledModules = enabledModules
+        record.colorThemeId = colorThemeId
         previewRecord = record
 
         do {
@@ -257,6 +270,7 @@ final class RecordFlowViewModel {
         previewRecord.cardStyleId = selectedStyleId
         previewRecord.textLayout = textLayout
         previewRecord.enabledModules = enabledModules
+        previewRecord.colorThemeId = colorThemeId
         if let renderedCardImage, let jpegData = renderedCardImage.jpegData(compressionQuality: 0.9) {
             // 双写：文件供本地快速读取，cardImageData 随 iCloud 同步到其他设备
             previewRecord.cardImagePath = persistImageData(jpegData, prefix: "card")
@@ -305,59 +319,67 @@ final class RecordFlowViewModel {
             textLayout.verticalPosition = .bottom
             textLayout.horizontalPosition = .trailing
             textLayout.fontSize = 16
-            textLayout.textColor = "#FFFFFF"
             textLayout.textOpacity = 1
             textLayout.fontPreset = .display
+            colorThemeId = CardColorTheme.dark.rawValue
         case "style_mono_overlay":
             textLayout.verticalPosition = .top
             textLayout.horizontalPosition = .trailing
             textLayout.fontSize = 15
-            textLayout.textColor = "#F8F8F4"
             textLayout.textOpacity = 1
             textLayout.fontPreset = .mono
-        case "style_plain_pro":
-            textLayout.verticalPosition = .top
-            textLayout.horizontalPosition = .leading
-            textLayout.fontSize = 20
-            textLayout.textColor = "#FFF4C2"
-            textLayout.textOpacity = 1
-            textLayout.fontPreset = .serif
+            colorThemeId = CardColorTheme.dark.rawValue
         case "style_minimal_white":
             textLayout.verticalPosition = .bottom
             textLayout.horizontalPosition = .leading
             textLayout.fontSize = 16
-            textLayout.textColor = "#1A1A1A"
             textLayout.textOpacity = 1
             textLayout.fontPreset = .display
+            colorThemeId = CardColorTheme.light.rawValue
         case "style_hero_title":
             textLayout.verticalPosition = .center
             textLayout.horizontalPosition = .leading
             textLayout.fontSize = 18
-            textLayout.textColor = "#FFFFFF"
             textLayout.textOpacity = 1
             textLayout.fontPreset = .display
+            colorThemeId = CardColorTheme.dark.rawValue
         case "style_data_dashboard":
             textLayout.verticalPosition = .bottom
             textLayout.horizontalPosition = .leading
             textLayout.fontSize = 14
-            textLayout.textColor = "#00FF88"
             textLayout.textOpacity = 1
             textLayout.fontPreset = .mono
+            colorThemeId = CardColorTheme.contrast.rawValue
         case "style_retro_film":
             textLayout.verticalPosition = .bottom
             textLayout.horizontalPosition = .leading
             textLayout.fontSize = 15
-            textLayout.textColor = "#F0E6C8"
             textLayout.textOpacity = 1
             textLayout.fontPreset = .mono
+            colorThemeId = CardColorTheme.film.rawValue
+        case "style_framed_bottom":
+            textLayout.verticalPosition = .bottom
+            textLayout.horizontalPosition = .leading
+            textLayout.fontSize = 16
+            textLayout.textOpacity = 1
+            textLayout.fontPreset = .display
+            colorThemeId = CardColorTheme.neon.rawValue
         default:
             break
         }
+        // 配色主题为主：用所选主题的文字色覆盖，保持读 textColor 的旧路径与主题一致
+        textLayout.textColor = CardColorTheme.theme(for: colorThemeId).textColorHex
         applySuggestedFontSizeIfNeeded()
     }
 
     func applyFontPreset(_ preset: TextLayout.FontPreset) {
         textLayout.fontPreset = preset
+    }
+
+    /// 一键换肤：配色主题决定文字色 + 卡底/留白色 + 强调色；同步镜像 textColor。
+    func applyColorTheme(_ theme: CardColorTheme) {
+        colorThemeId = theme.rawValue
+        textLayout.textColor = theme.textColorHex
     }
 
     func updateFontSize(_ size: Double) {

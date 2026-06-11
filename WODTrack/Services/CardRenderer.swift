@@ -79,6 +79,9 @@ struct CardRenderer {
             return 100
         case .retroFilm:
             return 32
+        case .framedBottom, .framedPolaroid:
+            // 文字压在照片上（非留白），可用区≈整张照片；边框只占少量高度
+            return 84
         }
     }
 
@@ -86,7 +89,7 @@ struct CardRenderer {
         switch layout {
         case .bottomCard, .bottomCardLight:
             return 32 + verticalMargin * 2
-        case .editorialTop, .rightOverlayMono, .heroTitle, .dataDashboard, .retroFilm:
+        case .editorialTop, .rightOverlayMono, .heroTitle, .dataDashboard, .retroFilm, .framedBottom, .framedPolaroid:
             return verticalMargin * 2
         }
     }
