@@ -264,7 +264,7 @@ private struct RecordStatBlock: View {
         VStack(alignment: .leading, spacing: WTSpacing.xs) {
             Text(value)
                 .font(.system(size: 22, weight: .bold))
-                .foregroundStyle(Color.wtPrimary)
+                .foregroundStyle(Color.wtTextPrimary)
             HStack(spacing: WTSpacing.xs) {
                 Image(systemName: icon)
                     .font(.system(size: 12))
@@ -294,12 +294,6 @@ private struct HistoryPreviewSection: View {
         (UIScreen.main.bounds.width - WTSpacing.lg * 2) / 3.5
     }
 
-    /// 两行之间的间距：给足上下错位 + 倾斜的溢出空间，避免重叠
-    private let rowSpacing: CGFloat = 16.8
-
-    private var topRow: [WODRecord] { Array(records.prefix(6)) }
-    private var bottomRow: [WODRecord] { Array(records.dropFirst(6).prefix(6)) }
-
     var body: some View {
         VStack(alignment: .leading, spacing: WTSpacing.md) {
             NavigationLink(destination: HistoryListView()) {
@@ -316,16 +310,11 @@ private struct HistoryPreviewSection: View {
             .buttonStyle(.plain)
 
             ScrollView(.horizontal, showsIndicators: false) {
-                // 两行各自独立排布、共享同一横向滚动；上下不强制对齐 → 更灵动
-                VStack(alignment: .leading, spacing: rowSpacing) {
-                    photoRow(topRow, indexOffset: 0)
-                    if !bottomRow.isEmpty {
-                        photoRow(bottomRow, indexOffset: topRow.count)
-                    }
-                }
-                .padding(.horizontal, WTSpacing.lg)
-                // 给倾斜 + 上下错位留出溢出空间，避免被裁切
-                .padding(.vertical, 14)
+                // 单行横滑图片流，相邻卡片轻微倾斜/错位 → 灵动
+                photoRow(records, indexOffset: 0)
+                    .padding(.horizontal, WTSpacing.lg)
+                    // 给倾斜 + 上下错位留出溢出空间，避免被裁切
+                    .padding(.vertical, 14)
             }
             // 抵消父级 lg 边距，让图片流贴近屏幕两侧、滑动时露出下一张
             .padding(.horizontal, -WTSpacing.lg)
@@ -393,12 +382,12 @@ private struct HistoryPhotoCard: View {
         .frame(width: width, height: height)
         .clipShape(RoundedRectangle(cornerRadius: WTRadius.lg))
         .overlay {
-            // 中性色细边框（绿色让位给按钮，仅勾出边界）
+            // 绿色细边框，配合外发光勾出边界
             RoundedRectangle(cornerRadius: WTRadius.lg)
-                .stroke(Color.white.opacity(0.15), lineWidth: 1)
+                .stroke(Color.wtPrimary.opacity(0.25), lineWidth: 1)
         }
-        // 中性白色微发光（y=0 均匀环绕勾边）+ 黑色投影做层次
-        .shadow(color: Color.white.opacity(0.15), radius: 5, x: 0, y: 0)
+        // 绿色外发光（y=0 均匀环绕勾边）+ 黑色投影做层次
+        .shadow(color: Color.wtPrimary.opacity(0.3), radius: 6, x: 0, y: 0)
         .shadow(color: Color.black.opacity(0.4), radius: 6, x: 0, y: 3)
     }
 
