@@ -55,7 +55,7 @@ private struct CheckinPhotosStep: View {
     var body: some View {
         RecordFlowStepPage(title: "选择训练打卡照", backAction: viewModel.goBack) {
             VStack(alignment: .leading, spacing: WTSpacing.md) {
-                Text("选 1 张今天的训练照片")
+                Text("选择一张训练打卡照，将 WOD 内容合成为分享卡片")
                     .font(WTFont.caption)
                     .foregroundStyle(Color.wtTextSecondary)
 
@@ -70,10 +70,12 @@ private struct CheckinPhotosStep: View {
                                     .foregroundStyle(Color.wtPrimary)
                                 Text("导入训练照片")
                                     .font(WTFont.bodyBold)
+                                    .foregroundStyle(Color.wtTextPrimary)
                             }
                         }
                         .contentShape(RoundedRectangle(cornerRadius: WTRadius.lg))
                 }
+                .tint(Color.wtPrimary)
 
                 if !viewModel.selectedCheckinImages.isEmpty {
                     VStack(alignment: .leading, spacing: WTSpacing.sm) {
@@ -82,32 +84,33 @@ private struct CheckinPhotosStep: View {
                             .foregroundStyle(Color.wtTextSecondary)
 
                         HStack(spacing: WTSpacing.sm) {
-                            ForEach(Array(viewModel.selectedCheckinImages.enumerated()), id: \.offset) { index, image in
-                                ZStack(alignment: .topTrailing) {
-                                    Image(uiImage: image)
-                                        .resizable()
-                                        .scaledToFill()
-                                        .frame(width: 104, height: 104)
-                                        .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
-
-                                    Text("\(index + 1)")
-                                        .font(.system(size: 11, weight: .bold))
-                                        .foregroundStyle(.black)
-                                        .padding(.horizontal, 8)
-                                        .padding(.vertical, 4)
-                                        .background(Color.wtPrimary)
-                                        .clipShape(Capsule())
-                                        .padding(8)
-                                }
+                            ForEach(Array(viewModel.selectedCheckinImages.enumerated()), id: \.offset) { _, image in
+                                Image(uiImage: image)
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: 104, height: 104)
+                                    .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
                             }
                         }
                     }
                 }
+
+                if viewModel.selectedCheckinImages.isEmpty {
+                    Text("未选择训练照片时，点击「下一步」将使用默认照片合成卡片")
+                        .font(WTFont.micro)
+                        .foregroundStyle(Color.wtTextSecondary)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding(.top, WTSpacing.xs)
+                }
             }
             .padding(WTSpacing.lg)
         } bottomBar: {
-            WTButton(title: "上一步", style: .secondary, action: viewModel.goBack)
-            WTButton(title: "下一步", isEnabled: !viewModel.selectedCheckinImages.isEmpty) {
+            WTButton(title: "下一步：生成训练卡片") {
+                // 未选照片时回退到默认图片，无需强制选择
+                if viewModel.selectedCheckinImages.isEmpty,
+                   let def = RecordFlowViewModel.defaultCheckinImage() {
+                    viewModel.selectedCheckinImages = [def]
+                }
                 viewModel.goToCardPreview()
             }
         }
@@ -115,7 +118,6 @@ private struct CheckinPhotosStep: View {
             guard let item = pickerItems.first,
                   let data = try? await item.loadTransferable(type: Data.self),
                   let image = UIImage(data: data) else {
-                viewModel.selectedCheckinImages = []
                 return
             }
             viewModel.selectedCheckinImages = [image]
@@ -857,7 +859,7 @@ private struct CardPreviewStep: View {
             .buttonStyle(.plain)
             .accessibilityLabel("返回上一步")
 
-            Text("最终预览")
+            Text("生成训练卡片")
                 .font(WTFont.title)
 
             Spacer()
@@ -865,10 +867,10 @@ private struct CardPreviewStep: View {
             Button {
                 saveRecord()
             } label: {
-                Text(isSaving ? "保存中" : "保存")
-                    .font(.system(size: 16, weight: .bold))
+                Text(isSaving ? "生成中" : "生成")
+                    .font(.system(size: 15, weight: .bold))
                     .foregroundStyle(.black)
-                    .frame(width: 76, height: 44)
+                    .frame(width: 68, height: 36)
                     .background(Color.wtPrimary)
                     .clipShape(RoundedRectangle(cornerRadius: WTRadius.sm))
             }
@@ -876,9 +878,9 @@ private struct CardPreviewStep: View {
             .disabled(isSaving)
             .opacity(isSaving ? 0.65 : 1)
         }
-        .padding(.horizontal, WTSpacing.md)
-        .padding(.top, WTSpacing.sm)
-        .padding(.bottom, WTSpacing.xs)
+        .padding(.horizontal, WTSpacing.lg)
+        .padding(.top, WTSpacing.md)
+        .padding(.bottom, WTSpacing.sm)
         .background(Color.wtBackground)
     }
 
