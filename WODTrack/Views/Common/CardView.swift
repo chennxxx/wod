@@ -101,15 +101,12 @@ struct CardView: View {
         let lineSpacing = adaptiveLineSpacing(for: textSize, defaultSpacing: 6)
 
         return anchoredPanel(verticalMargin: verticalMargin, proxy: proxy) {
-            VStack(alignment: panelTextAlignment, spacing: 10) {
-                contentLines(fontSize: textSize, lineSpacing: lineSpacing, weight: .bold, fillWidth: false)
-                dateLine(accented: false)
-            }
-            .padding(16)
-            .background(
-                RoundedRectangle(cornerRadius: 18)
-                    .fill(Color.black.opacity(0.55))
-            )
+            moduleStack(textSize: textSize, lineSpacing: lineSpacing, alignment: horizontalTextAlignment)
+                .padding(16)
+                .background(
+                    RoundedRectangle(cornerRadius: 18)
+                        .fill(Color.black.opacity(0.55))
+                )
         }
     }
 
@@ -119,15 +116,12 @@ struct CardView: View {
         let lineSpacing = adaptiveLineSpacing(for: textSize, defaultSpacing: 6)
 
         return anchoredPanel(verticalMargin: verticalMargin, proxy: proxy) {
-            VStack(alignment: panelTextAlignment, spacing: 10) {
-                contentLines(fontSize: textSize, lineSpacing: lineSpacing, weight: .bold, fillWidth: false)
-                dateLine(accented: false)
-            }
-            .padding(16)
-            .background(
-                RoundedRectangle(cornerRadius: 18)
-                    .fill(Color.white.opacity(0.9))
-            )
+            moduleStack(textSize: textSize, lineSpacing: lineSpacing, alignment: horizontalTextAlignment)
+                .padding(16)
+                .background(
+                    RoundedRectangle(cornerRadius: 18)
+                        .fill(Color.white.opacity(0.9))
+                )
         }
     }
 
@@ -137,34 +131,50 @@ struct CardView: View {
         let subSize = CGFloat(record.textLayout.fontSize) * 0.85
         let firstLine = record.wodContent.first ?? ""
         let remainingLines = Array(record.wodContent.dropFirst())
+        let modules = activeModules
 
-        return VStack(alignment: .leading, spacing: 12) {
-            Text(firstLine.uppercased())
-                .font(font(for: heroSize, weight: .black))
-                .foregroundStyle(textColor)
-                .shadow(color: .black.opacity(0.75), radius: 8, x: 0, y: 3)
-                .lineLimit(2)
-                .minimumScaleFactor(0.45)
+        return VStack(alignment: horizontalTextAlignment, spacing: 12) {
+            if modules.contains(.wodContent) {
+                Text(firstLine.uppercased())
+                    .font(font(for: heroSize, weight: .black))
+                    .foregroundStyle(textColor)
+                    .multilineTextAlignment(textAlignmentValue)
+                    .shadow(color: .black.opacity(0.75), radius: 8, x: 0, y: 3)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.45)
 
-            if !remainingLines.isEmpty {
-                VStack(alignment: .leading, spacing: 4) {
-                    ForEach(remainingLines, id: \.self) { line in
-                        Text(line)
-                            .font(font(for: subSize, weight: .medium))
-                            .foregroundStyle(textColor.opacity(0.8))
-                            .shadow(color: .black.opacity(0.6), radius: 3, x: 0, y: 1)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.75)
+                if !remainingLines.isEmpty {
+                    VStack(alignment: horizontalTextAlignment, spacing: 4) {
+                        ForEach(remainingLines, id: \.self) { line in
+                            Text(line)
+                                .font(font(for: subSize, weight: .medium))
+                                .foregroundStyle(textColor.opacity(0.8))
+                                .multilineTextAlignment(textAlignmentValue)
+                                .shadow(color: .black.opacity(0.6), radius: 3, x: 0, y: 1)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.75)
+                        }
                     }
                 }
             }
 
-            dateLine(accented: false)
-                .foregroundStyle(textColor.opacity(0.65))
+            if modules.contains(.score) {
+                scoreBlockView(size: CGFloat(record.textLayout.fontSize), alignment: horizontalTextAlignment)
+            }
+            if modules.contains(.difficulty) {
+                difficultyBlockView(size: CGFloat(record.textLayout.fontSize), alignment: horizontalTextAlignment)
+            }
+            if modules.contains(.note) {
+                noteBlockView(size: CGFloat(record.textLayout.fontSize))
+            }
+            if modules.contains(.date) {
+                dateLine(accented: false)
+                    .foregroundStyle(textColor.opacity(0.65))
+            }
         }
         .padding(.horizontal, 24)
         .padding(.vertical, verticalMargin)
-        .frame(width: proxy.size.width, height: proxy.size.height, alignment: leadingCardAlignment)
+        .frame(width: proxy.size.width, height: proxy.size.height, alignment: cardAlignment)
     }
 
     private func dataDashboardLayout(proxy: GeometryProxy) -> some View {
@@ -173,22 +183,16 @@ struct CardView: View {
         let lineSpacing = adaptiveLineSpacing(for: textSize, defaultSpacing: 6)
 
         return anchoredPanel(verticalMargin: verticalMargin, proxy: proxy) {
-            VStack(alignment: panelTextAlignment, spacing: 10) {
-                Text(record.wodDate.formatted(.dateTime.month(.abbreviated).day().year()))
-                    .font(.system(size: 11, weight: .bold, design: .monospaced))
-                    .foregroundStyle(textColor.opacity(0.55))
-
-                contentLines(fontSize: textSize, lineSpacing: lineSpacing, weight: .semibold, fillWidth: false)
-            }
-            .padding(18)
-            .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(Color.black.opacity(0.72))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(textColor.opacity(0.22), lineWidth: 1)
-                    )
-            )
+            moduleStack(textSize: textSize, lineSpacing: lineSpacing, alignment: horizontalTextAlignment)
+                .padding(18)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color.black.opacity(0.72))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(textColor.opacity(0.22), lineWidth: 1)
+                        )
+                )
         }
     }
 
@@ -201,18 +205,29 @@ struct CardView: View {
             Rectangle()
                 .strokeBorder(Color(red: 0.94, green: 0.9, blue: 0.78).opacity(0.72), lineWidth: 14)
 
-            VStack(alignment: .leading, spacing: 8) {
-                contentLines(fontSize: textSize, lineSpacing: lineSpacing, weight: .regular, fillWidth: false)
+            VStack(alignment: horizontalTextAlignment, spacing: 8) {
+                ForEach(activeModules.filter { $0 != .date }) { module in
+                    switch module {
+                    case .score:
+                        scoreBlockView(size: textSize, alignment: horizontalTextAlignment)
+                    case .wodContent:
+                        contentLines(fontSize: textSize, lineSpacing: lineSpacing, weight: .regular, fillWidth: false)
+                    default:
+                        EmptyView()
+                    }
+                }
 
-                Text(record.wodDate.formatted(
-                    .dateTime.year(.defaultDigits).month(.twoDigits).day(.twoDigits)
-                ))
-                .font(.system(size: 13, weight: .bold, design: .monospaced))
-                .foregroundStyle(Color(red: 1.0, green: 0.55, blue: 0.0).opacity(0.9))
+                if activeModules.contains(.date) {
+                    Text(record.wodDate.formatted(
+                        .dateTime.year(.defaultDigits).month(.twoDigits).day(.twoDigits)
+                    ))
+                    .font(.system(size: 13, weight: .bold, design: .monospaced))
+                    .foregroundStyle(Color(red: 1.0, green: 0.55, blue: 0.0).opacity(0.9))
+                }
             }
             .padding(.horizontal, 28)
             .padding(.bottom, verticalMargin + 16)
-            .frame(width: proxy.size.width, height: proxy.size.height, alignment: .bottomLeading)
+            .frame(width: proxy.size.width, height: proxy.size.height, alignment: Alignment(horizontal: isTrailing ? .trailing : .leading, vertical: .bottom))
         }
         .frame(width: proxy.size.width, height: proxy.size.height)
     }
@@ -222,14 +237,11 @@ struct CardView: View {
         let textSize = CGFloat(record.textLayout.fontSize)
         let lineSpacing = adaptiveLineSpacing(for: textSize, defaultSpacing: 6)
 
-        return VStack(alignment: .leading, spacing: 14) {
-            dateLine(accented: true)
-            contentLines(fontSize: textSize, lineSpacing: lineSpacing, weight: .bold)
-        }
-        .padding(.horizontal, 26)
-        .padding(.vertical, verticalMargin)
-        .frame(width: proxy.size.width - 52, alignment: .leading)
-        .frame(width: proxy.size.width, height: proxy.size.height, alignment: leadingCardAlignment)
+        return moduleStack(textSize: textSize, lineSpacing: lineSpacing, alignment: horizontalTextAlignment, dateAccented: true)
+            .padding(.horizontal, 26)
+            .padding(.vertical, verticalMargin)
+            .frame(width: proxy.size.width - 52, alignment: Alignment(horizontal: horizontalTextAlignment, vertical: .center))
+            .frame(width: proxy.size.width, height: proxy.size.height, alignment: cardAlignment)
     }
 
     private func rightOverlayMonoLayout(proxy: GeometryProxy) -> some View {
@@ -237,29 +249,40 @@ struct CardView: View {
         let textSize = CGFloat(record.textLayout.fontSize)
         let lineSpacing = adaptiveLineSpacing(for: textSize, defaultSpacing: 8)
 
-        return VStack(alignment: .trailing, spacing: 14) {
-            Text(record.wodDate.formatted(.dateTime.month(.abbreviated).day().year()))
-                .font(font(for: min(16, textSize + 2), weight: .bold))
-                .textCase(.uppercase)
-                .foregroundStyle(textColor)
-                .shadow(color: .black.opacity(0.85), radius: 5, x: 0, y: 2)
-
-            VStack(alignment: .trailing, spacing: lineSpacing) {
-                ForEach(Array(record.wodContent.enumerated()), id: \.offset) { index, line in
-                    Text(formattedMonoLine(line, index: index))
-                        .font(font(for: textSize, weight: index == 0 ? .semibold : .regular))
-                        .multilineTextAlignment(.trailing)
-                        .foregroundStyle(textColor.opacity(record.textLayout.textOpacity))
-                        .shadow(color: .black.opacity(0.9), radius: 5, x: 0, y: 2)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.75)
+        return VStack(alignment: horizontalTextAlignment, spacing: 14) {
+            ForEach(activeModules) { module in
+                switch module {
+                case .date:
+                    Text(record.wodDate.formatted(.dateTime.month(.abbreviated).day().year()))
+                        .font(font(for: min(16, textSize + 2), weight: .bold))
+                        .textCase(.uppercase)
+                        .foregroundStyle(textColor)
+                        .shadow(color: .black.opacity(0.85), radius: 5, x: 0, y: 2)
+                case .wodContent:
+                    VStack(alignment: horizontalTextAlignment, spacing: lineSpacing) {
+                        ForEach(Array(record.wodContent.enumerated()), id: \.offset) { index, line in
+                            Text(formattedMonoLine(line, index: index))
+                                .font(font(for: textSize, weight: index == 0 ? .semibold : .regular))
+                                .multilineTextAlignment(textAlignmentValue)
+                                .foregroundStyle(textColor.opacity(record.textLayout.textOpacity))
+                                .shadow(color: .black.opacity(0.9), radius: 5, x: 0, y: 2)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.75)
+                        }
+                    }
+                case .score:
+                    scoreBlockView(size: textSize, alignment: horizontalTextAlignment)
+                case .difficulty:
+                    difficultyBlockView(size: textSize, alignment: horizontalTextAlignment)
+                case .note:
+                    noteBlockView(size: textSize)
                 }
             }
         }
-        .padding(.trailing, 24)
+        .padding(isTrailing ? .trailing : .leading, 24)
         .padding(.vertical, verticalMargin)
-        .frame(width: proxy.size.width * 0.72, alignment: .trailing)
-        .frame(width: proxy.size.width, height: proxy.size.height, alignment: trailingCardAlignment)
+        .frame(width: proxy.size.width * 0.72, alignment: Alignment(horizontal: horizontalTextAlignment, vertical: .center))
+        .frame(width: proxy.size.width, height: proxy.size.height, alignment: cardAlignment)
     }
 
     // MARK: - Shared helpers
@@ -270,15 +293,7 @@ struct CardView: View {
         weight: Font.Weight,
         fillWidth: Bool = true
     ) -> some View {
-        let isTrailing: Bool
-        switch style.layout {
-        case .rightOverlayMono:
-            isTrailing = true
-        case .bottomCard, .bottomCardLight, .dataDashboard:
-            isTrailing = record.textLayout.horizontalPosition == .trailing
-        default:
-            isTrailing = false
-        }
+        let isTrailing = self.isTrailing
         return VStack(alignment: isTrailing ? .trailing : .leading, spacing: lineSpacing) {
             ForEach(record.wodContent, id: \.self) { line in
                 Text(line)
@@ -298,6 +313,136 @@ struct CardView: View {
         Text(record.wodDate.formatted(.dateTime.year().month().day()))
             .font(accented ? .system(size: 14, weight: .bold, design: .monospaced) : WTFont.caption)
             .foregroundStyle(accented ? Color.wtPrimary : Color.wtTextSecondary)
+    }
+
+    // MARK: - 内容模块（成绩 / 难度 / 完成时间）
+
+    /// 当前实际渲染的模块：已开启 ∩ 模板支持 ∩ 有数据，按 CardModule.allCases 固定顺序。
+    private var activeModules: [CardModule] {
+        CardModule.allCases.filter { module in
+            record.enabledModules.contains(module.rawValue)
+                && style.supportedModules.contains(module)
+                && hasData(module)
+        }
+    }
+
+    private func hasData(_ module: CardModule) -> Bool {
+        switch module {
+        case .date: return true
+        case .score: return !(record.scoreValue ?? "").isEmpty
+        case .difficulty: return record.difficultyRating != nil
+        case .note: return !(record.note ?? "").isEmpty
+        case .wodContent: return !record.wodContent.isEmpty
+        }
+    }
+
+    /// 按 activeModules 固定顺序竖排各模块块；空则兜底渲染日期，避免空卡。
+    @ViewBuilder private func moduleStack(
+        textSize: CGFloat,
+        lineSpacing: CGFloat,
+        alignment: HorizontalAlignment,
+        dateAccented: Bool = false
+    ) -> some View {
+        let modules = activeModules
+        VStack(alignment: alignment, spacing: 9) {
+            if modules.isEmpty {
+                dateLine(accented: dateAccented)
+            } else {
+                ForEach(modules) { module in
+                    moduleBlock(module, textSize: textSize, lineSpacing: lineSpacing, alignment: alignment, dateAccented: dateAccented)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder private func moduleBlock(
+        _ module: CardModule,
+        textSize: CGFloat,
+        lineSpacing: CGFloat,
+        alignment: HorizontalAlignment,
+        dateAccented: Bool = false
+    ) -> some View {
+        switch module {
+        case .date:
+            dateLine(accented: dateAccented)
+        case .score:
+            scoreBlockView(size: textSize, alignment: alignment)
+        case .difficulty:
+            difficultyBlockView(size: textSize, alignment: alignment)
+        case .note:
+            noteBlockView(size: textSize)
+        case .wodContent:
+            contentLines(fontSize: textSize, lineSpacing: lineSpacing, weight: .bold, fillWidth: false)
+        }
+    }
+
+    @ViewBuilder private func scoreBlockView(size: CGFloat, alignment: HorizontalAlignment) -> some View {
+        if let value = record.scoreValue, !value.isEmpty {
+            VStack(alignment: alignment, spacing: 2) {
+                HStack(spacing: 6) {
+                    if let typeName = scoreTypeLabel {
+                        Text(typeName.uppercased())
+                            .font(.system(size: max(9, size * 0.5), weight: .bold, design: .monospaced))
+                            .foregroundStyle(Color.wtPrimary)
+                    }
+                    if let scaling = scoreScalingLabel {
+                        Text(scaling)
+                            .font(.system(size: max(8, size * 0.42), weight: .heavy))
+                            .padding(.horizontal, 5)
+                            .padding(.vertical, 1)
+                            .background(Color.wtPrimary.opacity(0.9))
+                            .foregroundStyle(.black)
+                            .clipShape(Capsule())
+                    }
+                }
+                Text(value)
+                    .font(.system(size: size * 1.55, weight: .black, design: .monospaced))
+                    .foregroundStyle(textColor)
+                    .shadow(color: .black.opacity(0.4), radius: 3, x: 0, y: 1)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
+            }
+        }
+    }
+
+    @ViewBuilder private func difficultyBlockView(size: CGFloat, alignment: HorizontalAlignment) -> some View {
+        if let rating = record.difficultyRating {
+            let level = DifficultyLevel.from(stored: rating)
+            HStack(spacing: 6) {
+                HStack(spacing: 3) {
+                    ForEach(1 ... 4, id: \.self) { index in
+                        RoundedRectangle(cornerRadius: 1)
+                            .fill(index <= level.rawValue ? Color.wtPrimary : textColor.opacity(0.25))
+                            .frame(width: max(8, size * 0.5), height: max(4, size * 0.28))
+                    }
+                }
+                Text(level.label)
+                    .font(font(for: size * 0.78, weight: .semibold))
+                    .foregroundStyle(textColor.opacity(0.9))
+            }
+        }
+    }
+
+    @ViewBuilder private func noteBlockView(size: CGFloat) -> some View {
+        if let note = record.note, !note.isEmpty {
+            Text(note)
+                .font(font(for: size * 0.82, weight: .regular))
+                .italic()
+                .foregroundStyle(textColor.opacity(0.82))
+                .multilineTextAlignment(textAlignmentValue)
+                .lineLimit(2)
+                .minimumScaleFactor(0.7)
+        }
+    }
+
+    private var scoreTypeLabel: String? {
+        guard let raw = record.scoreType, let type = WODType(rawValue: raw), type != .other else { return nil }
+        return type.displayName
+    }
+
+    private var scoreScalingLabel: String? {
+        guard let raw = record.scoreScaling else { return nil }
+        return ScoreScaling(rawValue: raw)?.label
     }
 
     /// HStack + Spacer 显式锚定面板到选定的左/右侧，保证两侧 padding 完全对称。
@@ -320,14 +465,12 @@ struct CardView: View {
         .frame(width: proxy.size.width, height: proxy.size.height, alignment: cardVerticalAlignment)
     }
 
-    private var panelTextAlignment: HorizontalAlignment {
-        switch style.layout {
-        case .bottomCard, .bottomCardLight, .dataDashboard:
-            return record.textLayout.horizontalPosition == .trailing ? .trailing : .leading
-        default:
-            return .leading
-        }
-    }
+    /// 左右位置：所有模板通用，跟随 textLayout.horizontalPosition。
+    private var isTrailing: Bool { record.textLayout.horizontalPosition == .trailing }
+
+    private var horizontalTextAlignment: HorizontalAlignment { isTrailing ? .trailing : .leading }
+
+    private var textAlignmentValue: TextAlignment { isTrailing ? .trailing : .leading }
 
     private var textColor: Color {
         Color(hex: record.textLayout.textColor)
@@ -341,19 +484,13 @@ struct CardView: View {
         }
     }
 
-    private var trailingCardAlignment: Alignment {
+    /// 垂直 + 水平 合成的整卡锚点（非面板型布局用）。
+    private var cardAlignment: Alignment {
+        let horizontal: HorizontalAlignment = isTrailing ? .trailing : .leading
         switch record.textLayout.verticalPosition {
-        case .top: .topTrailing
-        case .center: .trailing
-        case .bottom: .bottomTrailing
-        }
-    }
-
-    private var leadingCardAlignment: Alignment {
-        switch record.textLayout.verticalPosition {
-        case .top: .topLeading
-        case .center: .leading
-        case .bottom: .bottomLeading
+        case .top: return Alignment(horizontal: horizontal, vertical: .top)
+        case .center: return Alignment(horizontal: horizontal, vertical: .center)
+        case .bottom: return Alignment(horizontal: horizontal, vertical: .bottom)
         }
     }
 

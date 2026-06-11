@@ -48,6 +48,8 @@ final class RecordFlowViewModel {
     var scoreScaling: ScoreScaling? = .rx
     var selectedStyleId = "style_mono_overlay"
     var textLayout = TextLayout()
+    /// 卡片上已开启的内容模块（CardModule.rawValue）。固定顺序由 CardModule.allCases 决定。
+    var enabledModules: [String] = CardModule.defaultEnabledRawValues
     // 进入即停留在内容表单（manual 默认），点击「自动识别」才进入 OCR loading
     var ocrState: OCRState = .success(OCRResult(wodContent: [], confidence: 1))
     var previewRecord = WODRecord()
@@ -78,9 +80,17 @@ final class RecordFlowViewModel {
         performOCR(image: image)
     }
 
-    /// 内置的默认训练打卡照（用户未选照片时可直接合成分享卡）。
-    static func defaultCheckinImage() -> UIImage? {
-        UIImage(named: "DefaultCheckinPhoto")
+    /// 内置默认训练打卡照资源名（横屏 + 竖屏各一张，未选照片时随机轮换）。
+    static let defaultCheckinAssetNames = ["DefaultCheckinPhoto", "DefaultCheckinPhotoPortrait"]
+
+    /// 全部可用的内置默认照（缺失的资源自动跳过，至少返回已存在的那张）。
+    static func defaultCheckinImages() -> [UIImage] {
+        defaultCheckinAssetNames.compactMap { UIImage(named: $0) }
+    }
+
+    /// 随机取一张内置默认照（用户未选照片时用）。
+    static func randomDefaultCheckinImage() -> UIImage? {
+        defaultCheckinImages().randomElement()
     }
 
     /// 取消正在进行的识别，回到内容表单（保留已输入内容）。
@@ -219,6 +229,7 @@ final class RecordFlowViewModel {
         record.note = note.isEmpty ? nil : note
         record.cardStyleId = selectedStyleId
         record.textLayout = textLayout
+        record.enabledModules = enabledModules
         previewRecord = record
 
         do {
@@ -245,6 +256,7 @@ final class RecordFlowViewModel {
         previewRecord.note = note.isEmpty ? nil : note
         previewRecord.cardStyleId = selectedStyleId
         previewRecord.textLayout = textLayout
+        previewRecord.enabledModules = enabledModules
         if let renderedCardImage, let jpegData = renderedCardImage.jpegData(compressionQuality: 0.9) {
             // 双写：文件供本地快速读取，cardImageData 随 iCloud 同步到其他设备
             previewRecord.cardImagePath = persistImageData(jpegData, prefix: "card")
@@ -268,6 +280,23 @@ final class RecordFlowViewModel {
         return true
     }
 
+    /// 模块是否当前已开启（仅看用户开关，不含模板支持判断）。
+    func isModuleEnabled(_ module: CardModule) -> Bool {
+        enabledModules.contains(module.rawValue)
+    }
+
+    /// 开关某模块；模板不支持的模块由 UI 禁用，此处仅兜底不允许开启不支持项。
+    func toggleModule(_ module: CardModule) {
+        if let index = enabledModules.firstIndex(of: module.rawValue) {
+            enabledModules.remove(at: index)
+        } else {
+            guard CardStyleConfig.style(for: selectedStyleId).supportedModules.contains(module) else { return }
+            enabledModules.append(module.rawValue)
+        }
+        // 模块增减改变了卡面内容高度，重新自适应字号（用户手动调过则尊重其选择）
+        applySuggestedFontSizeIfNeeded()
+    }
+
     func applyTemplate(_ style: CardStyle) {
         selectedStyleId = style.id
         hasUserAdjustedFontSize = false
@@ -281,12 +310,14 @@ final class RecordFlowViewModel {
             textLayout.fontPreset = .display
         case "style_mono_overlay":
             textLayout.verticalPosition = .top
+            textLayout.horizontalPosition = .trailing
             textLayout.fontSize = 15
             textLayout.textColor = "#F8F8F4"
             textLayout.textOpacity = 1
             textLayout.fontPreset = .mono
         case "style_plain_pro":
             textLayout.verticalPosition = .top
+            textLayout.horizontalPosition = .leading
             textLayout.fontSize = 20
             textLayout.textColor = "#FFF4C2"
             textLayout.textOpacity = 1
@@ -300,6 +331,7 @@ final class RecordFlowViewModel {
             textLayout.fontPreset = .display
         case "style_hero_title":
             textLayout.verticalPosition = .center
+            textLayout.horizontalPosition = .leading
             textLayout.fontSize = 18
             textLayout.textColor = "#FFFFFF"
             textLayout.textOpacity = 1
@@ -313,6 +345,7 @@ final class RecordFlowViewModel {
             textLayout.fontPreset = .mono
         case "style_retro_film":
             textLayout.verticalPosition = .bottom
+            textLayout.horizontalPosition = .leading
             textLayout.fontSize = 15
             textLayout.textColor = "#F0E6C8"
             textLayout.textOpacity = 1
@@ -345,8 +378,22 @@ final class RecordFlowViewModel {
             for: wodLines,
             images: selectedCheckinImages,
             style: CardStyleConfig.style(for: selectedStyleId),
-            preferredSize: textLayout.fontSize
+            preferredSize: textLayout.fontSize,
+            extraLineEquivalents: moduleExtraLineEquivalents
         )
+    }
+
+    /// 已开启且有数据的「成绩 / 难度 / 完成时间」模块折算成的等效文本行数（日期已计入各布局 chrome）。
+    private var moduleExtraLineEquivalents: Double {
+        let supported = CardStyleConfig.style(for: selectedStyleId).supportedModules
+        func on(_ m: CardModule, hasData: Bool) -> Bool {
+            hasData && supported.contains(m) && enabledModules.contains(m.rawValue)
+        }
+        var total = 0.0
+        if on(.score, hasData: formattedScore != nil) { total += 2.4 }
+        if on(.difficulty, hasData: true) { total += 1.2 }
+        if on(.note, hasData: !note.isEmpty) { total += 1.4 }
+        return total
     }
 
     private func localizedOCRError(_ error: Error, isNetworkError: Bool) -> String {

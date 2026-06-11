@@ -26,6 +26,8 @@ final class WODRecord {
     var scoreScaling: String?
     /// 自由备注
     var note: String?
+    /// 卡片上已开启的内容模块（CardModule.rawValue 集合）。非可选，CloudKit 增量字段。
+    var enabledModules: [String] = ["date", "score", "difficulty", "wodContent"]
     /// 合成卡片图字节，随 iCloud 同步；本地读取仍优先走 cardImagePath 文件
     @Attribute(.externalStorage) var cardImageData: Data?
 
@@ -47,6 +49,7 @@ final class WODRecord {
         self.scoreValue = nil
         self.scoreScaling = nil
         self.note = nil
+        self.enabledModules = ["date", "score", "difficulty", "wodContent"]
     }
 }
 

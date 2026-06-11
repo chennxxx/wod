@@ -1,5 +1,41 @@
 import SwiftUI
 
+/// 卡片内容模块。卡片 = 背景（照片）+ 若干可开关的内容块。
+/// `allCases` 的顺序即卡面固定渲染顺序（对齐线框 ACT3：日期 → 成绩 → 难度 → WOD 内容 → 完成时间）。
+enum CardModule: String, CaseIterable, Identifiable {
+    case date
+    case score
+    case difficulty
+    case wodContent
+    case note
+
+    var id: String { rawValue }
+
+    var label: String {
+        switch self {
+        case .date: "日期"
+        case .score: "成绩"
+        case .difficulty: "难度"
+        case .wodContent: "WOD 内容"
+        case .note: "备注"
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .date: "calendar"
+        case .score: "trophy.fill"
+        case .difficulty: "flame.fill"
+        case .wodContent: "list.bullet"
+        case .note: "text.quote"
+        }
+    }
+
+    /// 默认开启的模块（线框「默认开 4 个」，完成时间默认关）。
+    static let defaultEnabled: [CardModule] = [.date, .score, .difficulty, .wodContent]
+    static let defaultEnabledRawValues: [String] = defaultEnabled.map(\.rawValue)
+}
+
 struct CardStyle: Identifiable, Hashable {
     let id: String
     let name: String
@@ -7,6 +43,8 @@ struct CardStyle: Identifiable, Hashable {
     let overlay: OverlayStyle
     let layout: LayoutStyle
     let isPro: Bool
+    /// 该模板有版位的模块；其余模块在「模块」tab 中灰掉锁住、画布也不渲染。
+    let supportedModules: Set<CardModule>
 
     enum OverlayStyle: String, Hashable {
         case plain
@@ -28,6 +66,9 @@ struct CardStyle: Identifiable, Hashable {
 }
 
 enum CardStyleConfig {
+    /// 面板型布局（bottomCard / bottomCardLight / dataDashboard）有完整版位，支持全部 5 个模块。
+    private static let allModules: Set<CardModule> = Set(CardModule.allCases)
+
     static let freeStyles: [CardStyle] = [
         .init(
             id: "style_basic_dark",
@@ -35,7 +76,8 @@ enum CardStyleConfig {
             summary: "底部信息卡，适合内容多的 WOD",
             overlay: .dark,
             layout: .bottomCard,
-            isPro: false
+            isPro: false,
+            supportedModules: allModules
         ),
         .init(
             id: "style_mono_overlay",
@@ -43,7 +85,8 @@ enum CardStyleConfig {
             summary: "直接压字到图片上，参考你发的样式",
             overlay: .soft,
             layout: .rightOverlayMono,
-            isPro: false
+            isPro: false,
+            supportedModules: allModules
         ),
         .init(
             id: "style_minimal_white",
@@ -51,7 +94,8 @@ enum CardStyleConfig {
             summary: "浅色信息卡，适合日间分享",
             overlay: .light,
             layout: .bottomCardLight,
-            isPro: false
+            isPro: false,
+            supportedModules: allModules
         ),
         .init(
             id: "style_hero_title",
@@ -59,7 +103,8 @@ enum CardStyleConfig {
             summary: "超大标题字体，视觉冲击力强",
             overlay: .dark,
             layout: .heroTitle,
-            isPro: false
+            isPro: false,
+            supportedModules: allModules
         ),
         .init(
             id: "style_data_dashboard",
@@ -67,7 +112,8 @@ enum CardStyleConfig {
             summary: "强调训练数字，数据卡片风格",
             overlay: .dark,
             layout: .dataDashboard,
-            isPro: false
+            isPro: false,
+            supportedModules: allModules
         ),
         .init(
             id: "style_retro_film",
@@ -75,7 +121,8 @@ enum CardStyleConfig {
             summary: "胶片颗粒感，带日期戳，怀旧拍摄风",
             overlay: .grain,
             layout: .retroFilm,
-            isPro: false
+            isPro: false,
+            supportedModules: [.date, .score, .wodContent]
         )
     ]
 
@@ -86,7 +133,8 @@ enum CardStyleConfig {
             summary: "顶部排版，适合更强的海报感",
             overlay: .plain,
             layout: .editorialTop,
-            isPro: true
+            isPro: true,
+            supportedModules: allModules
         )
     ]
 
