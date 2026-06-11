@@ -78,6 +78,11 @@ final class RecordFlowViewModel {
         performOCR(image: image)
     }
 
+    /// 内置的默认训练打卡照（用户未选照片时可直接合成分享卡）。
+    static func defaultCheckinImage() -> UIImage? {
+        UIImage(named: "DefaultCheckinPhoto")
+    }
+
     /// 取消正在进行的识别，回到内容表单（保留已输入内容）。
     func cancelRecognition() {
         ocrTask?.cancel()
