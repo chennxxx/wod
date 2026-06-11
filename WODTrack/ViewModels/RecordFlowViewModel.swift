@@ -11,7 +11,6 @@ final class RecordFlowViewModel {
     }
 
     enum RecordStep: Hashable {
-        case whiteboard
         case checkinPhotos
         case ocrResult
         case scoreInput
@@ -28,7 +27,7 @@ final class RecordFlowViewModel {
         case failure(String)
     }
 
-    var step: RecordStep = .whiteboard
+    var step: RecordStep = .ocrResult
     var selectedWhiteboardImage: UIImage?
     var selectedCheckinImages: [UIImage] = []
     var wodContentText = ""
@@ -49,11 +48,12 @@ final class RecordFlowViewModel {
     var scoreScaling: ScoreScaling? = .rx
     var selectedStyleId = "style_mono_overlay"
     var textLayout = TextLayout()
-    var ocrState: OCRState = .idle
+    // 进入即停留在内容表单（manual 默认），点击「自动识别」才进入 OCR loading
+    var ocrState: OCRState = .success(OCRResult(wodContent: [], confidence: 1))
     var previewRecord = WODRecord()
     var renderedCardImage: UIImage?
     var isRendering = false
-    var entryMode: EntryMode = .photoOCR
+    var entryMode: EntryMode = .manual
 
     private let ocrService: OCRServicing
     private var hasUserAdjustedFontSize = false
@@ -66,33 +66,23 @@ final class RecordFlowViewModel {
         self.ocrService = ocrService
     }
 
-    func startFlow(with image: UIImage) {
+    /// 在「记录 WOD」页内自动识别 WOD 内容：弹出 loading，完成后仅回填内容，
+    /// 保留已填的日期 / 成绩 / 强度 / 备注等结构化字段。
+    func recognizeWODContent(from image: UIImage) {
         entryMode = .photoOCR
         selectedWhiteboardImage = image
         networkRetryCount = 0
-        wodContentText = ""          // 清空上次 OCR 残留内容
-        resetRecordFields()
+        wodContentText = ""          // 清空上次识别残留内容
         ocrState = .processing
         step = .ocrResult
         performOCR(image: image)
     }
 
-    /// 重置本次录入的结构化字段（日期 / 类型 / 成绩 / 强度 / 备注）
-    private func resetRecordFields() {
-        wodDate = .now
-        difficultyLevel = .moderate
-        completionMinutes = nil
-        note = ""
-        scoreType = .forTime
-        scoreMinutes = ""
-        scoreSeconds = ""
-        amrapReps = ""
-        emomRounds = ""
-        emomRepsDelta = ""
-        emomSign = true
-        maxLoadText = ""
-        maxLoadIsKg = true
-        scoreScaling = .rx
+    /// 取消正在进行的识别，回到内容表单（保留已输入内容）。
+    func cancelRecognition() {
+        ocrTask?.cancel()
+        ocrTask = nil
+        ocrState = .success(OCRResult(wodContent: wodLines, confidence: 1))
     }
 
     /// 按当前类型组装格式化成绩串；信息不足时返回 nil
@@ -168,15 +158,6 @@ final class RecordFlowViewModel {
         ocrTask = task
     }
 
-    func startManualEntry() {
-        entryMode = .manual
-        selectedWhiteboardImage = nil
-        wodContentText = ""
-        resetRecordFields()
-        ocrState = .success(OCRResult(wodContent: [], confidence: 1))
-        step = .ocrResult
-    }
-
     func goToOCRReview() {
         step = .ocrResult
     }
@@ -204,12 +185,9 @@ final class RecordFlowViewModel {
 
     func goBack() {
         switch step {
-        case .whiteboard:
-            break
         case .ocrResult:
-            ocrTask?.cancel()
-            ocrTask = nil
-            step = .whiteboard
+            // 内容页是第一步，返回由界面层 dismiss 处理；此处无上一步
+            break
         case .checkinPhotos, .scoreInput:
             step = .ocrResult
         case .cardEditor, .cardPreview:
@@ -368,17 +346,10 @@ final class RecordFlowViewModel {
 
     private func localizedOCRError(_ error: Error, isNetworkError: Bool) -> String {
         if isNetworkError {
-            if let urlError = error as? URLError {
-                switch urlError.code {
-                case .notConnectedToInternet, .networkConnectionLost:
-                    return "网络未连接，请检查网络后重试"
-                case .timedOut:
-                    return "请求超时，请稍后重试"
-                default:
-                    return "网络异常，请检查网络连接后重试"
-                }
+            if let urlError = error as? URLError, urlError.code == .timedOut {
+                return "请求超时，请检查网络后重试"
             }
-            return "网络异常，请检查网络连接后重试"
+            return "请检查网络后重试"
         }
         switch error {
         case OCRError.invalidImage:
