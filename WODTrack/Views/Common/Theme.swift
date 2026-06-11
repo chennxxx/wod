@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 extension Color {
     static let wtPrimary = Color(hex: "#5BE88F")
@@ -253,5 +254,43 @@ extension Color {
 
 extension Date: @retroactive Identifiable {
     public var id: TimeInterval { timeIntervalSince1970 }
+}
+
+// MARK: - 点击空白处收起键盘（全局安装一次，不拦截按钮 / 滚动）
+
+/// 收起键盘的动作目标 + 手势代理（单例，需被静态持有）。
+final class KeyboardDismisser: NSObject, UIGestureRecognizerDelegate {
+    static let shared = KeyboardDismisser()
+
+    @objc func dismiss() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    }
+
+    // 与滚动 / 其它手势同时识别，避免吞掉滑动
+    func gestureRecognizer(
+        _ gestureRecognizer: UIGestureRecognizer,
+        shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer
+    ) -> Bool { true }
+}
+
+extension UIApplication {
+    /// 安装一次全局点击手势：点任意空白处收起键盘。
+    /// `cancelsTouchesInView = false` 保证按钮 / 输入框 / 列表点击与滚动一切照常。
+    func installKeyboardDismissTapIfNeeded() {
+        let keyWindow = connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .flatMap { $0.windows }
+            .first { $0.isKeyWindow }
+        guard let window = keyWindow else { return }
+
+        let recognizerName = "wt.keyboardDismissTap"
+        if window.gestureRecognizers?.contains(where: { $0.name == recognizerName }) == true { return }
+
+        let tap = UITapGestureRecognizer(target: KeyboardDismisser.shared, action: #selector(KeyboardDismisser.dismiss))
+        tap.name = recognizerName
+        tap.cancelsTouchesInView = false
+        tap.delegate = KeyboardDismisser.shared
+        window.addGestureRecognizer(tap)
+    }
 }
 

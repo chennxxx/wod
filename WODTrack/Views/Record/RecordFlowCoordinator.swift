@@ -106,9 +106,9 @@ private struct CheckinPhotosStep: View {
             .padding(WTSpacing.lg)
         } bottomBar: {
             WTButton(title: "下一步：生成训练卡片") {
-                // 未选照片时回退到默认图片，无需强制选择
+                // 未选照片时随机用一张内置默认照（横屏 / 竖屏轮换），无需强制选择
                 if viewModel.selectedCheckinImages.isEmpty,
-                   let def = RecordFlowViewModel.defaultCheckinImage() {
+                   let def = RecordFlowViewModel.randomDefaultCheckinImage() {
                     viewModel.selectedCheckinImages = [def]
                 }
                 viewModel.goToCardPreview()
@@ -399,6 +399,7 @@ private struct RecordFlowStepPage<Content: View, BottomBar: View>: View {
             ScrollView {
                 content
             }
+            .scrollDismissesKeyboard(.interactively)
         }
         .safeAreaInset(edge: .bottom) {
             RecordFlowBottomBar {
@@ -925,6 +926,7 @@ private struct CardPreviewStep: View {
     @ViewBuilder private var panelContent: some View {
         switch selectedTab {
         case .template: templatePanel
+        case .modules:  modulesPanel
         case .text:     textPanel
         case .position: positionPanel
         }
@@ -937,8 +939,14 @@ private struct CardPreviewStep: View {
         record.wodDate = viewModel.wodDate
         record.wodContent = viewModel.wodLines
         record.difficultyRating = viewModel.difficultyLevel.rawValue
+        record.completionMinutes = viewModel.completionMinutes
+        record.scoreType = viewModel.scoreType.rawValue
+        record.scoreValue = viewModel.formattedScore
+        record.scoreScaling = viewModel.scoreScaling?.rawValue
+        record.note = viewModel.note.isEmpty ? nil : viewModel.note
         record.cardStyleId = viewModel.selectedStyleId
         record.textLayout = viewModel.textLayout
+        record.enabledModules = viewModel.enabledModules
         return record
     }
 
@@ -981,16 +989,13 @@ private struct CardPreviewStep: View {
                             showPaywall = true
                         }
                     } label: {
+                        let isSelected = style.id == viewModel.selectedStyleId
                         VStack(alignment: .center, spacing: WTSpacing.xs) {
-                            ZStack {
-                                RoundedRectangle(cornerRadius: WTRadius.sm)
-                                    .fill(style.id == viewModel.selectedStyleId ? Color.wtPrimary.opacity(0.9) : Color.wtSurface2)
-
-                                Image(systemName: styleIcon(for: style.layout))
-                                    .font(.system(size: 22, weight: .semibold))
-                                    .foregroundStyle(style.id == viewModel.selectedStyleId ? Color.black : Color.wtTextPrimary)
-                            }
-                            .frame(width: 62, height: 62)
+                            Image(systemName: styleIcon(for: style.layout))
+                                .font(.system(size: 22, weight: .semibold))
+                                .foregroundStyle(isSelected ? Color.wtPrimary : Color.wtTextPrimary)
+                                .frame(width: 62, height: 62)
+                                .selectableChip(isOn: isSelected, cornerRadius: WTRadius.sm)
 
                             Text(style.name)
                                 .font(.system(size: 12, weight: .semibold))
@@ -1014,6 +1019,50 @@ private struct CardPreviewStep: View {
         }
     }
 
+    // MARK: - 模块面板
+
+    private var modulesPanel: some View {
+        let supported = CardStyleConfig.style(for: viewModel.selectedStyleId).supportedModules
+        return ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: WTSpacing.sm) {
+                ForEach(CardModule.allCases) { module in
+                    moduleChip(module, isSupported: supported.contains(module))
+                }
+            }
+            .padding(.horizontal, WTSpacing.lg)
+            .padding(.vertical, WTSpacing.sm)
+        }
+    }
+
+    @ViewBuilder private func moduleChip(_ module: CardModule, isSupported: Bool) -> some View {
+        let isOn = isSupported && viewModel.isModuleEnabled(module)
+        let iconColor: Color = !isSupported ? Color.wtTextSecondary : (isOn ? Color.wtPrimary : Color.wtTextPrimary)
+
+        Button {
+            viewModel.toggleModule(module)
+        } label: {
+            VStack(alignment: .center, spacing: WTSpacing.xs) {
+                Image(systemName: isSupported ? module.icon : "lock.fill")
+                    .font(.system(size: 22, weight: .semibold))
+                    .foregroundStyle(iconColor)
+                    .frame(width: 62, height: 62)
+                    .selectableChip(isOn: isOn, cornerRadius: WTRadius.sm)
+
+                Text(module.label)
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(isSupported ? (isOn ? Color.wtPrimary : Color.wtTextPrimary) : Color.wtTextSecondary)
+                    .lineLimit(1)
+            }
+            .frame(width: 78, height: 98, alignment: .top)
+            .contentShape(Rectangle())
+            .opacity(isSupported ? 1 : 0.6)
+        }
+        .buttonStyle(.plain)
+        .disabled(!isSupported)
+        .accessibilityLabel("\(module.label) 模块")
+        .accessibilityAddTraits(isOn ? .isSelected : [])
+    }
+
     // MARK: - 文字面板
 
     private var textPanel: some View {
@@ -1027,10 +1076,8 @@ private struct CardPreviewStep: View {
                             Text(preset.label)
                                 .font(fontPreview(for: preset))
                                 .frame(width: 76, height: 38)
-                                .background(viewModel.textLayout.fontPreset == preset ? Color.wtPrimary : Color.wtSurface2)
-                                .foregroundStyle(viewModel.textLayout.fontPreset == preset ? Color.black : Color.wtTextPrimary)
-                                .clipShape(RoundedRectangle(cornerRadius: WTRadius.sm))
-                                .contentShape(RoundedRectangle(cornerRadius: WTRadius.sm))
+                                .foregroundStyle(viewModel.textLayout.fontPreset == preset ? Color.wtPrimary : Color.wtTextPrimary)
+                                .selectableChip(isOn: viewModel.textLayout.fontPreset == preset, cornerRadius: WTRadius.sm)
                         }
                         .buttonStyle(.plain)
                     }
@@ -1114,18 +1161,12 @@ private struct CardPreviewStep: View {
                             Image(systemName: positionIcon(for: position))
                                 .font(.system(size: 20, weight: .medium))
                                 .frame(maxWidth: .infinity, minHeight: 48)
-                                .background(
-                                    viewModel.textLayout.verticalPosition == position
-                                        ? Color.wtPrimary
-                                        : Color.wtSurface2
-                                )
                                 .foregroundStyle(
                                     viewModel.textLayout.verticalPosition == position
-                                        ? Color.black
+                                        ? Color.wtPrimary
                                         : Color.wtTextPrimary
                                 )
-                                .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
-                                .contentShape(RoundedRectangle(cornerRadius: WTRadius.md))
+                                .selectableChip(isOn: viewModel.textLayout.verticalPosition == position)
                         }
                         .buttonStyle(.plain)
 
@@ -1148,18 +1189,12 @@ private struct CardPreviewStep: View {
                                 Image(systemName: position.icon)
                                     .font(.system(size: 20, weight: .medium))
                                     .frame(maxWidth: .infinity, minHeight: 48)
-                                    .background(
-                                        viewModel.textLayout.horizontalPosition == position
-                                            ? Color.wtPrimary
-                                            : Color.wtSurface2
-                                    )
                                     .foregroundStyle(
                                         viewModel.textLayout.horizontalPosition == position
-                                            ? Color.black
+                                            ? Color.wtPrimary
                                             : Color.wtTextPrimary
                                     )
-                                    .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
-                                    .contentShape(RoundedRectangle(cornerRadius: WTRadius.md))
+                                    .selectableChip(isOn: viewModel.textLayout.horizontalPosition == position)
                             }
                             .buttonStyle(.plain)
 
@@ -1175,13 +1210,8 @@ private struct CardPreviewStep: View {
         .padding(.vertical, WTSpacing.sm)
     }
 
-    private var supportsHorizontalAlignment: Bool {
-        let layout = CardStyleConfig.style(for: viewModel.selectedStyleId).layout
-        switch layout {
-        case .bottomCard, .bottomCardLight, .dataDashboard: return true
-        default: return false
-        }
-    }
+    /// 左右位置现在所有模板通用（CardView 各布局都跟随 horizontalPosition）。
+    private var supportsHorizontalAlignment: Bool { true }
 
     // MARK: - 辅助
 
@@ -1253,6 +1283,7 @@ private struct CardPreviewStep: View {
 
     private enum EditorTab: String, CaseIterable, Identifiable {
         case template
+        case modules
         case text
         case position
 
@@ -1261,6 +1292,7 @@ private struct CardPreviewStep: View {
         var label: String {
             switch self {
             case .template: "模板"
+            case .modules:  "模块"
             case .text:     "文字"
             case .position: "位置"
             }
@@ -1269,6 +1301,7 @@ private struct CardPreviewStep: View {
         var icon: String {
             switch self {
             case .template: "square.grid.2x2.fill"
+            case .modules:  "checklist"
             case .text:     "textformat.size"
             case .position: "slider.horizontal.3"
             }

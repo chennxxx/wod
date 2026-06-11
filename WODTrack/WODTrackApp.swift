@@ -1,5 +1,6 @@
 import SwiftData
 import SwiftUI
+import UIKit
 
 @main
 struct WODTrackApp: App {
@@ -51,6 +52,9 @@ struct WODTrackApp: App {
                 }
                 .onAppear {
                     syncManager.onContainerRebuilt(container, syncActive: syncActive)
+                    DispatchQueue.main.async {
+                        UIApplication.shared.installKeyboardDismissTapIfNeeded()
+                    }
                 }
         }
         .modelContainer(container)

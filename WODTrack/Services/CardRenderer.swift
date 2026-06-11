@@ -32,15 +32,18 @@ struct CardRenderer {
         return size.width / max(size.height, 1)
     }
 
+    /// `extraLineEquivalents`：除 WOD 文本行外，已开启的内容模块（成绩 / 难度 / 完成时间）
+    /// 折算成的「等效文本行数」，让自适应字号把这些块的高度也算进去，避免文字超出图片。
     static func suggestedFontSize(
         for lines: [String],
         images: [UIImage],
         style: CardStyle,
-        preferredSize: Double
+        preferredSize: Double,
+        extraLineEquivalents: Double = 0
     ) -> Double {
         let logicalSize = logicalCanvasSize(for: images)
         let verticalMargin = min(36, max(8, logicalSize.height * 0.08))
-        let lineCount = CGFloat(max(lines.count, 1))
+        let lineCount = CGFloat(max(lines.count, 1)) + CGFloat(max(0, extraLineEquivalents))
         let availableHeight = max(
             logicalSize.height - chromeHeight(for: style.layout) - verticalMargins(for: style.layout, verticalMargin: verticalMargin),
             24
