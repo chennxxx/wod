@@ -20,6 +20,7 @@
 		A00000000000000000000A /* CardRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000010A /* CardRenderer.swift */; };
 		A00000000000000000000B /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000010B /* Theme.swift */; };
 		A00000000000000000000C /* CardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000010C /* CardView.swift */; };
+		A0000000000000000000F1 /* PhotoDropEasterEggView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000001F1 /* PhotoDropEasterEggView.swift */; };
 		A00000000000000000000D /* RecordFlowCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000010D /* RecordFlowCoordinator.swift */; };
 		A00000000000000000000E /* HistoryViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000010E /* HistoryViews.swift */; };
 		A00000000000000000000F /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000010F /* ProfileView.swift */; };
@@ -68,6 +69,7 @@
 		A00000000000000000010A /* CardRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardRenderer.swift; sourceTree = "<group>"; };
 		A00000000000000000010B /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		A00000000000000000010C /* CardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardView.swift; sourceTree = "<group>"; };
+		A0000000000000000001F1 /* PhotoDropEasterEggView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoDropEasterEggView.swift; sourceTree = "<group>"; };
 		A00000000000000000010D /* RecordFlowCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordFlowCoordinator.swift; sourceTree = "<group>"; };
 		A00000000000000000010E /* HistoryViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryViews.swift; sourceTree = "<group>"; };
 		A00000000000000000010F /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
@@ -213,6 +215,7 @@
 			children = (
 				A00000000000000000010B /* Theme.swift */,
 				A00000000000000000010C /* CardView.swift */,
+				A0000000000000000001F1 /* PhotoDropEasterEggView.swift */,
 			);
 			path = Common;
 			sourceTree = "<group>";
@@ -397,6 +400,7 @@
 				A00000000000000000000A /* CardRenderer.swift in Sources */,
 				A00000000000000000000B /* Theme.swift in Sources */,
 				A00000000000000000000C /* CardView.swift in Sources */,
+				A0000000000000000000F1 /* PhotoDropEasterEggView.swift in Sources */,
 				A00000000000000000000D /* RecordFlowCoordinator.swift in Sources */,
 				A00000000000000000000E /* HistoryViews.swift in Sources */,
 				A00000000000000000000F /* ProfileView.swift in Sources */,

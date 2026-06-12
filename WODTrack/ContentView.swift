@@ -9,8 +9,40 @@ struct ContentView: View {
     @Bindable var appState: AppState
     @Bindable var syncManager: CloudSyncManager
 
+    // MARK: - 彩蛋：记录 tab 连点 5 次（3 秒内）触发缩略图掉落堆叠
+    @State private var recordTapTimestamps: [Date] = []
+    @State private var showEasterEgg = false
+    private static let easterEggWindow: TimeInterval = 3
+    private static let easterEggTapCount = 5
+
+    /// 代理绑定：重复点击已选中的 tab 时 setter 仍会被调用，用此检测记录 tab 连点。
+    private var tabSelection: Binding<Int> {
+        Binding(
+            get: { appState.selectedTab },
+            set: { newValue in
+                if appState.selectedTab == 1, newValue == 1, !records.isEmpty {
+                    registerRecordTap()
+                }
+                appState.selectedTab = newValue
+            }
+        )
+    }
+
+    private func registerRecordTap() {
+        let now = Date.now
+        recordTapTimestamps = recordTapTimestamps.filter {
+            now.timeIntervalSince($0) < Self.easterEggWindow
+        }
+        recordTapTimestamps.append(now)
+        if recordTapTimestamps.count >= Self.easterEggTapCount {
+            recordTapTimestamps.removeAll()
+            UINotificationFeedbackGenerator().notificationOccurred(.success)
+            showEasterEgg = true
+        }
+    }
+
     var body: some View {
-        TabView(selection: $appState.selectedTab) {
+        TabView(selection: tabSelection) {
             SkillTreeView()
                 .tabItem { Label("技能树", systemImage: "sparkles.rectangle.stack") }
                 .tag(0)
@@ -53,6 +85,13 @@ struct ContentView: View {
                     modelContext.insert(record)
                     try? modelContext.save()
                 }
+            )
+            .preferredColorScheme(.dark)
+        }
+        .fullScreenCover(isPresented: $showEasterEgg) {
+            PhotoDropEasterEggView(
+                records: records,
+                onFinished: { showEasterEgg = false }
             )
             .preferredColorScheme(.dark)
         }
