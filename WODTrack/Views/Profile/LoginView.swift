@@ -8,7 +8,7 @@ struct LoginView: View {
 
     @State private var agreed = false
     @State private var localToast: String?
-    @State private var agreementKind: AgreementKind?
+    @State private var legalDocument: LegalDocument?
 
     var body: some View {
         ZStack {
@@ -25,10 +25,8 @@ struct LoginView: View {
             }
         }
         .wtToast(message: $localToast)
-        .sheet(item: $agreementKind) { kind in
-            NavigationStack {
-                AgreementView(kind: kind)
-            }
+        .sheet(item: $legalDocument) { document in
+            LegalDocumentSheet(document: document)
             .preferredColorScheme(.dark)
         }
     }
@@ -134,12 +132,12 @@ struct LoginView: View {
                     .foregroundStyle(Color.wtTextSecondary)
                 Text("《用户协议》")
                     .foregroundStyle(Color.wtPrimary)
-                    .onTapGesture { agreementKind = .userAgreement }
+                    .onTapGesture { legalDocument = .userAgreement }
                 Text(" 与 ")
                     .foregroundStyle(Color.wtTextSecondary)
                 Text("《隐私政策》")
                     .foregroundStyle(Color.wtPrimary)
-                    .onTapGesture { agreementKind = .privacyPolicy }
+                    .onTapGesture { legalDocument = .privacyPolicy }
             }
             .font(.system(size: 12.5))
         }

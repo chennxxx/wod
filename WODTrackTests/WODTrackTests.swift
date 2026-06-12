@@ -16,7 +16,7 @@ final class WODTrackTests: XCTestCase {
     func testRecordFlowStartsAtOCRStepAfterSelectingWhiteboard() {
         let viewModel = RecordFlowViewModel(ocrService: ImmediateOCRService())
 
-        viewModel.startFlow(with: UIImage())
+        viewModel.recognizeWODContent(from: UIImage())
 
         XCTAssertEqual(viewModel.step, .ocrResult)
     }
@@ -63,12 +63,43 @@ final class WODTrackTests: XCTestCase {
         viewModel.goToOCRReview()
         viewModel.goBack()
 
-        XCTAssertEqual(viewModel.step, .whiteboard)
+        XCTAssertEqual(viewModel.step, .ocrResult)
+    }
+
+    func testLegalDocumentURLs() {
+        XCTAssertEqual(LegalDocument.userAgreement.url.absoluteString, "https://docs.qq.com/doc/DUk5pRVREYWVqeUNn")
+        XCTAssertEqual(LegalDocument.privacyPolicy.url.absoluteString, "https://docs.qq.com/doc/DUklUeGFVdGFQVm9a")
+        XCTAssertEqual(LegalDocument.supportFAQ.url.absoluteString, "https://docs.qq.com/doc/DUkVISGZTcW1sT3Bz")
+        XCTAssertEqual(LegalDocument.accountDeletion.url.absoluteString, "https://docs.qq.com/doc/DUmhtT0RIUHZDU1hC")
+        XCTAssertEqual(LegalDocument.feedback.url.absoluteString, "https://docs.qq.com/form/page/DUmh6S25LcFNZZXBS")
+    }
+
+    func testLegalTermsAcceptancePersists() {
+        let key = "wt.legalTermsAccepted"
+        let defaults = UserDefaults.standard
+        let previous = defaults.object(forKey: key)
+        defer {
+            if let previous {
+                defaults.set(previous, forKey: key)
+            } else {
+                defaults.removeObject(forKey: key)
+            }
+        }
+
+        defaults.removeObject(forKey: key)
+        let appState = AppState()
+
+        XCTAssertFalse(appState.hasAcceptedLegalTerms)
+
+        appState.acceptLegalTerms()
+
+        XCTAssertTrue(appState.hasAcceptedLegalTerms)
+        XCTAssertTrue(defaults.bool(forKey: key))
     }
 }
 
 private struct ImmediateOCRService: OCRServicing {
     func recognize(image: UIImage) async throws -> OCRResult {
-        OCRResult(wodType: .forTime, wodContent: ["21-15-9"], confidence: 1)
+        OCRResult(wodContent: ["21-15-9"], confidence: 1)
     }
 }

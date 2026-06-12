@@ -11,6 +11,7 @@ final class AppState {
         static let avatarChoice = "wt.avatarChoice"
         static let lastLoginPromptDate = "wt.lastLoginPromptDate"
         static let profileUpdatedAt = "wt.profileUpdatedAt"
+        static let legalTermsAccepted = "wt.legalTermsAccepted"
     }
 
     /// 保存记录后自动弹登录页的冷却期
@@ -21,6 +22,7 @@ final class AppState {
     var profile: UserProfile
     var showLoginPage = false
     var toastMessage: String?
+    var hasAcceptedLegalTerms: Bool
     /// 放在 AppState 而非 ContentView：iCloud 容器切换会整树重建，tab 位置需跨重建保留
     var selectedTab = 1
 
@@ -45,6 +47,7 @@ final class AppState {
             isLoggedIn: appleUserID != nil,
             boxId: nil
         )
+        hasAcceptedLegalTerms = defaults.bool(forKey: DefaultsKey.legalTermsAccepted)
 
         revokeObserver = NotificationCenter.default.addObserver(
             forName: ASAuthorizationAppleIDProvider.credentialRevokedNotification,
@@ -57,6 +60,13 @@ final class AppState {
 
     var isPro: Bool {
         profile.subscriptionStatus == .pro
+    }
+
+    // MARK: - 合规同意
+
+    func acceptLegalTerms() {
+        UserDefaults.standard.set(true, forKey: DefaultsKey.legalTermsAccepted)
+        hasAcceptedLegalTerms = true
     }
 
     // MARK: - 登录

@@ -8,6 +8,7 @@ struct ProfileView: View {
     @State private var showEditSheet = false
     @State private var showSignOutDialog = false
     @State private var navigateToSyncSettings = false
+    @State private var legalDocument: LegalDocument?
     /// 从 iCloud 行进登录页的意图：登录成功后直接进同步详情页，不回「我的」根
     @State private var pendingSyncNavigation = false
 
@@ -62,16 +63,15 @@ struct ProfileView: View {
                     }
                     .buttonStyle(.plain)
                     rowDivider
-                    ProfileRow(icon: "bubble.left", title: "反馈") {
-                        appState.showToast("即将推出")
-                    }
+                    legalRow(.supportFAQ)
                     rowDivider
-                    NavigationLink {
-                        AgreementView(kind: .privacyPolicy)
-                    } label: {
-                        ProfileRowLabel(icon: "shield", title: "隐私协议")
-                    }
-                    .buttonStyle(.plain)
+                    legalRow(.feedback)
+                    rowDivider
+                    legalRow(.accountDeletion)
+                    rowDivider
+                    legalRow(.userAgreement)
+                    rowDivider
+                    legalRow(.privacyPolicy)
                 }
 
                 if appState.profile.isLoggedIn {
@@ -96,6 +96,10 @@ struct ProfileView: View {
         }
         .sheet(isPresented: $showEditSheet) {
             ProfileEditSheet(appState: appState)
+                .preferredColorScheme(.dark)
+        }
+        .sheet(item: $legalDocument) { document in
+            LegalDocumentSheet(document: document)
                 .preferredColorScheme(.dark)
         }
         .alert("确定退出登录？", isPresented: $showSignOutDialog) {
@@ -302,6 +306,12 @@ struct ProfileView: View {
             .fill(Color.white.opacity(0.08))
             .frame(height: 1)
             .padding(.leading, 50)
+    }
+
+    private func legalRow(_ document: LegalDocument) -> some View {
+        ProfileRow(icon: document.icon, title: document.title) {
+            legalDocument = document
+        }
     }
 }
 

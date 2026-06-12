@@ -28,6 +28,13 @@ struct ContentView: View {
         )
     }
 
+    private var legalConsentPresentation: Binding<Bool> {
+        Binding(
+            get: { !appState.hasAcceptedLegalTerms },
+            set: { _ in }
+        )
+    }
+
     private func registerRecordTap() {
         let now = Date.now
         recordTapTimestamps = recordTapTimestamps.filter {
@@ -64,6 +71,11 @@ struct ContentView: View {
         }
         .tint(.wtPrimary)
         .wtToast(message: $appState.toastMessage)
+        .fullScreenCover(isPresented: legalConsentPresentation) {
+            LegalConsentView(appState: appState)
+                .preferredColorScheme(.dark)
+                .interactiveDismissDisabled(true)
+        }
         .task {
             await appState.verifyCredentialOnLaunch()
             appState.reconcileProfile(context: modelContext)
@@ -95,6 +107,124 @@ struct ContentView: View {
             )
             .preferredColorScheme(.dark)
         }
+    }
+}
+
+private struct LegalConsentView: View {
+    @Bindable var appState: AppState
+    @State private var localToast: String?
+    @State private var legalDocument: LegalDocument?
+
+    var body: some View {
+        ZStack {
+            background
+
+            ScrollView {
+                VStack(alignment: .leading, spacing: WTSpacing.lg) {
+                    header
+                    message
+                    agreementLinks
+                    actions
+                }
+                .padding(.horizontal, WTSpacing.lg)
+                .padding(.vertical, WTSpacing.xl)
+                .frame(maxWidth: 520)
+                .frame(maxWidth: .infinity)
+            }
+        }
+        .wtToast(message: $localToast)
+        .sheet(item: $legalDocument) { document in
+            LegalDocumentSheet(document: document)
+                .preferredColorScheme(.dark)
+        }
+    }
+
+    private var background: some View {
+        ZStack {
+            Color.wtBackground.ignoresSafeArea()
+            RadialGradient(
+                colors: [Color.wtPrimary.opacity(0.16), .clear],
+                center: .init(x: 0.5, y: 0.08),
+                startRadius: 0,
+                endRadius: 420
+            )
+            .ignoresSafeArea()
+        }
+    }
+
+    private var header: some View {
+        VStack(alignment: .leading, spacing: WTSpacing.md) {
+            Image("AppLogo")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 72, height: 72)
+                .clipShape(RoundedRectangle(cornerRadius: 17))
+                .shadow(color: Color.wtPrimary.opacity(0.3), radius: 16, y: 10)
+
+            VStack(alignment: .leading, spacing: WTSpacing.sm) {
+                Text("使用前请阅读并同意")
+                    .font(.system(size: 26, weight: .heavy))
+                    .foregroundStyle(Color.wtTextPrimary)
+
+                Text("欢迎使用迹录 WOD")
+                    .font(WTFont.body)
+                    .foregroundStyle(Color.wtPrimary)
+            }
+        }
+    }
+
+    private var message: some View {
+        VStack(alignment: .leading, spacing: WTSpacing.md) {
+            Text("我们会按照《用户协议》和《隐私政策》为你提供训练记录、拍照识别、历史管理、卡片生成、Apple 登录与 iCloud 同步等服务。")
+            Text("使用过程中，你主动拍摄或选择的白板照片可能会发送至识别服务用于提取 WOD 内容；训练记录和个人资料会根据你的操作保存在本机，开启 iCloud 同步后会同步到你的 iCloud。")
+            Text("请你确认已阅读并同意《用户协议》和《隐私政策》，再继续使用本应用。")
+        }
+        .font(.system(size: 15))
+        .foregroundStyle(Color.wtTextSecondary)
+        .lineSpacing(5)
+    }
+
+    private var agreementLinks: some View {
+        HStack(spacing: WTSpacing.sm) {
+            legalButton(.userAgreement)
+            legalButton(.privacyPolicy)
+        }
+    }
+
+    private func legalButton(_ document: LegalDocument) -> some View {
+        Button {
+            legalDocument = document
+        } label: {
+            HStack(spacing: 6) {
+                Image(systemName: document.icon)
+                    .font(.system(size: 13, weight: .semibold))
+                Text("《\(document.title)》")
+                    .font(.system(size: 14, weight: .semibold))
+            }
+            .foregroundStyle(Color.wtPrimary)
+            .frame(maxWidth: .infinity)
+            .frame(height: 42)
+            .background(Color.wtPrimary.opacity(0.12))
+            .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
+            .overlay(
+                RoundedRectangle(cornerRadius: WTRadius.md)
+                    .stroke(Color.wtPrimary.opacity(0.35), lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var actions: some View {
+        VStack(spacing: WTSpacing.sm) {
+            WTButton(title: "同意并继续") {
+                appState.acceptLegalTerms()
+            }
+
+            WTButton(title: "暂不同意", style: .ghost) {
+                localToast = "不同意将无法继续使用迹录 WOD"
+            }
+        }
+        .padding(.top, WTSpacing.sm)
     }
 }
 
