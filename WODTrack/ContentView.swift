@@ -79,6 +79,7 @@ struct ContentView: View {
         .task {
             await appState.verifyCredentialOnLaunch()
             appState.reconcileProfile(context: modelContext)
+            SkillStatusSeeder.seedIfNeeded(context: modelContext)
         }
         .onChange(of: scenePhase) {
             if scenePhase == .active {

@@ -47,15 +47,20 @@ struct SkillDetailView: View {
                 VStack(alignment: .leading, spacing: WTSpacing.lg) {
                     videoPlaceholder
                     titleSection
-                    if !skill.prerequisites.isEmpty {
-                        prerequisitesSection
-                    }
                     statusSection
                     myDataSection
+                    if !prereqSkills.isEmpty {
+                        chainSection
+                    }
                     if !entries.isEmpty {
                         trainingHistorySection
                     }
-                    coachingPoints
+                    introSection
+                    stepsSection
+                    if let points = skill.keyPoints, !points.isEmpty {
+                        keyPointsSection(points)
+                    }
+                    scalingSection
                 }
                 .padding(.horizontal, WTSpacing.lg)
                 .padding(.bottom, WTSpacing.xl)
@@ -63,13 +68,6 @@ struct SkillDetailView: View {
         }
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .principal) {
-                Text(skill.englishName.uppercased())
-                    .font(.system(size: 11, weight: .regular, design: .monospaced))
-                    .foregroundStyle(Color.wtTextSecondary)
-            }
-        }
         .sheet(isPresented: $showAddSheet) {
             AddTrainingEntrySheet(skillId: skill.id)
         }
@@ -83,63 +81,55 @@ struct SkillDetailView: View {
                 .fill(Color.wtSurface)
                 .frame(height: 200)
 
-            VStack(spacing: WTSpacing.sm) {
-                ZStack {
-                    Circle()
-                        .strokeBorder(Color.wtPrimary, lineWidth: 2)
-                        .frame(width: 52, height: 52)
-                    Image(systemName: "play.fill")
-                        .font(.system(size: 20))
-                        .foregroundStyle(Color.wtPrimary)
-                        .offset(x: 2)
-                }
-                Text("即将上线 · Coming Soon")
-                    .font(WTFont.micro)
-                    .foregroundStyle(Color.wtTextSecondary)
+            ZStack {
+                Circle()
+                    .strokeBorder(Color.wtPrimary, lineWidth: 2)
+                    .frame(width: 52, height: 52)
+                Image(systemName: "play.fill")
+                    .font(.system(size: 20))
+                    .foregroundStyle(Color.wtPrimary)
+                    .offset(x: 2)
             }
+
+            VStack {
+                Spacer()
+                HStack {
+                    Text("视频 · 即将上线")
+                        .font(.system(size: 11))
+                        .foregroundStyle(Color.wtTextSecondary)
+                    Spacer()
+                }
+            }
+            .padding(WTSpacing.md)
         }
+        .frame(height: 200)
     }
 
     private var titleSection: some View {
-        VStack(alignment: .leading, spacing: WTSpacing.sm) {
-            Text(skill.name)
-                .font(.system(size: 28, weight: .bold))
-                .foregroundStyle(Color.wtTextPrimary)
-            Text(skill.englishName)
-                .font(.system(size: 13, weight: .regular, design: .monospaced))
-                .foregroundStyle(Color.wtTextSecondary)
-
-            HStack(spacing: WTSpacing.xs) {
-                TierBadge(tier: skill.tier)
-                Text(skill.tier.description)
-                    .font(WTFont.micro)
-                    .foregroundStyle(Color.wtTextSecondary)
+        VStack(alignment: .leading, spacing: WTSpacing.xs) {
+            HStack(alignment: .firstTextBaseline, spacing: WTSpacing.sm) {
+                Text(skill.name)
+                    .font(.system(size: 28, weight: .bold))
+                    .foregroundStyle(Color.wtTextPrimary)
+                TierBars(tier: skill.tier)
             }
         }
     }
 
-    private var prerequisitesSection: some View {
+    // MARK: 前置动作练习
+
+    private var prereqSkills: [SkillDefinition] {
+        skill.prerequisites.compactMap { SkillLibrary.skillById[$0] }
+    }
+
+    private var chainSection: some View {
         VStack(alignment: .leading, spacing: WTSpacing.sm) {
-            HStack(spacing: WTSpacing.xs) {
-                Text("前置动作")
-                    .font(WTFont.micro)
-                    .foregroundStyle(Color.wtTextSecondary)
-                if let unlock = skill.unlockCondition {
-                    Text("·")
-                        .font(WTFont.micro)
-                        .foregroundStyle(Color.wtTextDisabled)
-                    Text(unlock)
-                        .font(WTFont.micro)
-                        .foregroundStyle(Color.wtTextDisabled)
-                }
-            }
+            SkillSectionHeader(title: "前置动作练习")
 
             VStack(spacing: 0) {
                 ForEach(Array(prereqSkills.enumerated()), id: \.element.id) { index, prereq in
-                    let prereqStatus = statusMap[prereq.id]?.status ?? .unmarked
                     NavigationLink(destination: SkillDetailView(skill: prereq)) {
-                        PrereqRow(skill: prereq, status: prereqStatus)
-                            .contentShape(Rectangle())
+                        SkillStatusRow(skill: prereq, status: statusMap[prereq.id]?.status ?? .unmarked)
                     }
                     .buttonStyle(.plain)
                     if index < prereqSkills.count - 1 {
@@ -152,21 +142,15 @@ struct SkillDetailView: View {
         }
     }
 
-    private var prereqSkills: [SkillDefinition] {
-        skill.prerequisites.compactMap { SkillLibrary.skillById[$0] }
-    }
-
     private var statusSection: some View {
         VStack(alignment: .leading, spacing: WTSpacing.sm) {
-            Text("我的状态 · 点击切换")
-                .font(WTFont.micro)
-                .foregroundStyle(Color.wtTextSecondary)
+            SkillSectionHeader(title: "我的状态")
 
             HStack(spacing: WTSpacing.sm) {
                 StatusButton(title: "✓ 已掌握", isSelected: masteryStatus == .mastered, selectedColor: Color.wtPrimary) {
                     setStatus(.mastered)
                 }
-                StatusButton(title: "◐ 进行中", isSelected: masteryStatus == .inProgress, selectedColor: Color(hex: "#5E81F4")) {
+                StatusButton(title: "◐ 进行中", isSelected: masteryStatus == .inProgress, selectedColor: Color.wtInProgress) {
                     setStatus(.inProgress)
                 }
                 StatusButton(title: "○ 想学", isSelected: masteryStatus == .wantToLearn, selectedColor: Color.wtTextSecondary) {
@@ -178,28 +162,35 @@ struct SkillDetailView: View {
 
     private var myDataSection: some View {
         VStack(alignment: .leading, spacing: WTSpacing.sm) {
-            HStack {
-                Text("我的数据")
-                    .font(WTFont.micro)
-                    .foregroundStyle(Color.wtTextSecondary)
-                Spacer()
-                Button("记录一次") { showAddSheet = true }
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(Color.wtPrimary)
-            }
+            SkillSectionHeader(title: "我的数据")
 
             HStack(spacing: WTSpacing.sm) {
                 DataCell(label: "个人纪录", value: bestEntry?.formattedValue ?? "—")
+                DataCell(label: "练习次数", value: entries.isEmpty ? "—" : "\(entries.count)")
                 DataCell(label: "上次练", value: lastPracticedText)
             }
+
+            Button { showAddSheet = true } label: {
+                HStack(spacing: WTSpacing.xs) {
+                    Image(systemName: "plus")
+                        .font(.system(size: 15, weight: .semibold))
+                    Text("记录一次")
+                        .font(WTFont.bodyBold)
+                }
+                .foregroundStyle(Color.black)
+                .frame(maxWidth: .infinity)
+                .frame(height: 48)
+                .background(Color.wtPrimary)
+                .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
+            }
+            .buttonStyle(.plain)
+            .padding(.top, WTSpacing.xs)
         }
     }
 
     private var trainingHistorySection: some View {
         VStack(alignment: .leading, spacing: WTSpacing.sm) {
-            Text("训练记录")
-                .font(WTFont.micro)
-                .foregroundStyle(Color.wtTextSecondary)
+            SkillSectionHeader(title: "最近记录")
 
             VStack(spacing: 0) {
                 ForEach(Array(entries.enumerated()), id: \.element.persistentModelID) { index, entry in
@@ -214,18 +205,33 @@ struct SkillDetailView: View {
         }
     }
 
-    private var coachingPoints: some View {
-        VStack(alignment: .leading, spacing: WTSpacing.sm) {
-            Text("动作要领")
-                .font(WTFont.micro)
-                .foregroundStyle(Color.wtTextSecondary)
+    private var introSection: some View {
+        textSection(title: "动作简介", text: skill.intro)
+    }
 
-            VStack(alignment: .leading, spacing: WTSpacing.md) {
-                CoachingPoint(index: 1, text: "标准动作说明待补充——可在此填写动作要领、常见错误与进阶提示。")
-            }
-            .padding(WTSpacing.md)
-            .background(Color.wtSurface)
-            .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
+    private var stepsSection: some View {
+        textSection(title: "动作步骤", text: skill.steps)
+    }
+
+    private func keyPointsSection(_ points: String) -> some View {
+        textSection(title: "要点与注意", text: points)
+    }
+
+    private var scalingSection: some View {
+        textSection(title: "降阶替代", text: skill.scaling)
+    }
+
+    private func textSection(title: String, text: String) -> some View {
+        VStack(alignment: .leading, spacing: WTSpacing.sm) {
+            SkillSectionHeader(title: title)
+            Text(text)
+                .font(WTFont.body)
+                .foregroundStyle(Color.wtTextSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(WTSpacing.md)
+                .background(Color.wtSurface)
+                .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
         }
     }
 
@@ -320,8 +326,10 @@ private struct DataCell: View {
     var body: some View {
         VStack(spacing: WTSpacing.xs) {
             Text(value)
-                .font(WTFont.bodyBold)
+                .font(WTFont.mono(17, weight: .bold))
                 .foregroundStyle(Color.wtTextPrimary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
             Text(label)
                 .font(WTFont.micro)
                 .foregroundStyle(Color.wtTextSecondary)
@@ -330,68 +338,6 @@ private struct DataCell: View {
         .padding(.vertical, WTSpacing.md)
         .background(Color.wtSurface)
         .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
-    }
-}
-
-private struct CoachingPoint: View {
-    let index: Int
-    let text: String
-
-    var body: some View {
-        HStack(alignment: .top, spacing: WTSpacing.sm) {
-            Text(String(format: "%02d", index))
-                .font(.system(size: 12, weight: .bold, design: .monospaced))
-                .foregroundStyle(Color.wtPrimary)
-            Text(text)
-                .font(WTFont.caption)
-                .foregroundStyle(Color.wtTextSecondary)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-    }
-}
-
-// MARK: - Prereq Row
-
-private struct PrereqRow: View {
-    let skill: SkillDefinition
-    let status: SkillMasteryStatus
-
-    private var statusIcon: (name: String, color: Color) {
-        switch status {
-        case .mastered:    ("checkmark.circle.fill", Color.wtPrimary)
-        case .inProgress:  ("moon.fill",             Color(hex: "#5E81F4"))
-        case .wantToLearn: ("circle",                Color.wtTextSecondary)
-        case .unmarked:    ("circle",                Color.wtTextDisabled)
-        }
-    }
-
-    var body: some View {
-        HStack(spacing: WTSpacing.sm) {
-            Image(systemName: statusIcon.name)
-                .font(.system(size: 18))
-                .foregroundStyle(statusIcon.color)
-                .frame(width: 24)
-
-            VStack(alignment: .leading, spacing: 2) {
-                HStack(spacing: 6) {
-                    TierBadge(tier: skill.tier)
-                    Text(skill.name)
-                        .font(WTFont.body)
-                        .foregroundStyle(Color.wtTextPrimary)
-                }
-                Text(skill.englishName)
-                    .font(.system(size: 10, weight: .regular, design: .monospaced))
-                    .foregroundStyle(Color.wtTextSecondary)
-            }
-
-            Spacer()
-
-            Image(systemName: "chevron.right")
-                .font(.system(size: 11, weight: .semibold))
-                .foregroundStyle(Color.wtTextDisabled)
-        }
-        .padding(.horizontal, WTSpacing.md)
-        .padding(.vertical, 10)
     }
 }
 
@@ -538,7 +484,7 @@ private struct AddTrainingEntrySheet: View {
                 }
             }
         }
-        .presentationDetents([.medium, .large])
+        .presentationDetents([.large])
         .presentationDragIndicator(.visible)
         .interactiveDismissDisabled(showCalendar)
         .onAppear {
