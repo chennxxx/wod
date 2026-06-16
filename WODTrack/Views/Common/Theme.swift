@@ -11,6 +11,8 @@ extension Color {
     static let wtTextDisabled = Color(hex: "#444444")
     static let wtSuccess = Color(hex: "#34C759")
     static let wtDanger = Color(hex: "#FF3B30")
+    /// 「进行中」状态强调色（蓝，与已掌握的绿区分）。
+    static let wtInProgress = Color(hex: "#5E81F4")
 }
 
 enum WTFont {
@@ -20,6 +22,12 @@ enum WTFont {
     static let bodyBold = Font.system(size: 16, weight: .semibold)
     static let caption = Font.system(size: 13, weight: .regular)
     static let micro = Font.system(size: 11, weight: .regular)
+
+    /// 等宽数据字体（工程风读数：英文名、L1、日期、SKILL·INDEX 等标签）。
+    /// iOS 无 Geist Mono，统一用系统 SF Mono（`.monospaced`）。
+    static func mono(_ size: CGFloat, weight: Font.Weight = .regular) -> Font {
+        .system(size: size, weight: weight, design: .monospaced)
+    }
 }
 
 enum WTSpacing {

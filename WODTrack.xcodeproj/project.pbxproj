@@ -15,12 +15,10 @@
 		A000000000000000000006 /* RecordFlowViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000106 /* RecordFlowViewModel.swift */; };
 		A000000000000000000007 /* AppConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000107 /* AppConfig.swift */; };
 		A000000000000000000008 /* CardStyleConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000108 /* CardStyleConfig.swift */; };
-		A0000000000000000000F0 /* ColorThemeConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000001F0 /* ColorThemeConfig.swift */; };
 		A000000000000000000009 /* OCRService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000109 /* OCRService.swift */; };
 		A00000000000000000000A /* CardRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000010A /* CardRenderer.swift */; };
 		A00000000000000000000B /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000010B /* Theme.swift */; };
 		A00000000000000000000C /* CardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000010C /* CardView.swift */; };
-		A0000000000000000000F1 /* PhotoDropEasterEggView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000001F1 /* PhotoDropEasterEggView.swift */; };
 		A00000000000000000000D /* RecordFlowCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000010D /* RecordFlowCoordinator.swift */; };
 		A00000000000000000000E /* HistoryViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000010E /* HistoryViews.swift */; };
 		A00000000000000000000F /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000010F /* ProfileView.swift */; };
@@ -43,6 +41,10 @@
 		A00000000000000000004D /* CloudSyncManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000014D /* CloudSyncManager.swift */; };
 		A00000000000000000004E /* SyncDedupService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000014E /* SyncDedupService.swift */; };
 		A00000000000000000004F /* ICloudSyncSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000014F /* ICloudSyncSettingsView.swift */; };
+		A0000000000000000000F0 /* ColorThemeConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000001F0 /* ColorThemeConfig.swift */; };
+		A0000000000000000000F1 /* PhotoDropEasterEggView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000001F1 /* PhotoDropEasterEggView.swift */; };
+		A0000000000000000000FD /* SkillBrowseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000001FD /* SkillBrowseView.swift */; };
+		A0000000000000000000FE /* SkillTreeComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000001FE /* SkillTreeComponents.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -64,12 +66,10 @@
 		A000000000000000000106 /* RecordFlowViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordFlowViewModel.swift; sourceTree = "<group>"; };
 		A000000000000000000107 /* AppConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfig.swift; sourceTree = "<group>"; };
 		A000000000000000000108 /* CardStyleConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardStyleConfig.swift; sourceTree = "<group>"; };
-		A0000000000000000001F0 /* ColorThemeConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorThemeConfig.swift; sourceTree = "<group>"; };
 		A000000000000000000109 /* OCRService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OCRService.swift; sourceTree = "<group>"; };
 		A00000000000000000010A /* CardRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardRenderer.swift; sourceTree = "<group>"; };
 		A00000000000000000010B /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		A00000000000000000010C /* CardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardView.swift; sourceTree = "<group>"; };
-		A0000000000000000001F1 /* PhotoDropEasterEggView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoDropEasterEggView.swift; sourceTree = "<group>"; };
 		A00000000000000000010D /* RecordFlowCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordFlowCoordinator.swift; sourceTree = "<group>"; };
 		A00000000000000000010E /* HistoryViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryViews.swift; sourceTree = "<group>"; };
 		A00000000000000000010F /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
@@ -96,6 +96,10 @@
 		A00000000000000000014D /* CloudSyncManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudSyncManager.swift; sourceTree = "<group>"; };
 		A00000000000000000014E /* SyncDedupService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncDedupService.swift; sourceTree = "<group>"; };
 		A00000000000000000014F /* ICloudSyncSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ICloudSyncSettingsView.swift; sourceTree = "<group>"; };
+		A0000000000000000001F0 /* ColorThemeConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorThemeConfig.swift; sourceTree = "<group>"; };
+		A0000000000000000001F1 /* PhotoDropEasterEggView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoDropEasterEggView.swift; sourceTree = "<group>"; };
+		A0000000000000000001FD /* SkillBrowseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillBrowseView.swift; sourceTree = "<group>"; };
+		A0000000000000000001FE /* SkillTreeComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillTreeComponents.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -251,6 +255,8 @@
 			isa = PBXGroup;
 			children = (
 				A000000000000000000110 /* SkillTreeView.swift */,
+				A0000000000000000001FE /* SkillTreeComponents.swift */,
+				A0000000000000000001FD /* SkillBrowseView.swift */,
 				A000000000000000000143 /* SkillDetailView.swift */,
 				A000000000000000000146 /* ProgressionPathDetailView.swift */,
 			);
@@ -411,6 +417,8 @@
 				A00000000000000000004E /* SyncDedupService.swift in Sources */,
 				A00000000000000000004F /* ICloudSyncSettingsView.swift in Sources */,
 				A000000000000000000010 /* SkillTreeView.swift in Sources */,
+				A0000000000000000000FE /* SkillTreeComponents.swift in Sources */,
+				A0000000000000000000FD /* SkillBrowseView.swift in Sources */,
 				A000000000000000000040 /* SkillStatus.swift in Sources */,
 				A000000000000000000044 /* SkillData.swift in Sources */,
 				A000000000000000000043 /* SkillDetailView.swift in Sources */,
@@ -540,13 +548,14 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = WODTrack/WODTrack.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_ASSET_PATHS = "\"WODTrack/Resources/Preview Content\"";
 				DEVELOPMENT_TEAM = L8HPSR8537;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = WODTrack/Resources/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "迹录WOD：每一次进步都有迹可循";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -569,12 +578,13 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = WODTrack/WODTrack.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_ASSET_PATHS = "\"WODTrack/Resources/Preview Content\"";
 				DEVELOPMENT_TEAM = L8HPSR8537;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = WODTrack/Resources/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "迹录WOD：每一次进步都有迹可循";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

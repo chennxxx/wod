@@ -10,125 +10,83 @@ struct ProgressionPathDetailView: View {
         Dictionary(uniqueKeysWithValues: allStatuses.map { ($0.skillId, $0.status) })
     }
 
-    private var steps: [(index: Int, skill: SkillDefinition)] {
+    private var skills: [SkillDefinition] {
         path.steps.compactMap { SkillLibrary.skillById[$0] }
-            .enumerated()
-            .map { (index: $0.offset, skill: $0.element) }
+    }
+
+    private var masteredCount: Int {
+        skills.filter { (statusMap[$0.id] ?? .unmarked) == .mastered }.count
+    }
+
+    /// 当前站 = 第一个未掌握的动作
+    private var currentIndex: Int? {
+        skills.firstIndex { (statusMap[$0.id] ?? .unmarked) != .mastered }
+    }
+
+    private var progress: Double {
+        skills.isEmpty ? 0 : Double(masteredCount) / Double(skills.count)
+    }
+
+    private var categoryName: String {
+        SkillLibrary.categories.first { $0.id == path.categoryId }?.name ?? ""
     }
 
     var body: some View {
         ZStack {
             Color.wtBackground.ignoresSafeArea()
             ScrollView {
-                VStack(alignment: .leading, spacing: 0) {
-                    ForEach(Array(steps.enumerated()), id: \.element.skill.id) { outerIndex, step in
-                        PathStepRow(
-                            index: step.index + 1,
-                            skill: step.skill,
-                            status: statusMap[step.skill.id] ?? .unmarked,
-                            isLast: outerIndex == steps.count - 1
-                        )
-                    }
+                VStack(alignment: .leading, spacing: WTSpacing.lg) {
+                    headerSection
+                    stationsSection
                 }
-                .padding(.vertical, WTSpacing.md)
+                .padding(.vertical, WTSpacing.lg)
             }
         }
-        .navigationTitle(path.name)
-        .navigationBarTitleDisplayMode(.large)
-    }
-}
-
-// MARK: - Path Step Row
-
-private struct PathStepRow: View {
-    let index: Int
-    let skill: SkillDefinition
-    let status: SkillMasteryStatus
-    let isLast: Bool
-
-    private var statusColor: Color {
-        switch status {
-        case .mastered: Color.wtPrimary
-        case .inProgress: Color(hex: "#5E81F4")
-        case .wantToLearn: Color.wtTextSecondary
-        case .unmarked: Color.wtTextDisabled
-        }
-    }
-
-    private var statusIcon: String {
-        switch status {
-        case .mastered: "checkmark.circle.fill"
-        case .inProgress: "moon.fill"
-        case .wantToLearn: "circle"
-        case .unmarked: "circle"
-        }
-    }
-
-    var body: some View {
-        NavigationLink(destination: SkillDetailView(skill: skill)) {
-            HStack(alignment: .top, spacing: WTSpacing.md) {
-                // Step number + connector line
-                VStack(spacing: 0) {
-                    ZStack {
-                        Circle()
-                            .fill(status == .mastered ? Color.wtPrimary : Color.wtSurface)
-                            .frame(width: 36, height: 36)
-                        if status == .mastered {
-                            Image(systemName: "checkmark")
-                                .font(.system(size: 14, weight: .bold))
-                                .foregroundStyle(Color.black)
-                        } else {
-                            Text(String(format: "%02d", index))
-                                .font(.system(size: 12, weight: .bold, design: .monospaced))
-                                .foregroundStyle(Color.wtTextSecondary)
-                        }
-                    }
-
-                    if !isLast {
-                        Rectangle()
-                            .fill(Color.wtSurface2)
-                            .frame(width: 2)
-                            .frame(maxHeight: .infinity)
-                    }
-                }
-                .frame(width: 36)
-
-                // Skill info
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack(spacing: WTSpacing.xs) {
-                        TierBadge(tier: skill.tier)
-                        Text(skill.name)
-                            .font(WTFont.bodyBold)
-                            .foregroundStyle(Color.wtTextPrimary)
-                    }
-
-                    Text(skill.englishName)
-                        .font(.system(size: 11, weight: .regular, design: .monospaced))
-                        .foregroundStyle(Color.wtTextSecondary)
-
-                    HStack(spacing: 4) {
-                        Image(systemName: statusIcon)
-                            .font(.system(size: 11))
-                            .foregroundStyle(statusColor)
-                        Text(status.label)
-                            .font(WTFont.micro)
-                            .foregroundStyle(statusColor)
-                    }
-                }
-                .padding(.bottom, isLast ? 0 : WTSpacing.xl)
-                .padding(.top, WTSpacing.xs)
-
-                Spacer()
-
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(Color.wtTextDisabled)
-                    .padding(.top, WTSpacing.sm)
+        .navigationTitle("")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .principal) {
+                Text(categoryName)
+                    .font(.system(size: 13))
+                    .foregroundStyle(Color.wtTextSecondary)
             }
-            .padding(.horizontal, WTSpacing.lg)
-            .padding(.vertical, WTSpacing.xs)
-            .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+    }
+
+    private var headerSection: some View {
+        VStack(alignment: .leading, spacing: WTSpacing.sm) {
+            Text(path.name)
+                .font(.system(size: 28, weight: .bold))
+                .foregroundStyle(Color.wtTextPrimary)
+
+            HStack(spacing: WTSpacing.sm) {
+                Text("\(masteredCount)/\(skills.count)")
+                    .font(WTFont.mono(13, weight: .semibold))
+                    .foregroundStyle(Color.wtTextPrimary)
+                SkillProgressBar(total: skills.count, mastered: masteredCount, inProgress: 0)
+                Text("\(Int((progress * 100).rounded()))%")
+                    .font(WTFont.mono(11))
+                    .foregroundStyle(Color.wtTextSecondary)
+            }
+        }
+        .padding(.horizontal, WTSpacing.lg)
+    }
+
+    private var stationsSection: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            ForEach(Array(skills.enumerated()), id: \.element.id) { index, skill in
+                NavigationLink(destination: SkillDetailView(skill: skill)) {
+                    MetroStationRow(
+                        index: index + 1,
+                        skill: skill,
+                        status: statusMap[skill.id] ?? .unmarked,
+                        isCurrent: index == currentIndex,
+                        isLast: index == skills.count - 1,
+                        lineBelowActive: currentIndex.map { index < $0 } ?? true
+                    )
+                }
+                .buttonStyle(.plain)
+            }
+        }
     }
 }
