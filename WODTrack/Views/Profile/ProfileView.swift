@@ -67,6 +67,15 @@ struct ProfileView: View {
                     rowDivider
                     legalRow(.feedback)
                     rowDivider
+                    if appState.profile.isLoggedIn {
+                        NavigationLink {
+                            AccountDeletionView(appState: appState)
+                        } label: {
+                            ProfileRowLabel(icon: "person.crop.circle.badge.xmark", title: "删除账号")
+                        }
+                        .buttonStyle(.plain)
+                        rowDivider
+                    }
                     legalRow(.accountDeletion)
                     rowDivider
                     legalRow(.userAgreement)

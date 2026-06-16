@@ -71,7 +71,7 @@ enum LegalDocument: String, CaseIterable, Identifiable {
         case .userAgreement: "doc.text"
         case .privacyPolicy: "shield"
         case .supportFAQ: "questionmark.circle"
-        case .accountDeletion: "person.crop.circle.badge.xmark"
+        case .accountDeletion: "doc.plaintext"
         case .feedback: "bubble.left"
         }
     }
