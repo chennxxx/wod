@@ -38,6 +38,7 @@
 		A000000000000000000049 /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000149 /* AuthService.swift */; };
 		A00000000000000000004A /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000014A /* LoginView.swift */; };
 		A00000000000000000004B /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000014B /* AboutView.swift */; };
+		A000000000000000000ADE /* AccountDeletionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000ADF /* AccountDeletionView.swift */; };
 		A00000000000000000004D /* CloudSyncManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000014D /* CloudSyncManager.swift */; };
 		A00000000000000000004E /* SyncDedupService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000014E /* SyncDedupService.swift */; };
 		A00000000000000000004F /* ICloudSyncSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000014F /* ICloudSyncSettingsView.swift */; };
@@ -92,6 +93,7 @@
 		A000000000000000000149 /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
 		A00000000000000000014A /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		A00000000000000000014B /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
+		A000000000000000000ADF /* AccountDeletionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountDeletionView.swift; sourceTree = "<group>"; };
 		A00000000000000000014C /* WODTrack.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = WODTrack.entitlements; sourceTree = "<group>"; };
 		A00000000000000000014D /* CloudSyncManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudSyncManager.swift; sourceTree = "<group>"; };
 		A00000000000000000014E /* SyncDedupService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncDedupService.swift; sourceTree = "<group>"; };
@@ -246,6 +248,7 @@
 				A00000000000000000010F /* ProfileView.swift */,
 				A00000000000000000014A /* LoginView.swift */,
 				A00000000000000000014B /* AboutView.swift */,
+				A000000000000000000ADF /* AccountDeletionView.swift */,
 				A00000000000000000014F /* ICloudSyncSettingsView.swift */,
 			);
 			path = Profile;
@@ -413,6 +416,7 @@
 				A000000000000000000049 /* AuthService.swift in Sources */,
 				A00000000000000000004A /* LoginView.swift in Sources */,
 				A00000000000000000004B /* AboutView.swift in Sources */,
+				A000000000000000000ADE /* AccountDeletionView.swift in Sources */,
 				A00000000000000000004D /* CloudSyncManager.swift in Sources */,
 				A00000000000000000004E /* SyncDedupService.swift in Sources */,
 				A00000000000000000004F /* ICloudSyncSettingsView.swift in Sources */,
