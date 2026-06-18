@@ -32,6 +32,16 @@ enum SkillMasteryStatus: String, Codable {
     }
 }
 
+extension Collection where Element == SkillStatus {
+    /// 按 skillId 建索引。**必须用 uniquingKeysWith 而非 uniqueKeysWithValues**：CloudKit 无 unique 约束，
+    /// 多设备合并 / 种子与云端拉取相撞会出现同一 skillId 的重复行，而去重（SyncDedupService）是异步的，
+    /// 视图可能在去重完成前就渲染到重复行 —— 用 uniqueKeysWithValues 会直接 fatalError 崩溃。
+    /// 重复时保留 updatedAt 最新，与 SyncDedupService.dedupSkillStatuses 的 LWW 策略一致。
+    var indexedBySkillId: [String: SkillStatus] {
+        Dictionary(map { ($0.skillId, $0) }) { $0.updatedAt >= $1.updatedAt ? $0 : $1 }
+    }
+}
+
 // MARK: - 默认掌握动作（新用户首启种子）
 
 /// 新用户首次启动时，把几个最基础的动作默认标记为「已掌握」，

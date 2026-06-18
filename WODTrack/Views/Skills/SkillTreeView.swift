@@ -6,9 +6,7 @@ import SwiftUI
 struct SkillTreeView: View {
     @Query private var allStatuses: [SkillStatus]
 
-    private var statusMap: [String: SkillStatus] {
-        Dictionary(uniqueKeysWithValues: allStatuses.map { ($0.skillId, $0) })
-    }
+    private var statusMap: [String: SkillStatus] { allStatuses.indexedBySkillId }
 
     private func status(for skill: SkillDefinition) -> SkillMasteryStatus {
         statusMap[skill.id]?.status ?? .unmarked
