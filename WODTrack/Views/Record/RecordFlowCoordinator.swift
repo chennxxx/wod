@@ -37,11 +37,14 @@ struct RecordFlowCoordinator: View {
                     viewModel.goToSaveSuccess()
                 })
             case .saveSuccess:
-                SaveSuccessStep(viewModel: viewModel, onDone: {
-                    onSaved(viewModel.finalizeRecord())
-                    appState.triggerLoginPromptAfterSave()
-                    dismiss()
-                })
+                SaveSuccessStep(
+                    viewModel: viewModel,
+                    onSave: {
+                        onSaved(viewModel.finalizeRecord())
+                        appState.triggerLoginPromptAfterSave()
+                    },
+                    onDone: { dismiss() }
+                )
             }
         }
         .navigationBarBackButtonHidden()
@@ -1372,9 +1375,11 @@ private struct CardPreviewStep: View {
 
 private struct SaveSuccessStep: View {
     let viewModel: RecordFlowViewModel
+    let onSave: () -> Void
     let onDone: () -> Void
     @State private var showShareSheet = false
     @State private var showConfetti = false
+    @State private var didSave = false
 
     var body: some View {
         ZStack {
@@ -1443,6 +1448,10 @@ private struct SaveSuccessStep: View {
         }
         .onAppear {
             showConfetti = true
+            if !didSave {
+                didSave = true
+                onSave()
+            }
         }
         .sheet(isPresented: $showShareSheet) {
             if let cardImage = viewModel.renderedCardImage {
