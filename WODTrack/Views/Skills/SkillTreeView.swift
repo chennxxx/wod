@@ -110,7 +110,7 @@ struct SkillTreeView: View {
 
         if !inProgressSkills.isEmpty {
             VStack(alignment: .leading, spacing: WTSpacing.sm) {
-                SkillSectionHeader(title: "进行中", trailing: "\(inProgressTotal)")
+                SkillSectionHeader(title: "进行中")
                     .padding(.horizontal, WTSpacing.lg)
 
                 VStack(spacing: 0) {

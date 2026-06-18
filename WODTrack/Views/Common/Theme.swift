@@ -46,6 +46,30 @@ enum WTRadius {
     static let full: CGFloat = 9999
 }
 
+/// 统一的「选中=淡色填充+描边」样式，降低整页实心锚点，保持选中效果一致。
+extension View {
+    /// 圆角矩形版本。tint 默认主绿色，可传入状态色复用。
+    func selectableChip(isOn: Bool, tint: Color = .wtPrimary, cornerRadius: CGFloat = WTRadius.md) -> some View {
+        background(isOn ? tint.opacity(0.15) : Color.wtSurface)
+            .overlay(
+                RoundedRectangle(cornerRadius: cornerRadius)
+                    .stroke(isOn ? tint : Color.clear, lineWidth: 1.5)
+            )
+            .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
+            .contentShape(RoundedRectangle(cornerRadius: cornerRadius))
+    }
+
+    /// 胶囊版本，用于横向筛选 chip。
+    func selectablePill(isOn: Bool, tint: Color = .wtPrimary) -> some View {
+        background(isOn ? tint.opacity(0.15) : Color.wtSurface)
+            .overlay(
+                Capsule().stroke(isOn ? tint : Color.clear, lineWidth: 1.5)
+            )
+            .clipShape(Capsule())
+            .contentShape(Capsule())
+    }
+}
+
 struct WTButton: View {
     enum Style {
         case primary

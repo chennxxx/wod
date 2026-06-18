@@ -114,16 +114,15 @@ struct SkillBrowseView: View {
                             HStack(spacing: 5) {
                                 if let status = filter.status {
                                     StatusGlyph(status: status, size: 13)
-                                        .foregroundStyle(isSelected ? Color.black : status.accentColor)
+                                        .foregroundStyle(isSelected ? Color.wtPrimary : status.accentColor)
                                 }
                                 Text("\(filter.label) \(n)")
                                     .font(.system(size: 14, weight: .semibold))
-                                    .foregroundStyle(isSelected ? Color.black : Color.wtTextSecondary)
+                                    .foregroundStyle(isSelected ? Color.wtPrimary : Color.wtTextSecondary)
                             }
                             .padding(.horizontal, 14)
                             .padding(.vertical, 8)
-                            .background(isSelected ? Color.wtPrimary : Color.wtSurface)
-                            .clipShape(Capsule())
+                            .selectablePill(isOn: isSelected)
                         }
                         .buttonStyle(.plain)
                     }
@@ -149,11 +148,10 @@ struct SkillBrowseView: View {
         Button(action: action) {
             Text(label)
                 .font(.system(size: 13, weight: .medium))
-                .foregroundStyle(isSelected ? Color.black : Color.wtTextSecondary)
+                .foregroundStyle(isSelected ? Color.wtPrimary : Color.wtTextSecondary)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 6)
-                .background(isSelected ? Color.wtPrimary : Color.wtSurface)
-                .clipShape(Capsule())
+                .selectablePill(isOn: isSelected)
         }
         .buttonStyle(.plain)
     }

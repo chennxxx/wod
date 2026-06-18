@@ -42,7 +42,7 @@ def split_prereqs(v):
 def main():
     wb = openpyxl.load_workbook(XLSX, data_only=True)
     ws = wb["动作库"]
-    rows = [[ws.cell(r, c).value for c in range(1, 14)] for r in range(2, ws.max_row + 1)]
+    rows = [[ws.cell(r, c).value for c in range(1, 15)] for r in range(2, ws.max_row + 1)]
     rows = [r for r in rows if r[0]]
 
     # 每个类别按出现顺序收集 distinct 动作模式 → 子类 id
@@ -69,7 +69,7 @@ def main():
             out.append(
                 f'        s({q(r[0])}, {qs(r[1])}, {q(sid)}, {tier}, {qs(r[3])}, {qs(r[4])},\n'
                 f'          intro: {qs(r[6])}, steps: {qs(r[7])}, keyPoints: {q(r[8])},\n'
-                f'          scaling: {qs(r[11])}, prereqs: {pre}, rationale: {q(r[10])})'
+                f'          scaling: {qs(r[11])}, prereqs: {pre}, rationale: {q(r[10])}, englishName: {qs(r[13])})'
             )
         return ",\n".join(out)
 
@@ -137,6 +137,8 @@ struct SkillSubcategoryDefinition: Identifiable {{
 struct SkillDefinition: Identifiable {{
     let id: String
     let name: String
+    /// 英文名称
+    let englishName: String
     let tier: SkillTier
     let categoryId: String
     let subcategoryId: String
@@ -221,10 +223,11 @@ enum SkillLibrary {{
     private static func s(_ id: String, _ name: String, _ sub: String, _ tier: SkillTier,
                           _ measure: String, _ pattern: String,
                           intro: String, steps: String, keyPoints: String?,
-                          scaling: String, prereqs: [String] = [], rationale: String? = nil) -> SkillDefinition {{
+                          scaling: String, prereqs: [String] = [], rationale: String? = nil,
+                          englishName: String = "") -> SkillDefinition {{
         // 注意：参数顺序 measure 在 pattern 之前是生成器约定；此处显式映射，避免歧义。
         SkillDefinition(
-            id: id, name: name, tier: tier,
+            id: id, name: name, englishName: englishName, tier: tier,
             categoryId: sub.hasPrefix("gym") ? "gymnastics" : "weightlifting",
             subcategoryId: sub, movementPattern: pattern, measure: measure,
             intro: intro, steps: steps, keyPoints: keyPoints,
