@@ -48,9 +48,6 @@ struct SkillSectionHeader: View {
 
     var body: some View {
         HStack(spacing: WTSpacing.xs) {
-            RoundedRectangle(cornerRadius: 1.5)
-                .fill(Color.wtPrimary)
-                .frame(width: 3, height: 18)
             Text(title)
                 .font(.system(size: 20, weight: .semibold))
                 .foregroundStyle(Color.wtTextPrimary)
@@ -66,6 +63,18 @@ struct SkillSectionHeader: View {
                     .foregroundStyle(Color.wtTextSecondary)
             }
         }
+    }
+}
+
+/// 次级页面内的小标题（与记录详情页「WOD 内容」等标题一致）：caption 字号 + 次要灰，无竖线。
+/// 用于动作详情页这类二级页面内部分节，区别于页面级的 `SkillSectionHeader`。
+struct SkillSubSectionHeader: View {
+    let title: String
+
+    var body: some View {
+        Text(title)
+            .font(WTFont.caption)
+            .foregroundStyle(Color.wtTextSecondary)
     }
 }
 
@@ -171,9 +180,17 @@ struct SkillStatusRow: View {
             StatusGlyph(status: status)
                 .frame(width: 28)
 
-            Text(skill.name)
-                .font(WTFont.bodyBold)
-                .foregroundStyle(Color.wtTextPrimary)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(skill.name)
+                    .font(WTFont.bodyBold)
+                    .foregroundStyle(Color.wtTextPrimary)
+                if !skill.englishName.isEmpty {
+                    Text(skill.englishName)
+                        .font(.system(size: 12))
+                        .foregroundStyle(Color.wtTextSecondary)
+                        .lineLimit(1)
+                }
+            }
 
             Spacer(minLength: WTSpacing.sm)
 

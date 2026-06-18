@@ -122,7 +122,7 @@ struct SkillDetailView: View {
 
     private var chainSection: some View {
         VStack(alignment: .leading, spacing: WTSpacing.sm) {
-            SkillSectionHeader(title: "前置动作练习")
+            SkillSubSectionHeader(title: "前置动作练习")
 
             VStack(spacing: 0) {
                 ForEach(Array(prereqSkills.enumerated()), id: \.element.id) { index, prereq in
@@ -142,7 +142,7 @@ struct SkillDetailView: View {
 
     private var statusSection: some View {
         VStack(alignment: .leading, spacing: WTSpacing.sm) {
-            SkillSectionHeader(title: "我的状态")
+            SkillSubSectionHeader(title: "我的状态")
 
             HStack(spacing: WTSpacing.sm) {
                 StatusButton(title: "✓ 已掌握", isSelected: masteryStatus == .mastered, selectedColor: Color.wtPrimary) {
@@ -160,7 +160,7 @@ struct SkillDetailView: View {
 
     private var myDataSection: some View {
         VStack(alignment: .leading, spacing: WTSpacing.sm) {
-            SkillSectionHeader(title: "我的数据")
+            SkillSubSectionHeader(title: "我的数据")
 
             HStack(spacing: WTSpacing.sm) {
                 DataCell(label: "个人纪录", value: bestEntry?.formattedValue ?? "—")
@@ -175,11 +175,10 @@ struct SkillDetailView: View {
                     Text("记录一次")
                         .font(WTFont.bodyBold)
                 }
-                .foregroundStyle(Color.black)
+                .foregroundStyle(Color.wtPrimary)
                 .frame(maxWidth: .infinity)
                 .frame(height: 48)
-                .background(Color.wtPrimary)
-                .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
+                .selectableChip(isOn: true)
             }
             .buttonStyle(.plain)
             .padding(.top, WTSpacing.xs)
@@ -188,7 +187,7 @@ struct SkillDetailView: View {
 
     private var trainingHistorySection: some View {
         VStack(alignment: .leading, spacing: WTSpacing.sm) {
-            SkillSectionHeader(title: "最近记录")
+            SkillSubSectionHeader(title: "最近记录")
 
             VStack(spacing: 0) {
                 ForEach(Array(entries.enumerated()), id: \.element.persistentModelID) { index, entry in
@@ -221,7 +220,7 @@ struct SkillDetailView: View {
 
     private func textSection(title: String, text: String) -> some View {
         VStack(alignment: .leading, spacing: WTSpacing.sm) {
-            SkillSectionHeader(title: title)
+            SkillSubSectionHeader(title: title)
             Text(text)
                 .font(WTFont.body)
                 .foregroundStyle(Color.wtTextSecondary)
@@ -306,12 +305,10 @@ private struct StatusButton: View {
         Button(action: action) {
             Text(title)
                 .font(.system(size: 13, weight: .semibold))
-                .foregroundStyle(isSelected ? (selectedColor == Color.wtTextSecondary ? Color.wtTextPrimary : Color.black) : Color.wtTextSecondary)
+                .foregroundStyle(isSelected ? selectedColor : Color.wtTextSecondary)
                 .frame(maxWidth: .infinity)
                 .frame(height: 40)
-                .background(isSelected ? selectedColor : Color.wtSurface)
-                .clipShape(RoundedRectangle(cornerRadius: WTRadius.sm))
-                .contentShape(Rectangle())
+                .selectableChip(isOn: isSelected, tint: selectedColor, cornerRadius: WTRadius.sm)
         }
         .buttonStyle(.plain)
     }

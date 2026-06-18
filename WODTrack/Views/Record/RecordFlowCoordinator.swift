@@ -511,19 +511,6 @@ private struct IntensityField: View {
     }
 }
 
-/// 统一的「选中=淡色填充+描边」样式，降低整页绿色锚点，保持选中效果一致
-private extension View {
-    func selectableChip(isOn: Bool, cornerRadius: CGFloat = WTRadius.md) -> some View {
-        background(isOn ? Color.wtPrimary.opacity(0.15) : Color.wtSurface)
-            .overlay(
-                RoundedRectangle(cornerRadius: cornerRadius)
-                    .stroke(isOn ? Color.wtPrimary : Color.clear, lineWidth: 1.5)
-            )
-            .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
-            .contentShape(RoundedRectangle(cornerRadius: cornerRadius))
-    }
-}
-
 /// WOD 类型选择：For Time / AMRAP / EMOM / Max Load
 private struct WODTypeField: View {
     @Binding var scoreType: WODType
