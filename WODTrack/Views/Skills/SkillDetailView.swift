@@ -9,9 +9,7 @@ struct SkillDetailView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var showAddSheet = false
 
-    private var statusMap: [String: SkillStatus] {
-        Dictionary(uniqueKeysWithValues: allStatuses.map { ($0.skillId, $0) })
-    }
+    private var statusMap: [String: SkillStatus] { allStatuses.indexedBySkillId }
 
     private var statusEntry: SkillStatus? {
         statusMap[skill.id]

@@ -7,7 +7,7 @@ struct ProgressionPathDetailView: View {
     @Query private var allStatuses: [SkillStatus]
 
     private var statusMap: [String: SkillMasteryStatus] {
-        Dictionary(uniqueKeysWithValues: allStatuses.map { ($0.skillId, $0.status) })
+        allStatuses.indexedBySkillId.mapValues(\.status)
     }
 
     private var skills: [SkillDefinition] {
