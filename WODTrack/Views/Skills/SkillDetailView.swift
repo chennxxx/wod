@@ -44,7 +44,7 @@ struct SkillDetailView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: WTSpacing.lg) {
                     titleSection
-                    videoPlaceholder
+                    videoSection
                     statusSection
                     myDataSection
                     if !entries.isEmpty {
@@ -73,34 +73,12 @@ struct SkillDetailView: View {
 
     // MARK: - Sections
 
-    private var videoPlaceholder: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: WTRadius.lg)
-                .fill(Color.wtSurface)
-                .frame(height: 200)
-
-            ZStack {
-                Circle()
-                    .strokeBorder(Color.wtPrimary, lineWidth: 2)
-                    .frame(width: 52, height: 52)
-                Image(systemName: "play.fill")
-                    .font(.system(size: 20))
-                    .foregroundStyle(Color.wtPrimary)
-                    .offset(x: 2)
-            }
-
-            VStack {
-                Spacer()
-                HStack {
-                    Text("视频 · 即将上线")
-                        .font(.system(size: 11))
-                        .foregroundStyle(Color.wtTextSecondary)
-                    Spacer()
-                }
-            }
-            .padding(WTSpacing.md)
+    @ViewBuilder private var videoSection: some View {
+        if SkillLibrary.hasVideo(skill.id) {
+            LoopingVideoPlayerView(skillId: skill.id)
+        } else {
+            SkillVideoPlaceholder()
         }
-        .frame(height: 200)
     }
 
     private var titleSection: some View {

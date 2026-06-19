@@ -9,4 +9,16 @@ enum AppConfig {
     static let requestTimeout: TimeInterval = 30
 
     static let useMockOCR = false
+
+    // MARK: - 动作示范视频（腾讯云 COS + CDN）
+    /// 视频 CDN 域名。将来换域名只改这一行。
+    /// 备用（CDN 异常时可临时切回 COS 源站直连）：
+    /// "https://movements-1258129816.cos.ap-guangzhou.myqcloud.com"
+    static let videoBaseURL = "https://offercall.site"
+
+    /// 拼出某动作的示范视频地址：`{videoBaseURL}/movements/{skillId}.mp4`。
+    /// 靠动作 id + 命名规则得出，无需后端、无需逐个配置。
+    static func movementVideoURL(for skillId: String) -> URL? {
+        URL(string: "\(videoBaseURL)/movements/\(skillId).mp4")
+    }
 }
