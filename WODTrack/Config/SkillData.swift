@@ -88,6 +88,12 @@ enum SkillLibrary {
         Dictionary(uniqueKeysWithValues: allSkills.map { ($0.id, $0) })
     }
 
+    /// 已上传示范视频的动作 id（手动维护，避免被 gen_skilldata.py 覆盖）。
+    /// 上传新视频到 COS 的 `movements/{id}.mp4` 后，把对应 id 加进来即可生效。
+    static let skillsWithVideo: Set<String> = ["row"]
+
+    static func hasVideo(_ skillId: String) -> Bool { skillsWithVideo.contains(skillId) }
+
     // MARK: 体操 Gymnastics (56)
 
     static let gymnastics = SkillCategoryDefinition(
