@@ -54,6 +54,7 @@ struct SkillBrowseView: View {
 
     @State private var selectedFilter: SkillFilter = .all
     @State private var selectedTier: SkillTier? = nil
+    @State private var searchText: String = ""
 
     private var scopeSkills: [SkillDefinition] {
         category?.skills ?? SkillLibrary.allSkills
@@ -65,19 +66,29 @@ struct SkillBrowseView: View {
         statusMap[skill.id]?.status ?? .unmarked
     }
 
+    /// 中文名或英文名命中搜索词（去空格、忽略大小写）。空搜索词视为全部命中。
+    private func matchesSearch(_ skill: SkillDefinition) -> Bool {
+        let term = searchText.trimmingCharacters(in: .whitespaces)
+        guard !term.isEmpty else { return true }
+        return skill.name.localizedCaseInsensitiveContains(term)
+            || skill.englishName.localizedCaseInsensitiveContains(term)
+    }
+
     private func count(for filter: SkillFilter) -> Int {
         scopeSkills.filter {
             (selectedTier == nil || $0.tier == selectedTier) &&
+            matchesSearch($0) &&
             (filter == .all || filter.matches(status(for: $0)))
         }.count
     }
 
-    /// 通过筛选的动作，按难度升序排列（同难度保持原顺序）。
+    /// 通过筛选 + 搜索的动作，按难度升序排列（同难度保持原顺序）。
     private var skills: [SkillDefinition] {
         scopeSkills
             .filter {
                 selectedFilter.matches(status(for: $0)) &&
-                (selectedTier == nil || $0.tier == selectedTier)
+                (selectedTier == nil || $0.tier == selectedTier) &&
+                matchesSearch($0)
             }
             .enumerated()
             .sorted { ($0.element.tier.order, $0.offset) < ($1.element.tier.order, $1.offset) }
@@ -99,6 +110,7 @@ struct SkillBrowseView: View {
         }
         .navigationTitle(category?.name ?? "全部动作")
         .navigationBarTitleDisplayMode(.inline)
+        .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "搜索动作名称")
     }
 
     // MARK: 筛选（状态 + 难度）
@@ -147,10 +159,10 @@ struct SkillBrowseView: View {
     private func chip(_ label: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(label)
-                .font(.system(size: 13, weight: .medium))
+                .font(.system(size: 14, weight: .medium))
                 .foregroundStyle(isSelected ? Color.wtPrimary : Color.wtTextSecondary)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 8)
                 .selectablePill(isOn: isSelected)
         }
         .buttonStyle(.plain)
@@ -160,14 +172,9 @@ struct SkillBrowseView: View {
 
     private var list: some View {
         VStack(alignment: .leading, spacing: WTSpacing.sm) {
-            Text("共 \(skills.count) 个")
-                .font(.system(size: 13))
-                .foregroundStyle(Color.wtTextSecondary)
-                .padding(.horizontal, WTSpacing.lg)
-
             VStack(spacing: 0) {
                 if skills.isEmpty {
-                    Text("没有符合条件的动作")
+                    Text(searchText.isEmpty ? "没有符合条件的动作" : "没有匹配“\(searchText)”的动作")
                         .font(WTFont.body)
                         .foregroundStyle(Color.wtTextSecondary)
                         .frame(maxWidth: .infinity)
@@ -187,6 +194,14 @@ struct SkillBrowseView: View {
             .background(Color.wtSurface)
             .clipShape(RoundedRectangle(cornerRadius: WTRadius.lg))
             .padding(.horizontal, WTSpacing.lg)
+
+            if !skills.isEmpty {
+                Text("共 \(skills.count) 个")
+                    .font(.system(size: 12))
+                    .foregroundStyle(Color.wtTextSecondary)
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+                    .padding(.horizontal, WTSpacing.lg)
+            }
         }
     }
 }

@@ -6,6 +6,18 @@ import SwiftUI
 struct SkillTreeView: View {
     @Query private var allStatuses: [SkillStatus]
 
+    @State private var selectedPage: SkillPage = .actions
+
+    private enum SkillPage: CaseIterable {
+        case actions, paths
+        var label: String {
+            switch self {
+            case .actions: "动作"
+            case .paths: "进阶路线"
+            }
+        }
+    }
+
     private var statusMap: [String: SkillStatus] { allStatuses.indexedBySkillId }
 
     private func status(for skill: SkillDefinition) -> SkillMasteryStatus {
@@ -31,7 +43,13 @@ struct SkillTreeView: View {
         NavigationStack {
             ScrollView {
                 LazyVStack(spacing: WTSpacing.md) {
-                    actionsContent
+                    pageSwitcher
+                        .padding(.horizontal, WTSpacing.lg)
+
+                    switch selectedPage {
+                    case .actions: actionsContent
+                    case .paths: pathsContent
+                    }
                 }
                 .padding(.top, WTSpacing.sm)
                 .padding(.bottom, WTSpacing.xl)
@@ -41,6 +59,31 @@ struct SkillTreeView: View {
         }
     }
 
+    // MARK: 页签切换
+
+    private var pageSwitcher: some View {
+        Picker("", selection: $selectedPage) {
+            ForEach(SkillPage.allCases, id: \.self) { page in
+                Text(page.label).tag(page)
+            }
+        }
+        .pickerStyle(.segmented)
+    }
+
+    // MARK: 进阶路线
+
+    @ViewBuilder private var pathsContent: some View {
+        VStack(spacing: WTSpacing.sm) {
+            ForEach(ProgressionPathLibrary.all) { path in
+                NavigationLink(destination: ProgressionPathDetailView(path: path)) {
+                    PathRowCard(path: path, statusMap: statusMap)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(.horizontal, WTSpacing.lg)
+    }
+
     // MARK: 掌握卡（仪表盘）
 
     private var masteryCard: some View {
@@ -48,7 +91,7 @@ struct SkillTreeView: View {
             MasteryRing(progress: masteryProgress)
                 .frame(width: 96, height: 96)
 
-            VStack(alignment: .leading, spacing: WTSpacing.sm) {
+            VStack(alignment: .leading, spacing: WTSpacing.md) {
                 HStack(alignment: .firstTextBaseline, spacing: 4) {
                     Text("\(masteredTotal)")
                         .font(WTFont.mono(30, weight: .bold))
@@ -59,14 +102,9 @@ struct SkillTreeView: View {
                 }
 
                 VStack(spacing: WTSpacing.xs) {
-                    HStack(spacing: WTSpacing.md) {
-                        readout(.mastered, masteredTotal, "掌握")
-                        readout(.inProgress, inProgressTotal, "进行")
-                    }
-                    HStack(spacing: WTSpacing.md) {
-                        readout(.wantToLearn, wantToLearnTotal, "想学")
-                        readout(.unmarked, unmarkedTotal, "未标")
-                    }
+                    readout(.inProgress, inProgressTotal, "进行中")
+                    readout(.wantToLearn, wantToLearnTotal, "想学")
+                    readout(.unmarked, unmarkedTotal, "未标记")
                 }
             }
         }
