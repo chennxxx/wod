@@ -305,6 +305,23 @@ final class KeyboardDismisser: NSObject, UIGestureRecognizerDelegate {
     ) -> Bool { true }
 }
 
+/// 主页面全局背景：纯黑底 + 顶部柔和绿色光晕，呼应产品绿色调性。
+/// 用法：`.background(WTScreenBackground())`，已自带 `ignoresSafeArea`。
+struct WTScreenBackground: View {
+    var body: some View {
+        ZStack {
+            Color.wtBackground
+            RadialGradient(
+                colors: [Color.wtPrimary.opacity(0.16), .clear],
+                center: .init(x: 1.0, y: 0.0),
+                startRadius: 0,
+                endRadius: 720
+            )
+        }
+        .ignoresSafeArea()
+    }
+}
+
 extension UIApplication {
     /// 安装一次全局点击手势：点任意空白处收起键盘。
     /// `cancelsTouchesInView = false` 保证按钮 / 输入框 / 列表点击与滚动一切照常。
