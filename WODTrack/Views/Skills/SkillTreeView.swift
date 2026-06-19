@@ -54,7 +54,7 @@ struct SkillTreeView: View {
                 .padding(.top, WTSpacing.sm)
                 .padding(.bottom, WTSpacing.xl)
             }
-            .background(Color.wtBackground)
+            .background(WTScreenBackground())
             .navigationTitle("技能树")
         }
     }

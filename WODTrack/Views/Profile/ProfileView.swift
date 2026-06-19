@@ -21,9 +21,10 @@ struct ProfileView: View {
                     loginEntryCard
                 }
 
-                if showsInviteBanner {
-                    syncInviteBanner
-                }
+                // 暂时隐藏 iCloud 同步邀请提示框（未来可能恢复）。
+                // if showsInviteBanner {
+                //     syncInviteBanner
+                // }
 
                 rowGroup(label: "数据") {
                     if appState.profile.isLoggedIn {
@@ -90,7 +91,7 @@ struct ProfileView: View {
             .padding(WTSpacing.md)
             .padding(.bottom, 60)
         }
-        .background(Color.wtBackground)
+        .background(WTScreenBackground())
         .navigationTitle("我的")
         .navigationDestination(isPresented: $navigateToSyncSettings) {
             ICloudSyncSettingsView(appState: appState, syncManager: syncManager)

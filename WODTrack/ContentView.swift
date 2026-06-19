@@ -233,10 +233,12 @@ private struct RecordHomeView: View {
     let records: [WODRecord]
     let openRecordFlow: () -> Void
     @State private var historyScrollDate: Date?
+    @Query private var skillStatuses: [SkillStatus]
+    @Query private var trainingEntries: [SkillTrainingEntry]
 
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
-            Color.wtBackground.ignoresSafeArea()
+            WTScreenBackground()
 
             ScrollView {
                 VStack(alignment: .leading, spacing: WTSpacing.lg) {
@@ -252,6 +254,12 @@ private struct RecordHomeView: View {
                     } else {
                         HistoryPreviewSection(records: Array(records.prefix(12)))
                     }
+
+                    RecentActivitySection(
+                        statuses: skillStatuses,
+                        entries: trainingEntries,
+                        records: records
+                    )
                 }
                 .padding(WTSpacing.lg)
                 .padding(.bottom, 80)
@@ -509,6 +517,163 @@ private struct HistoryPreviewSection: View {
             }
         }
     }
+}
+
+// MARK: - 近期活动
+
+/// 首页「近期活动」聚合事件：解锁动作（标为已掌握）/ 记录一次动作完成 / 完成 WOD。
+private enum ActivityEvent: Identifiable {
+    case mastered(skillId: String, date: Date)
+    case completed(entryId: UUID, skillId: String, date: Date, value: Double, unit: String)
+    case wod(record: WODRecord)
+
+    var id: String {
+        switch self {
+        case let .mastered(skillId, date):
+            return "m-\(skillId)-\(date.timeIntervalSince1970)"
+        case let .completed(entryId, _, _, _, _):
+            return "c-\(entryId.uuidString)"
+        case let .wod(record):
+            return "w-\(record.id.uuidString)"
+        }
+    }
+
+    var date: Date {
+        switch self {
+        case let .mastered(_, date): return date
+        case let .completed(_, _, date, _, _): return date
+        case let .wod(record): return record.wodDate
+        }
+    }
+}
+
+/// 首页「近期活动」竖向时间线：按时间倒序合并掌握/完成/WOD 事件，仅展示最近 5 条。
+private struct RecentActivitySection: View {
+    let statuses: [SkillStatus]
+    let entries: [SkillTrainingEntry]
+    let records: [WODRecord]
+
+    private var events: [ActivityEvent] {
+        let masteredEvents = statuses
+            .filter { $0.status == .mastered }
+            .map { ActivityEvent.mastered(skillId: $0.skillId, date: $0.updatedAt) }
+        let completedEvents = entries.map {
+            ActivityEvent.completed(
+                entryId: $0.entryId,
+                skillId: $0.skillId,
+                date: $0.date,
+                value: $0.value,
+                unit: $0.unit
+            )
+        }
+        let wodEvents = records.map { ActivityEvent.wod(record: $0) }
+        return (masteredEvents + completedEvents + wodEvents)
+            .sorted { $0.date > $1.date }
+            .prefix(5)
+            .map { $0 }
+    }
+
+    var body: some View {
+        let items = events
+        if items.isEmpty {
+            EmptyView()
+        } else {
+            // 标题与内容间距（xl）刻意大于行间距（lg），与「训练时刻」标题—内容间距保持一致
+            VStack(alignment: .leading, spacing: WTSpacing.xl) {
+                Text("近期活动")
+                    .font(WTFont.title)
+                    .foregroundStyle(Color.wtTextPrimary)
+
+                VStack(alignment: .leading, spacing: WTSpacing.lg) {
+                    ForEach(items) { event in
+                        ActivityRow(event: event)
+                    }
+                }
+            }
+        }
+    }
+}
+
+/// 单条近期活动：左侧 emoji 区分事件类型，主文案 + 具体日期；点击跳转对应详情页。
+private struct ActivityRow: View {
+    let event: ActivityEvent
+
+    /// 解析动作定义（掌握/完成事件用，决定文案与跳转目标）。
+    private var skill: SkillDefinition? {
+        switch event {
+        case let .mastered(skillId, _): return SkillLibrary.skillById[skillId]
+        case let .completed(_, skillId, _, _, _): return SkillLibrary.skillById[skillId]
+        case .wod: return nil
+        }
+    }
+
+    private var skillName: String { skill?.name ?? "未知动作" }
+
+    private var emoji: String {
+        switch event {
+        case .mastered: return "🎉"
+        case .completed: return "💪"
+        case .wod: return "🔥"
+        }
+    }
+
+    private var title: String {
+        switch event {
+        case .mastered:
+            return "动作解锁 \(skillName)"
+        case let .completed(_, _, _, value, unit):
+            let isWhole = value.truncatingRemainder(dividingBy: 1) == 0
+            let numStr = isWhole ? String(Int(value)) : String(format: "%.1f", value)
+            return "动作训练 \(skillName) \(numStr) \(unit)"
+        case .wod:
+            return "完成WOD"
+        }
+    }
+
+    var body: some View {
+        switch event {
+        case .wod(let record):
+            NavigationLink {
+                HistoryDetailView(record: record)
+            } label: { rowContent }
+            .buttonStyle(.plain)
+        default:
+            if let skill {
+                NavigationLink {
+                    SkillDetailView(skill: skill)
+                } label: { rowContent }
+                .buttonStyle(.plain)
+            } else {
+                rowContent
+            }
+        }
+    }
+
+    private var rowContent: some View {
+        HStack(spacing: WTSpacing.md) {
+            Text(emoji)
+                .font(.system(size: 20))
+                .frame(width: 24)
+
+            Text(title)
+                .font(WTFont.body)
+                .foregroundStyle(Color.wtTextPrimary)
+                .lineLimit(1)
+
+            Spacer(minLength: WTSpacing.sm)
+
+            Text(Self.formatter.string(from: event.date))
+                .font(WTFont.caption)
+                .foregroundStyle(Color.wtTextSecondary)
+        }
+        .contentShape(Rectangle())
+    }
+
+    private static let formatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "M.d"
+        return f
+    }()
 }
 
 /// 首页历史记录图片流卡片：统一竖图比例 + 底部信息条，灵动倾斜/错位由外层应用。
