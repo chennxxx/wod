@@ -112,16 +112,6 @@ enum SkillTier: String, CaseIterable, Identifiable, Codable {{
         case .l5: "精英"
         }}
     }}
-
-    var color: Color {{
-        switch self {{
-        case .l1: Color(hex: "#34C759")
-        case .l2: Color(hex: "#5E81F4")
-        case .l3: Color(hex: "#F5A623")
-        case .l4: Color(hex: "#FF6B6B")
-        case .l5: Color(hex: "#9B59B6")
-        }}
-    }}
 }}
 
 // MARK: - SkillSubcategoryDefinition

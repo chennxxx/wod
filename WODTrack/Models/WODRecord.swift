@@ -1,5 +1,6 @@
 import Foundation
 import SwiftData
+import SwiftUI
 
 // CloudKit 约束：不得用 @Attribute(.unique)（唯一性由 SyncDedupService 应用层保证）；
 // 非可选属性必须有声明处完全限定默认值（不能写前导点简写）。
@@ -82,6 +83,16 @@ enum DifficultyLevel: Int, CaseIterable, Identifiable {
         case .moderate: "🙂"
         case .hard: "😤"
         case .challenge: "🔥"
+        }
+    }
+
+    /// 强度配色（同时作为技能难度 L1–L5 的统一配色来源，见 `SkillTier.color`）。
+    var color: Color {
+        switch self {
+        case .easy: Color(red: 0.30, green: 0.74, blue: 0.46)
+        case .moderate: Color(red: 0.27, green: 0.62, blue: 0.86)
+        case .hard: Color(red: 0.93, green: 0.60, blue: 0.20)
+        case .challenge: Color(red: 0.90, green: 0.33, blue: 0.30)
         }
     }
 

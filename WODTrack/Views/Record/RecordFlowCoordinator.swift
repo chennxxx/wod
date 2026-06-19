@@ -481,14 +481,14 @@ private struct IntensityField: View {
                                 .font(.system(size: 18))
                             Text(option.label)
                                 .font(.system(size: 12, weight: .bold))
-                                .foregroundStyle(isOn ? Self.tint(option) : Color.wtTextPrimary)
+                                .foregroundStyle(isOn ? option.color : Color.wtTextPrimary)
                         }
                         .frame(maxWidth: .infinity)
                         .frame(height: 52)
-                        .background(isOn ? Self.tint(option).opacity(0.18) : Color.wtSurface)
+                        .background(isOn ? option.color.opacity(0.18) : Color.wtSurface)
                         .overlay(
                             RoundedRectangle(cornerRadius: WTRadius.md)
-                                .stroke(isOn ? Self.tint(option) : Color.clear, lineWidth: 1.5)
+                                .stroke(isOn ? option.color : Color.clear, lineWidth: 1.5)
                         )
                         .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
                         .contentShape(RoundedRectangle(cornerRadius: WTRadius.md))
@@ -498,15 +498,6 @@ private struct IntensityField: View {
                     .accessibilityAddTraits(isOn ? .isSelected : [])
                 }
             }
-        }
-    }
-
-    private static func tint(_ level: DifficultyLevel) -> Color {
-        switch level {
-        case .easy: Color(red: 0.30, green: 0.74, blue: 0.46)
-        case .moderate: Color(red: 0.27, green: 0.62, blue: 0.86)
-        case .hard: Color(red: 0.93, green: 0.60, blue: 0.20)
-        case .challenge: Color(red: 0.90, green: 0.33, blue: 0.30)
         }
     }
 }

@@ -78,9 +78,24 @@ struct SkillSubSectionHeader: View {
     }
 }
 
+// MARK: - 难度配色
+
+extension SkillTier {
+    /// 难度配色，与训练强度 RPE 四色统一（`DifficultyLevel.color` 为唯一来源）：
+    /// L1=轻松 / L2=适中 / L3=困难 / L4·L5=挑战（红）。
+    var color: Color {
+        switch self {
+        case .l1: DifficultyLevel.easy.color
+        case .l2: DifficultyLevel.moderate.color
+        case .l3: DifficultyLevel.hard.color
+        case .l4, .l5: DifficultyLevel.challenge.color
+        }
+    }
+}
+
 // MARK: - 等级条形徽章
 
-/// `L3 ▮▮▮▯▯`：等宽等级 + 5 格按 tier 点亮。
+/// `L3 ▮▮▮▯▯`：等宽等级 + 5 格按 tier 点亮，颜色按难度区分（与 RPE 强度四色统一）。
 struct TierBars: View {
     let tier: SkillTier
 
@@ -98,11 +113,11 @@ struct TierBars: View {
         HStack(spacing: 4) {
             Text(tier.label)
                 .font(WTFont.mono(10, weight: .semibold))
-                .foregroundStyle(Color.wtTextSecondary)
+                .foregroundStyle(tier.color)
             HStack(spacing: 2) {
                 ForEach(0 ..< 5, id: \.self) { i in
                     RoundedRectangle(cornerRadius: 0.5)
-                        .fill(i < level ? Color.wtPrimary : Color.wtSurface2)
+                        .fill(i < level ? tier.color : Color.wtSurface2)
                         .frame(width: 3, height: 9)
                 }
             }
@@ -125,14 +140,9 @@ struct MasteryRing: View {
                 .trim(from: 0, to: max(0, min(1, progress)))
                 .stroke(Color.wtPrimary, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
                 .rotationEffect(.degrees(-90))
-            VStack(spacing: 1) {
-                Text("\(Int((progress * 100).rounded()))%")
-                    .font(WTFont.mono(20, weight: .bold))
-                    .foregroundStyle(Color.wtTextPrimary)
-                Text("已掌握")
-                    .font(.system(size: 9))
-                    .foregroundStyle(Color.wtTextSecondary)
-            }
+            Text("\(Int((progress * 100).rounded()))%")
+                .font(WTFont.mono(22, weight: .bold))
+                .foregroundStyle(Color.wtTextPrimary)
         }
     }
 }
@@ -168,22 +178,21 @@ struct SkillProgressBar: View {
 
 // MARK: - 统一动作行
 
-/// 列表 / 扁平列表 / 线路详情共用的动作行（StatusGlyph + 中文名 + 等宽英文名 + TierBars）。
-struct SkillStatusRow: View {
+/// 动作行主体（中文名 + 等宽英文名 + 右侧成绩/难度 + chevron），不含左侧状态指示。
+/// 分类列表（前置 StatusGlyph）与线路详情（前置地铁站点圆）共用，保证两处样式一致。
+struct SkillRowContent: View {
     let skill: SkillDefinition
-    let status: SkillMasteryStatus
     var bestEntry: SkillTrainingEntry? = nil
     var showChevron: Bool = true
+    /// 未解锁时正文置灰。
+    var dimmed: Bool = false
 
     var body: some View {
         HStack(spacing: WTSpacing.sm) {
-            StatusGlyph(status: status)
-                .frame(width: 28)
-
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: 3) {
                 Text(skill.name)
                     .font(WTFont.bodyBold)
-                    .foregroundStyle(Color.wtTextPrimary)
+                    .foregroundStyle(dimmed ? Color.wtTextDisabled : Color.wtTextPrimary)
                 if !skill.englishName.isEmpty {
                     Text(skill.englishName)
                         .font(.system(size: 12))
@@ -208,6 +217,23 @@ struct SkillStatusRow: View {
                     .foregroundStyle(Color.wtTextSecondary)
                     .padding(.leading, 2)
             }
+        }
+    }
+}
+
+/// 列表 / 扁平列表共用的动作行（StatusGlyph + SkillRowContent）。
+struct SkillStatusRow: View {
+    let skill: SkillDefinition
+    let status: SkillMasteryStatus
+    var bestEntry: SkillTrainingEntry? = nil
+    var showChevron: Bool = true
+
+    var body: some View {
+        HStack(spacing: WTSpacing.sm) {
+            StatusGlyph(status: status)
+                .frame(width: 28)
+
+            SkillRowContent(skill: skill, bestEntry: bestEntry, showChevron: showChevron)
         }
         .padding(.horizontal, WTSpacing.md)
         .padding(.vertical, 12)
@@ -309,76 +335,59 @@ struct MetroLineMini: View {
 
 // MARK: - 地铁线路（纵向单站）
 
-/// 路径详情的单个站点：左侧站点圆 + 上下连线 + 序号；右侧动作信息；当前站挂 YOU ARE HERE 标。
+/// 路径详情的单个站点：左侧站点圆 + 上下连线（贯通连接相邻站点）；右侧复用 `SkillRowContent`（中文 + 英文 + 难度），与分类列表样式统一。
 struct MetroStationRow: View {
-    let index: Int
     let skill: SkillDefinition
     let status: SkillMasteryStatus
     let isCurrent: Bool
+    let isFirst: Bool
     let isLast: Bool
-    /// 此站下方连线是否点亮（当前站之前为绿）。
+    /// 此站上方连线是否点亮。
+    let lineAboveActive: Bool
+    /// 此站下方连线是否点亮。
     let lineBelowActive: Bool
+    /// 顺序解锁：前一站未掌握且本站尚未标记时未解锁（灰显 + 锁图标，仍可点开）。
+    var isLocked: Bool = false
 
     var body: some View {
-        HStack(alignment: .top, spacing: WTSpacing.md) {
-            VStack(spacing: 0) {
-                stationDot
-                if !isLast {
+        HStack(alignment: .center, spacing: WTSpacing.md) {
+            ZStack {
+                VStack(spacing: 0) {
+                    Rectangle()
+                        .fill(lineAboveActive ? Color.wtPrimary : Color.wtSurface2)
+                        .frame(width: 2)
+                        .frame(maxHeight: .infinity)
+                        .opacity(isFirst ? 0 : 1)
                     Rectangle()
                         .fill(lineBelowActive ? Color.wtPrimary : Color.wtSurface2)
                         .frame(width: 2)
                         .frame(maxHeight: .infinity)
+                        .opacity(isLast ? 0 : 1)
                 }
+                stationDot
+                    .background(Circle().fill(Color.wtBackground))
             }
             .frame(width: 28)
 
-            VStack(alignment: .leading, spacing: 4) {
-                HStack(alignment: .firstTextBaseline, spacing: WTSpacing.xs) {
-                    Text(String(format: "%02d", index))
-                        .font(WTFont.mono(11, weight: .medium))
-                        .foregroundStyle(Color.wtTextDisabled)
-                    Text(skill.name)
-                        .font(WTFont.bodyBold)
-                        .foregroundStyle(isReachable ? Color.wtTextPrimary : Color.wtTextDisabled)
-                    Spacer(minLength: WTSpacing.sm)
-                    TierBars(tier: skill.tier)
-                }
-
-                if isCurrent {
-                    HStack(spacing: 5) {
-                        Text("当前")
-                            .font(.system(size: 10, weight: .semibold))
-                        if let rationale = skill.prereqRationale {
-                            Text("· \(rationale)")
-                                .font(.system(size: 10, weight: .medium))
-                        }
-                    }
-                    .foregroundStyle(Color.black)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(Color.wtPrimary)
-                    .clipShape(RoundedRectangle(cornerRadius: WTRadius.sm))
-                    .padding(.top, 2)
-                }
-            }
-            .padding(.bottom, isLast ? 0 : WTSpacing.lg)
-
-            Image(systemName: "chevron.right")
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(Color.wtTextDisabled)
-                .padding(.top, WTSpacing.xs)
+            SkillRowContent(skill: skill, showChevron: true, dimmed: isLocked)
         }
+        .frame(minHeight: 68)
         .padding(.horizontal, WTSpacing.lg)
         .contentShape(Rectangle())
     }
 
-    /// 已掌握 / 进行中 / 想学 = 可达（实心字），未标记 = 暗（视作未解锁）。
-    private var isReachable: Bool { status != .unmarked }
-
     @ViewBuilder
     private var stationDot: some View {
         ZStack {
-            if status == .mastered {
+            if isLocked {
+                Circle()
+                    .strokeBorder(style: StrokeStyle(lineWidth: 1.5, dash: [3, 3]))
+                    .foregroundStyle(Color.wtTextDisabled)
+                    .frame(width: 28, height: 28)
+                Image(systemName: "lock.fill")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(Color.wtTextDisabled)
+            } else if status == .mastered {
                 Circle().fill(Color.wtPrimary).frame(width: 28, height: 28)
                 Image(systemName: "checkmark")
                     .font(.system(size: 13, weight: .bold))
@@ -399,6 +408,52 @@ struct MetroStationRow: View {
             }
         }
         .frame(width: 28, height: 28)
+    }
+}
+
+// MARK: - 进阶路线列表卡片
+
+/// 进阶路线列表里的单条路线卡：图标 + 路线名 + 进度条 + 进度数字 + chevron。
+struct PathRowCard: View {
+    let path: ProgressionPath
+    let statusMap: [String: SkillStatus]
+
+    private var progress: (mastered: Int, inProgress: Int, total: Int) {
+        let skills = path.steps.compactMap { SkillLibrary.skillById[$0] }
+        let m = skills.filter { statusMap[$0.id]?.status == .mastered }.count
+        let ip = skills.filter { statusMap[$0.id]?.status == .inProgress }.count
+        return (m, ip, skills.count)
+    }
+
+    var body: some View {
+        HStack(spacing: WTSpacing.md) {
+            Image(systemName: path.icon)
+                .font(.system(size: 18, weight: .medium))
+                .foregroundStyle(Color.wtPrimary)
+                .frame(width: 44, height: 44)
+                .background(Color.wtPrimary.opacity(0.12))
+                .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
+
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(alignment: .firstTextBaseline) {
+                    Text(path.name)
+                        .font(WTFont.bodyBold)
+                        .foregroundStyle(Color.wtTextPrimary)
+                    Spacer(minLength: WTSpacing.sm)
+                    Text("\(progress.mastered)/\(progress.total)")
+                        .font(WTFont.mono(12, weight: .semibold))
+                        .foregroundStyle(Color.wtTextSecondary)
+                }
+                SkillProgressBar(total: progress.total, mastered: progress.mastered, inProgress: progress.inProgress)
+            }
+
+            Image(systemName: "chevron.right")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(Color.wtTextDisabled)
+        }
+        .padding(WTSpacing.md)
+        .background(Color.wtSurface)
+        .clipShape(RoundedRectangle(cornerRadius: WTRadius.lg))
     }
 }
 

@@ -43,15 +43,15 @@ struct SkillDetailView: View {
             Color.wtBackground.ignoresSafeArea()
             ScrollView {
                 VStack(alignment: .leading, spacing: WTSpacing.lg) {
-                    videoPlaceholder
                     titleSection
+                    videoPlaceholder
                     statusSection
                     myDataSection
-                    if !prereqSkills.isEmpty {
-                        chainSection
-                    }
                     if !entries.isEmpty {
                         trainingHistorySection
+                    }
+                    if !prereqSkills.isEmpty {
+                        chainSection
                     }
                     introSection
                     stepsSection
