@@ -52,7 +52,7 @@ struct ProgressionPathDetailView: View {
 
     private var headerSection: some View {
         VStack(alignment: .leading, spacing: WTSpacing.sm) {
-            Text(path.name)
+            Text(path.localizedName)
                 .font(.system(size: 28, weight: .bold))
                 .foregroundStyle(Color.wtTextPrimary)
 
@@ -70,10 +70,10 @@ struct ProgressionPathDetailView: View {
     }
 
     @ViewBuilder private var introSection: some View {
-        if !path.intro.isEmpty {
+        if !path.localizedIntro.isEmpty {
             VStack(alignment: .leading, spacing: WTSpacing.sm) {
                 SkillSubSectionHeader(title: "路线进阶提示")
-                Text(path.intro)
+                Text(path.localizedIntro)
                     .font(WTFont.body)
                     .foregroundStyle(Color.wtTextSecondary)
                     .fixedSize(horizontal: false, vertical: true)

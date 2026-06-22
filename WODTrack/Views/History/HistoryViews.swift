@@ -274,10 +274,10 @@ struct HistoryDetailView: View {
 
     private var saveButtonTitle: String {
         switch saveState {
-        case .idle: "保存图片到相册"
-        case .saving: "保存中…"
-        case .saved: "已保存"
-        case .failed: "保存失败"
+        case .idle: String(localized: "保存图片到相册")
+        case .saving: String(localized: "保存中…")
+        case .saved: String(localized: "已保存")
+        case .failed: String(localized: "保存失败")
         }
     }
 
@@ -417,7 +417,7 @@ struct HistoryDetailView: View {
         }
     }
 
-    private func detailTextCard(title: String, text: String) -> some View {
+    private func detailTextCard(title: LocalizedStringKey, text: String) -> some View {
         VStack(alignment: .leading, spacing: WTSpacing.sm) {
             Text(title)
                 .font(WTFont.caption)
@@ -463,7 +463,7 @@ struct HistoryDetailView: View {
 
 /// 详情页数据概览的单格：上方小标签、下方数值（左对齐，用于 2×2 网格）
 private struct StatCell<Value: View>: View {
-    let label: String
+    let label: LocalizedStringKey
     @ViewBuilder var value: Value
 
     var body: some View {

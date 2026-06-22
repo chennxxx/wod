@@ -55,7 +55,7 @@ struct SkillDetailView: View {
                     }
                     introSection
                     stepsSection
-                    if let points = skill.keyPoints, !points.isEmpty {
+                    if let points = skill.localizedKeyPoints {
                         keyPointsSection(points)
                     }
                     scalingSection
@@ -84,7 +84,7 @@ struct SkillDetailView: View {
     private var titleSection: some View {
         VStack(alignment: .leading, spacing: WTSpacing.xs) {
             HStack(alignment: .firstTextBaseline, spacing: WTSpacing.sm) {
-                Text(skill.name)
+                Text(skill.localizedName)
                     .font(.system(size: 28, weight: .bold))
                     .foregroundStyle(Color.wtTextPrimary)
                 TierBars(tier: skill.tier)
@@ -181,11 +181,11 @@ struct SkillDetailView: View {
     }
 
     private var introSection: some View {
-        textSection(title: "动作简介", text: skill.intro)
+        textSection(title: "动作简介", text: skill.localizedIntro)
     }
 
     private var stepsSection: some View {
-        textSection(title: "动作步骤", text: skill.steps)
+        textSection(title: "动作步骤", text: skill.localizedSteps)
     }
 
     private func keyPointsSection(_ points: String) -> some View {
@@ -193,10 +193,10 @@ struct SkillDetailView: View {
     }
 
     private var scalingSection: some View {
-        textSection(title: "降阶替代", text: skill.scaling)
+        textSection(title: "降阶替代", text: skill.localizedScaling)
     }
 
-    private func textSection(title: String, text: String) -> some View {
+    private func textSection(title: LocalizedStringKey, text: String) -> some View {
         VStack(alignment: .leading, spacing: WTSpacing.sm) {
             SkillSubSectionHeader(title: title)
             Text(text)
@@ -274,7 +274,7 @@ private struct TrainingEntryRow: View {
 // MARK: - Sub-views
 
 private struct StatusButton: View {
-    let title: String
+    let title: LocalizedStringKey
     let isSelected: Bool
     let selectedColor: Color
     let action: () -> Void
@@ -293,7 +293,7 @@ private struct StatusButton: View {
 }
 
 private struct DataCell: View {
-    let label: String
+    let label: LocalizedStringKey
     let value: String
 
     var body: some View {
@@ -469,8 +469,7 @@ private struct AddTrainingEntrySheet: View {
 
     private var formattedDate: String {
         let f = DateFormatter()
-        f.dateStyle = .medium
-        f.locale = Locale(identifier: "zh_CN")
+        f.dateFormat = "yyyy.MM.dd"
         return f.string(from: date)
     }
 

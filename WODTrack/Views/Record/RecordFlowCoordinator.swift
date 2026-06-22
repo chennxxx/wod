@@ -165,7 +165,7 @@ private struct OCRLoadingView: View {
     let onRetry: () -> Void
     let onBack: () -> Void
 
-    private let messages = ["正在抓取白板内容", "正在处理白板内容", "正在将图片转化为文字"]
+    private let messages = [String(localized: "正在抓取白板内容"), String(localized: "正在处理白板内容"), String(localized: "正在将图片转化为文字")]
     @State private var messageIndex = 0
     @State private var cycleTimer: Timer?
 
@@ -386,7 +386,7 @@ C WOD/任务计时/7轮
 }
 
 private struct RecordFlowStepPage<Content: View, BottomBar: View>: View {
-    let title: String
+    let title: LocalizedStringKey
     let backAction: () -> Void
     @ViewBuilder let content: Content
     @ViewBuilder let bottomBar: BottomBar
@@ -413,7 +413,7 @@ private struct RecordFlowStepPage<Content: View, BottomBar: View>: View {
 }
 
 private struct RecordStepHeader: View {
-    let title: String
+    let title: LocalizedStringKey
     let backAction: () -> Void
 
     var body: some View {
@@ -638,7 +638,7 @@ private struct ScoreField: View {
         .buttonStyle(.plain)
     }
 
-    private func scoreTextField(text: Binding<String>, placeholder: String, keyboard: UIKeyboardType) -> some View {
+    private func scoreTextField(text: Binding<String>, placeholder: LocalizedStringKey, keyboard: UIKeyboardType) -> some View {
         TextField(placeholder, text: text)
             .keyboardType(keyboard)
             .font(WTFont.body)
@@ -650,7 +650,7 @@ private struct ScoreField: View {
             .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
     }
 
-    private func unitLabel(_ text: String) -> some View {
+    private func unitLabel(_ text: LocalizedStringKey) -> some View {
         Text(text)
             .font(WTFont.caption)
             .foregroundStyle(Color.wtTextSecondary)
@@ -1329,11 +1329,11 @@ private struct CardPreviewStep: View {
 
         var label: String {
             switch self {
-            case .template:   "模板"
-            case .modules:    "模块"
-            case .text:       "文字"
-            case .colorTheme: "配色"
-            case .position:   "位置"
+            case .template:   String(localized: "模板")
+            case .modules:    String(localized: "模块")
+            case .text:       String(localized: "文字")
+            case .colorTheme: String(localized: "配色")
+            case .position:   String(localized: "位置")
             }
         }
 

@@ -31,6 +31,15 @@ ICON = {
 }
 DEFAULT_ICON = "point.topleft.down.to.point.bottomright.curvepath.fill"
 
+# path_id → 路线英文名（xlsx 无英文名列，与 ICON 同样在脚本内查表维护）。
+EN_NAME = {
+    "path_1": "Jump Rope",
+    "path_2": "Handstand",
+    "path_3": "Bar Muscle-Up",
+    "path_4": "Pull-Up",
+    "path_5": "Toes-to-Bar",
+}
+
 
 def q(v):
     s = "" if v is None else str(v).strip()
@@ -46,22 +55,30 @@ def split_steps(v):
 def main():
     wb = openpyxl.load_workbook(XLSX, data_only=True)
     ws = wb.active
-    rows = [[ws.cell(r, c).value for c in range(1, 7)] for r in range(2, ws.max_row + 1)]
+    # 列：路径ID | 动作(name) | 动作ID(target) | 路径动作 | 路径动作ID(steps) | 路径说明(intro) | 路径说明_En
+    rows = [[ws.cell(r, c).value for c in range(1, ws.max_column + 1)] for r in range(2, ws.max_row + 1)]
     rows = [r for r in rows if r[0]]
+
+    def cell(r, i):
+        return r[i] if i < len(r) else None
 
     blocks = []
     for r in rows:
-        pid, name, target, _names, step_ids, intro = r
+        pid, name, target, _names, step_ids, intro = r[:6]
         pid = str(pid).strip()
+        en_name = EN_NAME.get(pid, "")          # 路线英文名走查表
+        en_intro = cell(r, 6)                   # 路径说明_En（第7列）
         steps = split_steps(step_ids)
         steps_lit = "[\n" + "".join(f"                {q(s)},\n" for s in steps) + "            ]"
         blocks.append(
             f'        ProgressionPath(\n'
             f'            id: {q(pid)},\n'
             f'            name: {q(name)},\n'
+            f'            englishName: {q(en_name)},\n'
             f'            icon: {q(ICON.get(pid, DEFAULT_ICON))},\n'
             f'            targetSkillId: {q(target)},\n'
             f'            intro: {q(intro)},\n'
+            f'            englishIntro: {q(en_intro)},\n'
             f'            steps: {steps_lit}\n'
             f'        )'
         )
@@ -77,11 +94,15 @@ import SwiftUI
 struct ProgressionPath: Identifiable {{
     let id: String
     let name: String
+    /// 英文路线名（来自 xlsx；空则运行时回退中文）。
+    var englishName: String = ""
     let icon: String
     /// 代表/目标动作（动作ID），仅作路线身份，不作为站点。
     let targetSkillId: String
     /// 路径说明，展示在路线详情页顶部。
     let intro: String
+    /// 英文路径说明（来自 xlsx；空则运行时回退中文）。
+    var englishIntro: String = ""
     /// 需按顺序依次解锁的动作 id 序列（metro 站点）。
     let steps: [String]
 }}

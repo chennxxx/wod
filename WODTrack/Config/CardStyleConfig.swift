@@ -13,11 +13,11 @@ enum CardModule: String, CaseIterable, Identifiable {
 
     var label: String {
         switch self {
-        case .date: "日期"
-        case .score: "成绩"
-        case .difficulty: "难度"
-        case .wodContent: "WOD 内容"
-        case .note: "备注"
+        case .date: String(localized: "日期")
+        case .score: String(localized: "成绩")
+        case .difficulty: String(localized: "难度")
+        case .wodContent: String(localized: "WOD 内容")
+        case .note: String(localized: "备注")
         }
     }
 
@@ -76,8 +76,8 @@ enum CardStyleConfig {
     static let freeStyles: [CardStyle] = [
         .init(
             id: "style_framed_bottom",
-            name: "边框留白",
-            summary: "照片装进色框、四周留白，数据压在照片上",
+            name: String(localized: "边框留白"),
+            summary: String(localized: "照片装进色框、四周留白，数据压在照片上"),
             overlay: .plain,
             layout: .framedBottom,
             isPro: false,
@@ -85,8 +85,8 @@ enum CardStyleConfig {
         ),
         .init(
             id: "style_mono_overlay",
-            name: "训练日志",
-            summary: "直接压字到图片上，参考你发的样式",
+            name: String(localized: "训练日志"),
+            summary: String(localized: "直接压字到图片上，参考你发的样式"),
             overlay: .soft,
             layout: .rightOverlayMono,
             isPro: false,
@@ -94,8 +94,8 @@ enum CardStyleConfig {
         ),
         .init(
             id: "style_basic_dark",
-            name: "夜训卡片",
-            summary: "底部信息卡，适合内容多的 WOD",
+            name: String(localized: "夜训卡片"),
+            summary: String(localized: "底部信息卡，适合内容多的 WOD"),
             overlay: .dark,
             layout: .bottomCard,
             isPro: false,
@@ -103,8 +103,8 @@ enum CardStyleConfig {
         ),
         .init(
             id: "style_minimal_white",
-            name: "极简白底",
-            summary: "浅色信息卡，适合日间分享",
+            name: String(localized: "极简白底"),
+            summary: String(localized: "浅色信息卡，适合日间分享"),
             overlay: .light,
             layout: .bottomCardLight,
             isPro: false,
@@ -112,8 +112,8 @@ enum CardStyleConfig {
         ),
         .init(
             id: "style_hero_title",
-            name: "大字报",
-            summary: "超大标题字体，视觉冲击力强",
+            name: String(localized: "大字报"),
+            summary: String(localized: "超大标题字体，视觉冲击力强"),
             overlay: .dark,
             layout: .heroTitle,
             isPro: false,
@@ -121,8 +121,8 @@ enum CardStyleConfig {
         ),
         .init(
             id: "style_data_dashboard",
-            name: "数据仪表盘",
-            summary: "强调训练数字，数据卡片风格",
+            name: String(localized: "数据仪表盘"),
+            summary: String(localized: "强调训练数字，数据卡片风格"),
             overlay: .dark,
             layout: .dataDashboard,
             isPro: false,
@@ -130,8 +130,8 @@ enum CardStyleConfig {
         ),
         .init(
             id: "style_retro_film",
-            name: "胶片复古",
-            summary: "胶片颗粒感，带日期戳，怀旧拍摄风",
+            name: String(localized: "胶片复古"),
+            summary: String(localized: "胶片颗粒感，带日期戳，怀旧拍摄风"),
             overlay: .grain,
             layout: .retroFilm,
             isPro: false,

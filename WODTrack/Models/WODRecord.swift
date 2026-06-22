@@ -70,10 +70,10 @@ enum DifficultyLevel: Int, CaseIterable, Identifiable {
 
     var label: String {
         switch self {
-        case .easy: "轻松"
-        case .moderate: "适中"
-        case .hard: "困难"
-        case .challenge: "挑战"
+        case .easy: String(localized: "轻松")
+        case .moderate: String(localized: "适中")
+        case .hard: String(localized: "困难")
+        case .challenge: String(localized: "挑战")
         }
     }
 
@@ -147,17 +147,17 @@ enum WODType: String, Codable, CaseIterable, Identifiable {
         case .amrap: "AMRAP"
         case .emom: "EMOM"
         case .maxLoad: "Max Load"
-        case .other: "其他"
+        case .other: String(localized: "其他")
         }
     }
 
     var scorePlaceholder: String {
         switch self {
-        case .forTime: "MM:SS，例如 04:32"
-        case .amrap: "例如 18 rounds + 7 reps"
-        case .emom: "完成 / 第 X 组未完成"
-        case .maxLoad: "例如 100 kg"
-        case .other: "自由填写成绩"
+        case .forTime: String(localized: "MM:SS，例如 04:32")
+        case .amrap: String(localized: "例如 18 rounds + 7 reps")
+        case .emom: String(localized: "完成 / 第 X 组未完成")
+        case .maxLoad: String(localized: "例如 100 kg")
+        case .other: String(localized: "自由填写成绩")
         }
     }
 }
@@ -233,8 +233,8 @@ struct TextLayout: Codable {
 
         var label: String {
             switch self {
-            case .fill: "填充裁切"
-            case .fit: "完整显示"
+            case .fill: String(localized: "填充裁切")
+            case .fit: String(localized: "完整显示")
             }
         }
 
@@ -247,8 +247,8 @@ struct TextLayout: Codable {
 
         var description: String {
             switch self {
-            case .fill: "照片铺满画布，边缘自动裁切"
-            case .fit: "完整保留照片，边缘用模糊填充"
+            case .fill: String(localized: "照片铺满画布，边缘自动裁切")
+            case .fit: String(localized: "完整保留照片，边缘用模糊填充")
             }
         }
     }
@@ -261,8 +261,8 @@ struct TextLayout: Codable {
 
         var label: String {
             switch self {
-            case .leading: "左侧"
-            case .trailing: "右侧"
+            case .leading: String(localized: "左侧")
+            case .trailing: String(localized: "右侧")
             }
         }
 
@@ -283,9 +283,9 @@ struct TextLayout: Codable {
 
         var label: String {
             switch self {
-            case .top: "顶部"
-            case .center: "居中"
-            case .bottom: "底部"
+            case .top: String(localized: "顶部")
+            case .center: String(localized: "居中")
+            case .bottom: String(localized: "底部")
             }
         }
     }
@@ -300,10 +300,10 @@ struct TextLayout: Codable {
 
         var label: String {
             switch self {
-            case .display: "标准"
-            case .rounded: "圆角"
-            case .serif: "衬线"
-            case .mono: "等宽"
+            case .display: String(localized: "标准")
+            case .rounded: String(localized: "圆角")
+            case .serif: String(localized: "衬线")
+            case .mono: String(localized: "等宽")
             }
         }
     }

@@ -17,7 +17,7 @@ final class AppState {
     /// 保存记录后自动弹登录页的冷却期
     private static let loginPromptCooldown: TimeInterval = 7 * 24 * 3600
 
-    private static let defaultNickname = "迹录用户"
+    private static let defaultNickname = String(localized: "迹录用户")
 
     var profile: UserProfile
     var showLoginPage = false
@@ -88,7 +88,7 @@ final class AppState {
         profile.appleUserID = userID
         profile.userId = userID
         profile.isLoggedIn = true
-        showToast("登录成功")
+        showToast(String(localized: "登录成功"))
     }
 
     func signOut() {
@@ -126,7 +126,7 @@ final class AppState {
     func setCustomAvatar(imageData: Data) {
         guard let image = UIImage(data: imageData),
               let jpegData = Self.squareThumbnail(from: image)?.jpegData(compressionQuality: 0.85) else {
-            showToast("头像设置失败，请重试")
+            showToast(String(localized: "头像设置失败，请重试"))
             return
         }
 
@@ -138,7 +138,7 @@ final class AppState {
             profile.avatar = .custom
             touchProfileEdited()
         } catch {
-            showToast("头像设置失败，请重试")
+            showToast(String(localized: "头像设置失败，请重试"))
         }
     }
 

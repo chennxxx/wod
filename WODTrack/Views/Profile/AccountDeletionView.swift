@@ -74,7 +74,7 @@ struct AccountDeletionView: View {
         .clipShape(RoundedRectangle(cornerRadius: WTRadius.lg))
     }
 
-    private func processRow(index: Int, text: String) -> some View {
+    private func processRow(index: Int, text: LocalizedStringKey) -> some View {
         HStack(alignment: .top, spacing: WTSpacing.md - 4) {
             Text("\(index)")
                 .font(.system(size: 13, weight: .bold))
@@ -149,12 +149,12 @@ struct AccountDeletionView: View {
 
     private func copyIdentifier() {
         UIPasteboard.general.string = accountIdentifier
-        appState.showToast("已复制账号标识")
+        appState.showToast(String(localized: "已复制账号标识"))
     }
 
     private func submitDeletion() {
         UIPasteboard.general.string = accountIdentifier
         openURL(accountDeletionFormURL)
-        appState.showToast("已复制账号标识，请在表单中粘贴")
+        appState.showToast(String(localized: "已复制账号标识，请在表单中粘贴"))
     }
 }

@@ -6,10 +6,10 @@ enum SkillMasteryStatus: String, Codable {
 
     var label: String {
         switch self {
-        case .unmarked: "未标记"
-        case .wantToLearn: "想学"
-        case .inProgress: "进行中"
-        case .mastered: "已掌握"
+        case .unmarked: String(localized: "未标记")
+        case .wantToLearn: String(localized: "想学")
+        case .inProgress: String(localized: "进行中")
+        case .mastered: String(localized: "已掌握")
         }
     }
 }

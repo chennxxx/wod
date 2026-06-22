@@ -35,7 +35,7 @@ struct ProfileView: View {
                                 icon: "icloud",
                                 iconTint: Color(hex: "#6EA2FF"),
                                 title: "iCloud 同步",
-                                value: syncManager.isSyncEnabled ? "已开启" : "未开启"
+                                value: syncManager.isSyncEnabled ? String(localized: "已开启") : String(localized: "未开启")
                             )
                         }
                         .buttonStyle(.plain)
@@ -44,7 +44,7 @@ struct ProfileView: View {
                             icon: "icloud",
                             iconTint: Color(hex: "#6EA2FF"),
                             title: "iCloud 同步",
-                            value: "未登录"
+                            value: String(localized: "未登录")
                         ) {
                             pendingSyncNavigation = true
                             appState.showLoginPage = true
@@ -52,7 +52,7 @@ struct ProfileView: View {
                     }
                     rowDivider
                     ProfileRow(icon: "arrow.down.circle", title: "本地数据备份") {
-                        appState.showToast("即将推出")
+                        appState.showToast(String(localized: "即将推出"))
                     }
                 }
 
@@ -296,7 +296,7 @@ struct ProfileView: View {
     // MARK: - 行组
 
     @ViewBuilder
-    private func rowGroup(label: String, @ViewBuilder content: () -> some View) -> some View {
+    private func rowGroup(label: LocalizedStringKey, @ViewBuilder content: () -> some View) -> some View {
         VStack(alignment: .leading, spacing: WTSpacing.sm + 1) {
             Text(label)
                 .font(.system(size: 12, weight: .semibold))
@@ -330,7 +330,7 @@ struct ProfileView: View {
 private struct ProfileRowLabel: View {
     let icon: String
     var iconTint: Color?
-    let title: String
+    let title: LocalizedStringKey
     var value: String?
 
     var body: some View {
@@ -368,7 +368,7 @@ private struct ProfileRowLabel: View {
 private struct ProfileRow: View {
     let icon: String
     var iconTint: Color?
-    let title: String
+    let title: LocalizedStringKey
     var value: String?
     let action: () -> Void
 

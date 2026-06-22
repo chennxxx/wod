@@ -42,7 +42,7 @@ struct StatusGlyph: View {
 
 /// 左侧细绿竖条 + 中文标题 + 灰色等宽副标 + 可选尾部读数。
 struct SkillSectionHeader: View {
-    let title: String
+    let title: LocalizedStringKey
     var mono: String? = nil
     var trailing: String? = nil
 
@@ -69,7 +69,7 @@ struct SkillSectionHeader: View {
 /// 次级页面内的小标题（与记录详情页「WOD 内容」等标题一致）：caption 字号 + 次要灰，无竖线。
 /// 用于动作详情页这类二级页面内部分节，区别于页面级的 `SkillSectionHeader`。
 struct SkillSubSectionHeader: View {
-    let title: String
+    let title: LocalizedStringKey
 
     var body: some View {
         Text(title)
@@ -190,11 +190,12 @@ struct SkillRowContent: View {
     var body: some View {
         HStack(spacing: WTSpacing.sm) {
             VStack(alignment: .leading, spacing: 3) {
-                Text(skill.name)
+                Text(skill.localizedName)
                     .font(WTFont.bodyBold)
                     .foregroundStyle(dimmed ? Color.wtTextDisabled : Color.wtTextPrimary)
-                if !skill.englishName.isEmpty {
-                    Text(skill.englishName)
+                let secondaryName = AppLanguage.isEnglish ? skill.name : skill.englishName
+                if !secondaryName.isEmpty {
+                    Text(secondaryName)
                         .font(.system(size: 12))
                         .foregroundStyle(Color.wtTextSecondary)
                         .lineLimit(1)
@@ -258,7 +259,7 @@ struct CategoryModuleCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: WTSpacing.md) {
             HStack(alignment: .firstTextBaseline, spacing: WTSpacing.sm) {
-                Text(category.name)
+                Text(category.localizedName)
                     .font(.system(size: 20, weight: .bold))
                     .foregroundStyle(Color.wtTextPrimary)
                 Spacer(minLength: WTSpacing.sm)
@@ -436,7 +437,7 @@ struct PathRowCard: View {
 
             VStack(alignment: .leading, spacing: 6) {
                 HStack(alignment: .firstTextBaseline) {
-                    Text(path.name)
+                    Text(path.localizedName)
                         .font(WTFont.bodyBold)
                         .foregroundStyle(Color.wtTextPrimary)
                     Spacer(minLength: WTSpacing.sm)
