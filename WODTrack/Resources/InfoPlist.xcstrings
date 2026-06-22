@@ -1,8 +1,9 @@
 {
   "sourceLanguage" : "zh-Hans",
   "strings" : {
-    "CFBundleDisplayName" : {
-      "extractionState" : "stale",
+    "CFBundleName" : {
+      "comment" : "Bundle name",
+      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -10,18 +11,6 @@
             "value" : "WOD Trace"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "迹录WOD：每一次进步都有迹可循"
-          }
-        }
-      }
-    },
-    "CFBundleName" : {
-      "comment" : "Bundle name",
-      "extractionState" : "extracted_with_value",
-      "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "new",
