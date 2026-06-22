@@ -1,13 +1,15 @@
 # 维护更新记录
 
-## 英文版（进行中）- 2026-06-20
+## 英文版上线 - 2026-06-22
 
 **全量本地化：同一 App 跟随系统语言自动中/英文切换（品牌英文名 WOD Trace）**
 
 - **运行时语言层**：新增 `WODTrack/Config/Localization.swift`，提供 `AppLanguage.isEnglish` 与各数据结构的 `localized*` 取值（动作名/简介/步骤/要点/降阶、分类、进阶路线名/说明、难度 `SkillTier`），并为分类/子类（动作模式）、计量、难度等固定名词内置中英查表。技能树、动作详情、进阶路线、二级分类页等展示处统一改用 `localized*`，英文缺失时自动回退中文。
-- **数据层双语字段**：`SkillDefinition` / `ProgressionPath` 新增 `englishIntro/englishSteps/englishKeyPoints/englishScaling`、`englishName/englishIntro` 字段；`gen_skilldata.py` / `gen_progressionpath.py` 改造为读取 xlsx 英文列并 emit（缺列安全回退）。动作库/进阶路线的英文长文本由更新 xlsx 后重跑脚本填充。
+- **动作库全英文**：`SkillDefinition` 新增 `englishIntro/englishSteps/englishKeyPoints/englishScaling` 字段，`gen_skilldata.py` 改造读取 xlsx 英文列生成。123 个动作（体操 56 / 举重 67）的名称、简介、步骤、要点、降阶替代英文全部到位。
+- **进阶路线全英文**：`ProgressionPath` 新增 `englishName/englishIntro`，`gen_progressionpath.py` 读取「路径说明_En」生成，路线英文名（Jump Rope / Handstand / Bar Muscle-Up / Pull-Up / Toes-to-Bar）随脚本内查表维护。5 条路线名称与说明英文齐全。
 - **UI 文案 String Catalog**：以 `Localizable.xcstrings` 取代失效的 `Localizable.strings`，全量 UI 文案（按钮/标题/提示/弹窗/错误/状态等约 280 条）补齐英文；自定义组件 `title/label` 等参数改为 `LocalizedStringKey`，枚举展示标签与动态串改用 `String(localized:)`，确保运行时真正切换。
 - **App 名称与系统权限**：新增 `InfoPlist.xcstrings`，英文环境 App 名显示 `WOD Trace`，相机/相册权限说明同步本地化。
+- **细节打磨**：英文首页标语「Track every workout.」（单行不截断）；Add Entry 日期改 `yyyy.MM.dd`（不再出现中文「年月日」）；首页统计「Check-ins」单行对齐；技能树仪表盘状态、动作详情等残余中文清零。
 - **数据安全**：本地化仅作用于展示层，不改任何 `@Model` 字段；已持久化/同步的成绩文本（如「X 轮」）保持原样，避免影响 CloudKit 与多设备一致性。
 - 工程已声明 `knownRegions = zh-Hans, en`，跟随系统语言；中文为开发语言，行为不变。
 
