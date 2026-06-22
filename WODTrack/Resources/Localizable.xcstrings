@@ -17,9 +17,6 @@
     ":" : {
 
     },
-    "·" : {
-
-    },
     "(RPE)" : {
 
     },
@@ -258,12 +255,6 @@
     "PRO" : {
 
     },
-    "Pro 会员" : {
-
-    },
-    "Pro 高级卡片模板（陆续上线）" : {
-
-    },
     "reps" : {
 
     },
@@ -340,6 +331,16 @@
         }
       }
     },
+    "今天的你，又强了一点点" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A little stronger than yesterday"
+          }
+        }
+      }
+    },
     "今天的感受、重量来源等" : {
       "localizations" : {
         "en" : {
@@ -359,9 +360,6 @@
           }
         }
       }
-    },
-    "今日免费识别已用完" : {
-
     },
     "从相册选取" : {
       "localizations" : {
@@ -389,6 +387,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Position"
+          }
+        }
+      }
+    },
+    "你的每一次努力，都算数" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every rep counts"
+          }
+        }
+      }
+    },
+    "你的每一次进步，都值得被记录" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every bit of progress is worth remembering"
           }
         }
       }
@@ -484,6 +502,7 @@
       }
     },
     "保存成功" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -503,9 +522,6 @@
         }
       }
     },
-    "免费版每天可识别 2 次。升级 Pro 后拍照识别不限次数。" : {
-
-    },
     "免费用户不可移除水印，Pro 样式需要订阅后解锁。" : {
       "localizations" : {
         "en" : {
@@ -517,7 +533,6 @@
       }
     },
     "免费用户不可移除水印，Pro 模板需要订阅后解锁。" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -616,9 +631,6 @@
           }
         }
       }
-    },
-    "最划算" : {
-
     },
     "最近记录" : {
       "localizations" : {
@@ -818,12 +830,6 @@
         }
       }
     },
-    "升级 Pro" : {
-
-    },
-    "升级 WOD Trace Pro" : {
-
-    },
     "占用空间" : {
       "localizations" : {
         "en" : {
@@ -894,15 +900,6 @@
           }
         }
       }
-    },
-    "去除卡片「@迹录 WOD」水印" : {
-
-    },
-    "去除卡片水印" : {
-
-    },
-    "去除水印、拍照识别不限次" : {
-
     },
     "反馈" : {
       "localizations" : {
@@ -984,9 +981,6 @@
         }
       }
     },
-    "商品暂时无法加载，请检查网络后重试。" : {
-
-    },
     "困难" : {
       "localizations" : {
         "en" : {
@@ -1027,6 +1021,16 @@
         }
       }
     },
+    "坚持训练的样子，真好看" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Showing up looks good on you"
+          }
+        }
+      }
+    },
     "填充裁切" : {
       "localizations" : {
         "en" : {
@@ -1036,9 +1040,6 @@
           }
         }
       }
-    },
-    "处理中…" : {
-
     },
     "备注" : {
       "localizations" : {
@@ -1300,9 +1301,6 @@
         }
       }
     },
-    "已解锁全部 Pro 权益，点击管理订阅" : {
-
-    },
     "已选照片" : {
       "localizations" : {
         "en" : {
@@ -1312,9 +1310,6 @@
           }
         }
       }
-    },
-    "年订阅" : {
-
     },
     "底部" : {
       "localizations" : {
@@ -1405,12 +1400,6 @@
           }
         }
       }
-    },
-    "恢复中…" : {
-
-    },
-    "恢复购买" : {
-
     },
     "想学" : {
       "localizations" : {
@@ -1533,9 +1522,6 @@
         }
       }
     },
-    "拍照识别不限次数" : {
-
-    },
     "挑战" : {
       "localizations" : {
         "en" : {
@@ -1565,9 +1551,6 @@
           }
         }
       }
-    },
-    "提示" : {
-
     },
     "搜索动作名称" : {
       "localizations" : {
@@ -1679,9 +1662,6 @@
         }
       }
     },
-    "月订阅" : {
-
-    },
     "未开启" : {
       "localizations" : {
         "en" : {
@@ -1691,9 +1671,6 @@
           }
         }
       }
-    },
-    "未找到可恢复的订阅。" : {
-
     },
     "未标记" : {
       "localizations" : {
@@ -2386,24 +2363,6 @@
         }
       }
     },
-    "解锁 Pro 卡片模板" : {
-
-    },
-    "解锁全部 Pro 权益，专注训练记录。" : {
-
-    },
-    "订阅" : {
-
-    },
-    "订阅 Pro，分享无「@迹录 WOD」水印的纯净卡片。" : {
-
-    },
-    "订阅 Pro，解锁全部高级卡片模板。" : {
-
-    },
-    "订阅会自动续期，可随时在系统「订阅」中取消。" : {
-
-    },
     "订阅后可用" : {
       "localizations" : {
         "en" : {
@@ -2664,12 +2623,6 @@
           }
         }
       }
-    },
-    "购买失败，请稍后重试" : {
-
-    },
-    "购买待确认，完成后将自动解锁。" : {
-
     },
     "超大标题字体，视觉冲击力强" : {
       "localizations" : {
@@ -2960,9 +2913,6 @@
           }
         }
       }
-    },
-    "高级数据统计（陆续上线）" : {
-
     }
   },
   "version" : "1.0"
