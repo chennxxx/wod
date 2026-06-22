@@ -1359,6 +1359,15 @@ private struct SaveSuccessStep: View {
     @State private var showConfetti = false
     @State private var didSave = false
 
+    /// 情绪文案池，每次进入成功页随机轮换一句（中文为 key，英文走 Localizable.xcstrings）
+    private let encouragements: [LocalizedStringKey] = [
+        "你的每一次进步，都值得被记录",
+        "今天的你，又强了一点点",
+        "坚持训练的样子，真好看",
+        "你的每一次努力，都算数"
+    ]
+    @State private var encouragement: LocalizedStringKey = "你的每一次进步，都值得被记录"
+
     var body: some View {
         ZStack {
             Color.wtBackground.ignoresSafeArea()
@@ -1367,18 +1376,13 @@ private struct SaveSuccessStep: View {
                 // 顶部标题栏
                 HStack {
                     Spacer()
-                    VStack(spacing: 4) {
-                        HStack(spacing: 6) {
-                            Image(systemName: "checkmark.circle.fill")
-                                .font(.system(size: 18, weight: .semibold))
-                                .foregroundStyle(Color.wtSuccess)
-                            Text("保存成功")
-                                .font(.system(size: 17, weight: .semibold))
-                                .foregroundStyle(Color.wtTextPrimary)
-                        }
+                    HStack(spacing: 6) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundStyle(Color.wtSuccess)
                         Text("已保存到相册")
-                            .font(WTFont.caption)
-                            .foregroundStyle(Color.wtTextSecondary)
+                            .font(.system(size: 17, weight: .semibold))
+                            .foregroundStyle(Color.wtTextPrimary)
                     }
                     Spacer()
                 }
@@ -1405,11 +1409,19 @@ private struct SaveSuccessStep: View {
                         .padding(.horizontal, WTSpacing.xl)
                 }
 
+                // 情绪文案（正文区域，字号更大、每次随机轮换）
+                Text(encouragement)
+                    .font(.system(size: 18, weight: .medium))
+                    .foregroundStyle(Color.wtTextPrimary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, WTSpacing.xl)
+                    .padding(.top, WTSpacing.lg)
+
                 Spacer()
 
-                // 底部按钮
-                VStack(spacing: WTSpacing.sm) {
-                    WTButton(title: "分享到社交媒体") {
+                // 底部按钮（横向并排）：分享=淡绿填充强调，完成=纯描边次要
+                HStack(spacing: WTSpacing.sm) {
+                    WTButton(title: "分享到社交媒体", style: .tinted) {
                         showShareSheet = true
                     }
                     WTButton(title: "完成", style: .secondary, action: onDone)
@@ -1419,13 +1431,18 @@ private struct SaveSuccessStep: View {
             }
 
             if showConfetti {
-                ConfettiView()
+                FireworkBurstView()
                     .ignoresSafeArea()
                     .allowsHitTesting(false)
             }
         }
         .onAppear {
+            encouragement = encouragements.randomElement() ?? encouragement
             showConfetti = true
+            // 礼花炸开瞬间来一记重震动，强化"砰"的惊喜感
+            let haptic = UIImpactFeedbackGenerator(style: .heavy)
+            haptic.prepare()
+            haptic.impactOccurred()
             if !didSave {
                 didSave = true
                 onSave()
@@ -1440,62 +1457,100 @@ private struct SaveSuccessStep: View {
     }
 }
 
-private struct ConfettiParticle: Identifiable {
-    let id = UUID()
-    let x: CGFloat
-    let color: Color
-    let size: CGFloat
-    let rotation: Double
-    let delay: Double
-    let duration: Double
-}
-
-private struct ConfettiView: View {
-    private let particles: [ConfettiParticle] = (0..<60).map { i in
-        let colors: [Color] = [.yellow, .green, .blue, .red, .orange, .purple, .pink, .cyan]
-        return ConfettiParticle(
-            x: CGFloat.random(in: 0...1),
-            color: colors[i % colors.count],
-            size: CGFloat.random(in: 6...12),
-            rotation: Double.random(in: 0...360),
-            delay: Double.random(in: 0...0.8),
-            duration: Double.random(in: 1.8...3.0)
-        )
+/// 底部双侧礼炮喷射特效：从屏幕左下、右下两角朝中上方"砰"地喷出彩屑，
+/// 冲高后受重力沿抛物线回落。基于原生 CAEmitterLayer，零第三方依赖。
+private struct FireworkBurstView: UIViewRepresentable {
+    func makeUIView(context: Context) -> FireworkBurstUIView {
+        FireworkBurstUIView()
     }
 
-    var body: some View {
-        GeometryReader { geo in
-            ForEach(particles) { p in
-                ConfettiPiece(particle: p, screenSize: geo.size)
-            }
+    func updateUIView(_ uiView: FireworkBurstUIView, context: Context) {}
+}
+
+private final class FireworkBurstUIView: UIView {
+    private var didFire = false
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        backgroundColor = .clear
+        isUserInteractionEnabled = false
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        // 等拿到真实尺寸后只发射一次
+        guard !didFire, bounds.width > 0, bounds.height > 0 else { return }
+        didFire = true
+        fireCannon(at: CGPoint(x: bounds.minX, y: bounds.maxY), emissionDegrees: -60)  // 左下角朝右上
+        fireCannon(at: CGPoint(x: bounds.maxX, y: bounds.maxY), emissionDegrees: -120) // 右下角朝左上
+    }
+
+    /// 在指定位置放一门礼炮，朝 emissionDegrees 方向（屏幕坐标，0°向右、负值向上）扇形喷射后停止。
+    private func fireCannon(at position: CGPoint, emissionDegrees: CGFloat) {
+        let emitter = CAEmitterLayer()
+        emitter.emitterPosition = position
+        emitter.emitterShape = .point
+        emitter.emitterSize = CGSize(width: 1, height: 1)
+        emitter.beginTime = CACurrentMediaTime()
+        emitter.emitterCells = makeCells(emissionDegrees: emissionDegrees)
+        layer.addSublayer(emitter)
+
+        // 像"砰"一下喷完：短暂高出生率后立即归零，残留粒子靠 lifetime 自然消散
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.28) {
+            emitter.birthRate = 0
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 4.5) {
+            emitter.removeFromSuperlayer()
         }
     }
-}
 
-private struct ConfettiPiece: View {
-    let particle: ConfettiParticle
-    let screenSize: CGSize
-    @State private var fallen = false
+    private func makeCells(emissionDegrees: CGFloat) -> [CAEmitterCell] {
+        let colors: [UIColor] = [
+            .systemYellow, .systemGreen, .systemBlue, .systemRed,
+            .systemOrange, .systemPurple, .systemPink, .systemTeal
+        ]
+        let image = Self.confettiImage
+        // CAEmitterCell 角度系统：0 沿 +x，逆时针为正；屏幕 y 向下，
+        // 故"向上"对应负角度，转成弧度。
+        let longitude = emissionDegrees * .pi / 180
 
-    var body: some View {
-        RoundedRectangle(cornerRadius: 2)
-            .fill(particle.color)
-            .frame(width: particle.size, height: particle.size * 0.5)
-            .rotationEffect(.degrees(fallen ? particle.rotation + 360 : particle.rotation))
-            .position(
-                x: particle.x * screenSize.width,
-                y: fallen ? screenSize.height + 20 : -20
-            )
-            .opacity(fallen ? 0 : 1)
-            .onAppear {
-                withAnimation(
-                    .easeIn(duration: particle.duration)
-                    .delay(particle.delay)
-                ) {
-                    fallen = true
-                }
-            }
+        return colors.map { color in
+            let cell = CAEmitterCell()
+            cell.contents = image
+            cell.color = color.cgColor
+            cell.birthRate = 28          // 每门炮每色约 28 片，两门 × 8 色 ≈ 满屏爆发
+            cell.lifetime = 3.4
+            cell.lifetimeRange = 0.8
+            cell.velocity = 1000         // 大初速 → 冲高（峰值约屏幕 3/4 处）
+            cell.velocityRange = 220
+            cell.emissionLongitude = longitude
+            cell.emissionRange = 50 * .pi / 180   // ±50° 扇形张开
+            cell.yAcceleration = 520     // 正值 = 向下重力，冲高后抛物线回落
+            cell.spin = 6                // 彩片翻滚
+            cell.spinRange = 8
+            cell.scale = 0.5
+            cell.scaleRange = 0.3
+            cell.alphaSpeed = -0.45      // 末段渐隐
+            return cell
+        }
     }
+
+    /// 代码生成的小圆角矩形彩片，作为粒子贴图（白色，实际颜色由 cell.color 着色）。
+    private static let confettiImage: CGImage = {
+        let size = CGSize(width: 14, height: 8)
+        let renderer = UIGraphicsImageRenderer(size: size)
+        let img = renderer.image { ctx in
+            let rect = CGRect(origin: .zero, size: size)
+            let path = UIBezierPath(roundedRect: rect, cornerRadius: 2)
+            UIColor.white.setFill()
+            path.fill()
+        }
+        return img.cgImage!
+    }()
 }
 
 private struct ShareSheet: UIViewControllerRepresentable {

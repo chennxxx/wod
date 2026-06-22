@@ -74,6 +74,8 @@ struct WTButton: View {
     enum Style {
         case primary
         case secondary
+        /// 绿色描边 + 淡绿色半透明填充（同「记录一次」chip），强调但不抢眼
+        case tinted
         case ghost
     }
 
@@ -104,19 +106,27 @@ struct WTButton: View {
     private var foreground: Color {
         switch style {
         case .primary: .black
-        case .secondary: .wtPrimary
+        case .secondary, .tinted: .wtPrimary
         case .ghost: .wtTextSecondary
         }
     }
 
     @ViewBuilder private var background: some View {
         RoundedRectangle(cornerRadius: WTRadius.md)
-            .fill(style == .primary ? Color.wtPrimary : .clear)
+            .fill(fillColor)
+    }
+
+    private var fillColor: Color {
+        switch style {
+        case .primary: .wtPrimary
+        case .tinted: .wtPrimary.opacity(0.15)
+        case .secondary, .ghost: .clear
+        }
     }
 
     @ViewBuilder private var border: some View {
         RoundedRectangle(cornerRadius: WTRadius.md)
-            .stroke(style == .secondary ? Color.wtPrimary : .clear, lineWidth: 1)
+            .stroke((style == .secondary || style == .tinted) ? Color.wtPrimary : .clear, lineWidth: 1)
     }
 }
 
