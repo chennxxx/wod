@@ -199,7 +199,7 @@ private struct LegalConsentView: View {
             HStack(spacing: 6) {
                 Image(systemName: document.icon)
                     .font(.system(size: 13, weight: .semibold))
-                Text("《\(document.title)》")
+                (Text(verbatim: "《") + Text(document.title) + Text(verbatim: "》"))
                     .font(.system(size: 14, weight: .semibold))
             }
             .foregroundStyle(Color.wtPrimary)
@@ -222,7 +222,7 @@ private struct LegalConsentView: View {
             }
 
             WTButton(title: "暂不同意", style: .ghost) {
-                localToast = "不同意将无法继续使用迹录 WOD"
+                localToast = String(localized: "不同意将无法继续使用迹录 WOD")
             }
         }
         .padding(.top, WTSpacing.sm)
@@ -436,7 +436,7 @@ private struct HeatmapGrid: View {
 private struct RecordStatBlock: View {
     let icon: String
     let value: String
-    let label: String
+    let label: LocalizedStringKey
 
     var body: some View {
         VStack(alignment: .leading, spacing: WTSpacing.xs) {
@@ -607,7 +607,7 @@ private struct ActivityRow: View {
         }
     }
 
-    private var skillName: String { skill?.name ?? "未知动作" }
+    private var skillName: String { skill?.localizedName ?? String(localized: "未知动作") }
 
     private var emoji: String {
         switch event {
@@ -620,13 +620,13 @@ private struct ActivityRow: View {
     private var title: String {
         switch event {
         case .mastered:
-            return "动作解锁 \(skillName)"
+            return String(localized: "动作解锁 \(skillName)")
         case let .completed(_, _, _, value, unit):
             let isWhole = value.truncatingRemainder(dividingBy: 1) == 0
             let numStr = isWhole ? String(Int(value)) : String(format: "%.1f", value)
-            return "动作训练 \(skillName) \(numStr) \(unit)"
+            return String(localized: "动作训练 \(skillName) \(numStr) \(unit)")
         case .wod:
-            return "完成WOD"
+            return String(localized: "完成WOD")
         }
     }
 

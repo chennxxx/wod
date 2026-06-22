@@ -18,6 +18,24 @@ CAT_ID = {"体操": "gymnastics", "举重": "weightlifting"}
 CAT_PREFIX = {"gymnastics": "gym", "weightlifting": "wl"}
 TIER = {1: ".l1", 2: ".l2", 3: ".l3", 4: ".l4", 5: ".l5"}
 
+# xlsx「动作库」列索引（0-based，对应 row[i]）。
+# 表头：动作编号 | 动作名称 | 动作名称_En | 训练类别 | 动作模式 | 计量方式 | 难度 |
+#       动作简介 | 动作简介_En | 动作步骤 | 动作步骤_En | 要点与注意 | 要点与注意_En |
+#       前置动作 | 前置依据 | 降阶替代 | 源ID | 英文名称 | 视频链接
+# 中文列后紧跟对应 _En 列；「降阶替代」无英文列 → englishScaling 留空，运行时回退中文。
+ID, NAME, EN_NAME = 0, 1, 2
+CATEGORY, PATTERN, MEASURE, TIER_COL = 3, 4, 5, 6
+INTRO, EN_INTRO = 7, 8
+STEPS, EN_STEPS = 9, 10
+KEYPOINTS, EN_KEYPOINTS = 11, 12
+PREREQS, RATIONALE, SCALING = 13, 14, 15
+EN_SCALING = 16  # 降阶替代_En
+
+
+def cell(r, i):
+    """安全取列：越界返回 None。"""
+    return r[i] if i < len(r) else None
+
 
 def q(v):
     """转成 Swift 字符串字面量；空/None → nil。"""
@@ -42,15 +60,16 @@ def split_prereqs(v):
 def main():
     wb = openpyxl.load_workbook(XLSX, data_only=True)
     ws = wb["动作库"]
-    rows = [[ws.cell(r, c).value for c in range(1, 15)] for r in range(2, ws.max_row + 1)]
-    rows = [r for r in rows if r[0]]
+    # 读全部列（含交错的 _En 英文列）。
+    rows = [[ws.cell(r, c).value for c in range(1, ws.max_column + 1)] for r in range(2, ws.max_row + 1)]
+    rows = [r for r in rows if r[ID]]
 
     # 每个类别按出现顺序收集 distinct 动作模式 → 子类 id
     sub_ids = {}   # (catId, pattern) -> subId
     cat_subs = {cid: OrderedDict() for cid in CAT_ID.values()}
     for r in rows:
-        cid = CAT_ID[str(r[2]).strip()]
-        pattern = str(r[3]).strip()
+        cid = CAT_ID[str(r[CATEGORY]).strip()]
+        pattern = str(r[PATTERN]).strip()
         if pattern not in cat_subs[cid]:
             idx = len(cat_subs[cid]) + 1
             sid = f"{CAT_PREFIX[cid]}_m{idx:02d}"
@@ -60,16 +79,19 @@ def main():
     def emit_skills(cid):
         out = []
         for r in rows:
-            if CAT_ID[str(r[2]).strip()] != cid:
+            if CAT_ID[str(r[CATEGORY]).strip()] != cid:
                 continue
-            sid = sub_ids[(cid, str(r[3]).strip())]
-            prereqs = split_prereqs(r[9])
+            sid = sub_ids[(cid, str(r[PATTERN]).strip())]
+            prereqs = split_prereqs(r[PREREQS])
             pre = "[" + ", ".join(json.dumps(p) for p in prereqs) + "]"
-            tier = TIER[int(r[5])]
+            tier = TIER[int(float(r[TIER_COL]))]
+            # 5th/6th 实参顺序：动作模式 → measure 槽、计量 → pattern 槽（沿用既有生成约定，保持输出一致）。
             out.append(
-                f'        s({q(r[0])}, {qs(r[1])}, {q(sid)}, {tier}, {qs(r[3])}, {qs(r[4])},\n'
-                f'          intro: {qs(r[6])}, steps: {qs(r[7])}, keyPoints: {q(r[8])},\n'
-                f'          scaling: {qs(r[11])}, prereqs: {pre}, rationale: {q(r[10])}, englishName: {qs(r[13])})'
+                f'        s({q(r[ID])}, {qs(r[NAME])}, {q(sid)}, {tier}, {qs(r[PATTERN])}, {qs(r[MEASURE])},\n'
+                f'          intro: {qs(r[INTRO])}, steps: {qs(r[STEPS])}, keyPoints: {q(r[KEYPOINTS])},\n'
+                f'          scaling: {qs(r[SCALING])}, prereqs: {pre}, rationale: {q(r[RATIONALE])}, englishName: {qs(r[EN_NAME])},\n'
+                f'          englishIntro: {qs(cell(r, EN_INTRO))}, englishSteps: {qs(cell(r, EN_STEPS))},\n'
+                f'          englishKeyPoints: {q(cell(r, EN_KEYPOINTS))}, englishScaling: {qs(cell(r, EN_SCALING) if EN_SCALING is not None else None)})'
             )
         return ",\n".join(out)
 
@@ -79,8 +101,8 @@ def main():
             out.append(f'            SkillSubcategoryDefinition(id: {q(sid)}, name: {qs(pattern)}, categoryId: {q(cid)}),')
         return "\n".join(out)
 
-    gym_total = sum(1 for r in rows if CAT_ID[str(r[2]).strip()] == "gymnastics")
-    wl_total = sum(1 for r in rows if CAT_ID[str(r[2]).strip()] == "weightlifting")
+    gym_total = sum(1 for r in rows if CAT_ID[str(r[CATEGORY]).strip()] == "gymnastics")
+    wl_total = sum(1 for r in rows if CAT_ID[str(r[CATEGORY]).strip()] == "weightlifting")
 
     swift = f'''import Foundation
 import SwiftUI
@@ -148,6 +170,11 @@ struct SkillDefinition: Identifiable {{
     let prerequisites: [String]
     /// 前置依据
     let prereqRationale: String?
+    /// 英文简介 / 步骤 / 要点 / 降阶（来自 xlsx 英文列；空则运行时回退中文）
+    let englishIntro: String
+    let englishSteps: String
+    let englishKeyPoints: String?
+    let englishScaling: String
 }}
 
 // MARK: - SkillCategoryDefinition
@@ -171,6 +198,12 @@ enum SkillLibrary {{
     static var skillById: [String: SkillDefinition] {{
         Dictionary(uniqueKeysWithValues: allSkills.map {{ ($0.id, $0) }})
     }}
+
+    /// 已上传示范视频的动作 id（在脚本模板内维护，重跑脚本不丢失）。
+    /// 上传新视频到 COS 的 `movements/{{id}}.mp4` 后，把对应 id 加进来即可生效。
+    static let skillsWithVideo: Set<String> = ["row"]
+
+    static func hasVideo(_ skillId: String) -> Bool {{ skillsWithVideo.contains(skillId) }}
 
     // MARK: 体操 Gymnastics ({gym_total})
 
@@ -214,14 +247,18 @@ enum SkillLibrary {{
                           _ measure: String, _ pattern: String,
                           intro: String, steps: String, keyPoints: String?,
                           scaling: String, prereqs: [String] = [], rationale: String? = nil,
-                          englishName: String = "") -> SkillDefinition {{
+                          englishName: String = "",
+                          englishIntro: String = "", englishSteps: String = "",
+                          englishKeyPoints: String? = nil, englishScaling: String = "") -> SkillDefinition {{
         // 注意：参数顺序 measure 在 pattern 之前是生成器约定；此处显式映射，避免歧义。
         SkillDefinition(
             id: id, name: name, englishName: englishName, tier: tier,
             categoryId: sub.hasPrefix("gym") ? "gymnastics" : "weightlifting",
             subcategoryId: sub, movementPattern: pattern, measure: measure,
             intro: intro, steps: steps, keyPoints: keyPoints,
-            scaling: scaling, prerequisites: prereqs, prereqRationale: rationale
+            scaling: scaling, prerequisites: prereqs, prereqRationale: rationale,
+            englishIntro: englishIntro, englishSteps: englishSteps,
+            englishKeyPoints: englishKeyPoints, englishScaling: englishScaling
         )
     }}
 }}

@@ -86,7 +86,7 @@ struct ICloudSyncSettingsView: View {
                     Task {
                         let ok = await syncManager.requestEnableSync()
                         if !ok {
-                            appState.showToast("请先在系统设置中登录 iCloud")
+                            appState.showToast(String(localized: "请先在系统设置中登录 iCloud"))
                         }
                     }
                 } else {
@@ -98,9 +98,9 @@ struct ICloudSyncSettingsView: View {
 
     private var explanation: String {
         if syncManager.isSyncEnabled {
-            return "同步在后台自动进行，无需手动操作。数据通过你的私人 iCloud 在多台设备间同步，不经过我们的服务器。iCloud 空间不足时，系统会自动暂停同步。"
+            return String(localized: "同步在后台自动进行，无需手动操作。数据通过你的私人 iCloud 在多台设备间同步，不经过我们的服务器。iCloud 空间不足时，系统会自动暂停同步。")
         }
-        return "开启后，训练记录通过你的 iCloud 在多台设备间同步、换机不丢。数据存于你的 iCloud 私人空间，不经过我们的服务器。关闭后本机与云端数据均会保留。"
+        return String(localized: "开启后，训练记录通过你的 iCloud 在多台设备间同步、换机不丢。数据存于你的 iCloud 私人空间，不经过我们的服务器。关闭后本机与云端数据均会保留。")
     }
 
     // MARK: - 账号状态
@@ -113,12 +113,12 @@ struct ICloudSyncSettingsView: View {
 
     private var accountStatusText: String {
         switch syncManager.accountStatus {
-        case .available: "已登录"
-        case .noAccount: "未登录"
-        case .restricted: "受限"
-        case .temporarilyUnavailable: "暂不可用"
-        case .couldNotDetermine: "检查中…"
-        @unknown default: "未知"
+        case .available: String(localized: "已登录")
+        case .noAccount: String(localized: "未登录")
+        case .restricted: String(localized: "受限")
+        case .temporarilyUnavailable: String(localized: "暂不可用")
+        case .couldNotDetermine: String(localized: "检查中…")
+        @unknown default: String(localized: "未知")
         }
     }
 
@@ -131,12 +131,12 @@ struct ICloudSyncSettingsView: View {
     private var localDataGroup: some View {
         VStack(alignment: .leading, spacing: WTSpacing.sm + 1) {
             group(label: "本地数据") {
-                infoRow(title: "记录条目", value: "\(records.count) 条")
+                infoRow(title: "记录条目", value: String(localized: "\(records.count) 条"))
                 divider
                 infoRow(title: "占用空间", value: storageSizeText)
                 divider
                 Button {
-                    appState.showToast("即将推出")
+                    appState.showToast(String(localized: "即将推出"))
                 } label: {
                     HStack {
                         Text("导出全部数据")
@@ -175,7 +175,7 @@ struct ICloudSyncSettingsView: View {
     // MARK: - 通用小组件
 
     @ViewBuilder
-    private func group(label: String, @ViewBuilder content: () -> some View) -> some View {
+    private func group(label: LocalizedStringKey, @ViewBuilder content: () -> some View) -> some View {
         VStack(alignment: .leading, spacing: WTSpacing.sm + 1) {
             Text(label)
                 .font(.system(size: 12, weight: .semibold))
@@ -190,7 +190,7 @@ struct ICloudSyncSettingsView: View {
         }
     }
 
-    private func infoRow(title: String, value: String, valueColor: Color = .wtTextSecondary) -> some View {
+    private func infoRow(title: LocalizedStringKey, value: String, valueColor: Color = .wtTextSecondary) -> some View {
         HStack {
             Text(title)
                 .font(WTFont.body)

@@ -254,7 +254,7 @@ final class RecordFlowViewModel {
             )
             step = .cardPreview
         } catch {
-            ocrState = .failure("卡片生成失败，请重试")
+            ocrState = .failure(String(localized: "卡片生成失败，请重试"))
         }
     }
 
@@ -421,19 +421,19 @@ final class RecordFlowViewModel {
     private func localizedOCRError(_ error: Error, isNetworkError: Bool) -> String {
         if isNetworkError {
             if let urlError = error as? URLError, urlError.code == .timedOut {
-                return "请求超时，请检查网络后重试"
+                return String(localized: "请求超时，请检查网络后重试")
             }
-            return "请检查网络后重试"
+            return String(localized: "请检查网络后重试")
         }
         switch error {
         case OCRError.invalidImage:
-            return "图片格式有误，请重新拍摄"
+            return String(localized: "图片格式有误，请重新拍摄")
         case OCRError.serviceUnavailable:
-            return "识别服务暂时不可用，请稍后重试"
+            return String(localized: "识别服务暂时不可用，请稍后重试")
         case OCRError.parseError:
-            return "内容解析失败，请手动输入训练内容"
+            return String(localized: "内容解析失败，请手动输入训练内容")
         default:
-            return "识别失败，你可以手动输入今日训练内容"
+            return String(localized: "识别失败，你可以手动输入今日训练内容")
         }
     }
 

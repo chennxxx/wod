@@ -77,7 +77,7 @@ struct WTButton: View {
         case ghost
     }
 
-    let title: String
+    let title: LocalizedStringKey
     var style: Style = .primary
     var isEnabled = true
     var maxWidth: CGFloat? = .infinity
@@ -121,8 +121,8 @@ struct WTButton: View {
 }
 
 struct WTTextField: View {
-    let title: String
-    let placeholder: String
+    let title: LocalizedStringKey
+    let placeholder: LocalizedStringKey
     @Binding var text: String
     var axis: Axis = .horizontal
 
@@ -147,8 +147,8 @@ struct WTTextField: View {
 }
 
 struct WTTextEditor: View {
-    let title: String
-    let placeholder: String
+    let title: LocalizedStringKey
+    let placeholder: LocalizedStringKey
     @Binding var text: String
     var minHeight: CGFloat = 220
     /// 输入框内部底部的附件（如「自动识别」按钮）
@@ -238,8 +238,8 @@ extension View {
 }
 
 struct LoadingOverlay: View {
-    let title: String
-    let subtitle: String?
+    let title: LocalizedStringKey
+    let subtitle: LocalizedStringKey?
 
     var body: some View {
         VStack(spacing: WTSpacing.md) {

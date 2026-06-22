@@ -12,8 +12,8 @@ struct SkillTreeView: View {
         case actions, paths
         var label: String {
             switch self {
-            case .actions: "动作"
-            case .paths: "进阶路线"
+            case .actions: String(localized: "动作")
+            case .paths: String(localized: "进阶路线")
             }
         }
     }
@@ -115,7 +115,7 @@ struct SkillTreeView: View {
         .padding(.horizontal, WTSpacing.lg)
     }
 
-    private func readout(_ status: SkillMasteryStatus, _ value: Int, _ label: String) -> some View {
+    private func readout(_ status: SkillMasteryStatus, _ value: Int, _ label: LocalizedStringKey) -> some View {
         HStack(spacing: 5) {
             StatusGlyph(status: status, size: 15)
             Text("\(value)")

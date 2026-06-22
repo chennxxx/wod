@@ -9,10 +9,10 @@ enum OCRError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .networkTimeout: "识别超时，请检查网络连接"
-        case .invalidImage: "图片无效，请重新选择"
-        case .serviceUnavailable: "识别服务暂不可用"
-        case .parseError: "识别结果解析失败"
+        case .networkTimeout: String(localized: "识别超时，请检查网络连接")
+        case .invalidImage: String(localized: "图片无效，请重新选择")
+        case .serviceUnavailable: String(localized: "识别服务暂不可用")
+        case .parseError: String(localized: "识别结果解析失败")
         }
     }
 }

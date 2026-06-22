@@ -56,7 +56,7 @@ enum LegalDocument: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
-    var title: String {
+    var title: LocalizedStringKey {
         switch self {
         case .userAgreement: "用户协议"
         case .privacyPolicy: "隐私政策"

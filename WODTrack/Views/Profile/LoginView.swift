@@ -111,7 +111,7 @@ struct LoginView: View {
                 Color.black.opacity(0.001)
                     .contentShape(Rectangle())
                     .onTapGesture {
-                        localToast = "请先阅读并同意用户协议与隐私政策"
+                        localToast = String(localized: "请先阅读并同意用户协议与隐私政策")
                     }
             }
         }
@@ -148,7 +148,7 @@ struct LoginView: View {
         switch result {
         case .success(let authorization):
             guard let credential = authorization.credential as? ASAuthorizationAppleIDCredential else {
-                localToast = "登录失败，请重试"
+                localToast = String(localized: "登录失败，请重试")
                 return
             }
             appState.completeSignIn(userID: credential.user, fullName: credential.fullName)

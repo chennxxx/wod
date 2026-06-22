@@ -14,12 +14,12 @@ enum CardColorTheme: String, CaseIterable, Identifiable {
 
     var label: String {
         switch self {
-        case .light: "浅色"
-        case .dark: "深色"
-        case .neon: "荧光绿"
-        case .film: "胶片"
-        case .ocean: "海蓝"
-        case .contrast: "高对比"
+        case .light: String(localized: "浅色")
+        case .dark: String(localized: "深色")
+        case .neon: String(localized: "荧光绿")
+        case .film: String(localized: "胶片")
+        case .ocean: String(localized: "海蓝")
+        case .contrast: String(localized: "高对比")
         }
     }
 

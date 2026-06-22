@@ -8,10 +8,10 @@ private enum SkillFilter: CaseIterable {
 
     var label: String {
         switch self {
-        case .all: "全部"
-        case .mastered: "已掌握"
-        case .inProgress: "进行中"
-        case .wantToLearn: "想学"
+        case .all: String(localized: "全部")
+        case .mastered: String(localized: "已掌握")
+        case .inProgress: String(localized: "进行中")
+        case .wantToLearn: String(localized: "想学")
         }
     }
 
@@ -108,7 +108,7 @@ struct SkillBrowseView: View {
                 .padding(.bottom, WTSpacing.xl)
             }
         }
-        .navigationTitle(category?.name ?? "全部动作")
+        .navigationTitle(category?.localizedName ?? String(localized: "全部动作"))
         .navigationBarTitleDisplayMode(.inline)
         .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "搜索动作名称")
     }
@@ -144,9 +144,9 @@ struct SkillBrowseView: View {
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: WTSpacing.sm) {
-                    chip("全部难度", isSelected: selectedTier == nil) { selectedTier = nil }
+                    chip(String(localized: "全部难度"), isSelected: selectedTier == nil) { selectedTier = nil }
                     ForEach(SkillTier.allCases) { tier in
-                        chip("\(tier.label) · \(tier.description)", isSelected: selectedTier == tier) {
+                        chip("\(tier.label) · \(tier.localizedDescription)", isSelected: selectedTier == tier) {
                             selectedTier = selectedTier == tier ? nil : tier
                         }
                     }
