@@ -7,11 +7,13 @@ import AVFoundation
 struct RecordFlowCoordinator: View {
     @Environment(\.dismiss) private var dismiss
     let appState: AppState
+    let subscriptions: SubscriptionManager
     @State private var viewModel = RecordFlowViewModel()
     let onSaved: (WODRecord) -> Void
 
-    init(appState: AppState, onSaved: @escaping (WODRecord) -> Void) {
+    init(appState: AppState, subscriptions: SubscriptionManager, onSaved: @escaping (WODRecord) -> Void) {
         self.appState = appState
+        self.subscriptions = subscriptions
         self.onSaved = onSaved
         let service: OCRServicing = AppConfig.useMockOCR ? PreviewOCRService() : OCRService.shared
         _viewModel = State(initialValue: RecordFlowViewModel(ocrService: service))
@@ -25,15 +27,15 @@ struct RecordFlowCoordinator: View {
             case .checkinPhotos:
                 CheckinPhotosStep(viewModel: viewModel)
             case .ocrResult:
-                OCRResultStep(viewModel: viewModel, dismiss: dismiss.callAsFunction)
+                OCRResultStep(viewModel: viewModel, appState: appState, subscriptions: subscriptions, dismiss: dismiss.callAsFunction)
             case .scoreInput:
                 CheckinPhotosStep(viewModel: viewModel)
             case .cardEditor:
-                CardPreviewStep(viewModel: viewModel, appState: appState, onSaved: {
+                CardPreviewStep(viewModel: viewModel, appState: appState, subscriptions: subscriptions, onSaved: {
                     viewModel.goToSaveSuccess()
                 })
             case .cardPreview:
-                CardPreviewStep(viewModel: viewModel, appState: appState, onSaved: {
+                CardPreviewStep(viewModel: viewModel, appState: appState, subscriptions: subscriptions, onSaved: {
                     viewModel.goToSaveSuccess()
                 })
             case .saveSuccess:
@@ -229,6 +231,8 @@ private struct OCRLoadingView: View {
 
 private struct OCRResultStep: View {
     @Bindable var viewModel: RecordFlowViewModel
+    let appState: AppState
+    let subscriptions: SubscriptionManager
     let dismiss: () -> Void
 
     @State private var pickerItem: PhotosPickerItem?
@@ -236,6 +240,18 @@ private struct OCRResultStep: View {
     @State private var showPhotoPicker = false
     @State private var showCamera = false
     @State private var showCameraUnavailable = false
+    @State private var showOCRPaywall = false
+    @State private var ocrTracker = OCRUsageTracker()
+
+    /// 免费用户每自然日限 OCR 次数；超额弹付费墙。仅用户主动发起时计数，重试不计。
+    private func attemptRecognize(from image: UIImage) {
+        if appState.isPro || ocrTracker.canRecognize() {
+            if !appState.isPro { ocrTracker.recordUsage() }
+            viewModel.recognizeWODContent(from: image)
+        } else {
+            showOCRPaywall = true
+        }
+    }
 
     /// 是否处于"需要展示内容页"的状态（包括失败、成功、手动输入）
     private var isContentReady: Bool {
@@ -336,7 +352,7 @@ C WOD/任务计时/7轮
         .fullScreenCover(isPresented: $showCamera) {
             CameraPickerView { image in
                 showCamera = false
-                viewModel.recognizeWODContent(from: image)
+                attemptRecognize(from: image)
             } onCancel: {
                 showCamera = false
             }
@@ -352,7 +368,11 @@ C WOD/任务计时/7轮
                   let data = try? await item.loadTransferable(type: Data.self),
                   let image = UIImage(data: data) else { return }
             pickerItem = nil
-            viewModel.recognizeWODContent(from: image)
+            attemptRecognize(from: image)
+        }
+        .sheet(isPresented: $showOCRPaywall) {
+            PaywallView(context: .ocrLimit, subscriptions: subscriptions)
+                .preferredColorScheme(.dark)
         }
     }
 
@@ -800,6 +820,7 @@ private struct CardEditorStep: View {
 private struct CardPreviewStep: View {
     @Bindable var viewModel: RecordFlowViewModel
     let appState: AppState
+    let subscriptions: SubscriptionManager
     let onSaved: () -> Void
     @State private var selectedTab: EditorTab = .template
     @State private var showPaywall = false
@@ -819,10 +840,9 @@ private struct CardPreviewStep: View {
             }
             .ignoresSafeArea(.keyboard, edges: .bottom)
         }
-        .alert("订阅后可用", isPresented: $showPaywall) {
-            Button("知道了", role: .cancel) {}
-        } message: {
-            Text("免费用户不可移除水印，Pro 模板需要订阅后解锁。")
+        .sheet(isPresented: $showPaywall) {
+            PaywallView(context: .proStyle, subscriptions: subscriptions)
+                .preferredColorScheme(.dark)
         }
     }
 

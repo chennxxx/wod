@@ -1,5 +1,17 @@
 # 维护更新记录
 
+## 订阅制上线（Pro 会员）- 2026-06-22
+
+**接入 StoreKit 2 内购，给已埋好的 Pro 门控通电；本期开放「去水印」与「拍照识别每日限额」两项现成权益**
+
+- **支付层（StoreKit 2）**：新增 `WODTrack/Services/SubscriptionManager.swift`，作为订阅态唯一真相源——拉取年/月两档自动续期商品、按 `Transaction.currentEntitlements` 计算权益、`Transaction.updates` 全程监听续期/退款、支持购买与「恢复购买」。权益绑 Apple ID 由系统自动跨设备同步，**不经 CloudKit**，不触碰本地 store。建在 App 层（`WODTrackApp`）持有，避免随 iCloud 容器重建而丢失监听；算出结果回写 `AppState.applyEntitlement(isPro:)`，全站既有 `appState.isPro` 读取点零改动生效。
+- **付费墙页面**：新增 `WODTrack/Views/Subscription/PaywallView.swift`（原生 SwiftUI），展示权益列表、年/月价格卡（年付标「最划算」，价格取自 StoreKit 本地化 `displayPrice`）、订阅/恢复购买、用户协议与隐私政策链接。按触发场景（去水印 / Pro 模板 / OCR 限额 / 主动升级）切换标题文案。
+- **权益①去水印**：卡片生成页选 Pro 模板触发的占位 alert 改为弹出 Paywall；水印显隐逻辑早已随 `isPro` 工作，订阅成功后预览自动去除「@迹录 WOD」水印。
+- **权益②拍照识别限额**：新增 `WODTrack/Services/OCRUsageTracker.swift`，免费用户每**自然日**最多识别 2 次（跨天自动归零），第 3 次起在记录流程弹 Paywall；Pro 不限次数。仅用户主动发起时计数，超时/网络重试不重复计。
+- **订阅入口**：「我的」页顶部新增订阅卡片——未订阅显示「升级 Pro」进 Paywall，已订阅显示「Pro 会员」并跳系统「管理订阅」。
+- **本地测试**：新增 `WODTrack/StoreKit/WODTrack.storekit` 配置并关联 Scheme，可在模拟器离线自测购买/续期/退款；正式商品需在 App Store Connect 按相同商品 ID 创建。
+- 注：Pro 高级卡片模板与高级数据统计的门控已就绪（`CardStyleConfig.proStyles` 暂留空），内容设计完成后另行上线。
+
 ## 英文版上线 - 2026-06-22
 
 **全量本地化：同一 App 跟随系统语言自动中/英文切换（品牌英文名 WOD Trace）**

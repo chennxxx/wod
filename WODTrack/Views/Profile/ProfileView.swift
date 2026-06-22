@@ -4,10 +4,13 @@ import SwiftUI
 struct ProfileView: View {
     @Bindable var appState: AppState
     @Bindable var syncManager: CloudSyncManager
+    var subscriptions: SubscriptionManager
 
     @State private var showEditSheet = false
     @State private var showSignOutDialog = false
     @State private var navigateToSyncSettings = false
+    @State private var showPaywall = false
+    @State private var showManageSubscriptions = false
     @State private var legalDocument: LegalDocument?
     /// 从 iCloud 行进登录页的意图：登录成功后直接进同步详情页，不回「我的」根
     @State private var pendingSyncNavigation = false
@@ -20,6 +23,8 @@ struct ProfileView: View {
                 } else {
                     loginEntryCard
                 }
+
+                subscriptionCard
 
                 // 暂时隐藏 iCloud 同步邀请提示框（未来可能恢复）。
                 // if showsInviteBanner {
@@ -112,6 +117,11 @@ struct ProfileView: View {
             LegalDocumentSheet(document: document)
                 .preferredColorScheme(.dark)
         }
+        .sheet(isPresented: $showPaywall) {
+            PaywallView(context: .general, subscriptions: subscriptions)
+                .preferredColorScheme(.dark)
+        }
+        .manageSubscriptionsSheet(isPresented: $showManageSubscriptions)
         .alert("确定退出登录？", isPresented: $showSignOutDialog) {
             Button("退出登录", role: .destructive) {
                 appState.signOut()
@@ -122,6 +132,67 @@ struct ProfileView: View {
                 ? "iCloud 同步将暂停，本机与云端数据都保留，重新登录后可恢复同步。"
                 : "退出后本机的训练数据仍会保留。")
         }
+    }
+
+    // MARK: - 订阅入口
+
+    @ViewBuilder private var subscriptionCard: some View {
+        if appState.isPro {
+            Button {
+                showManageSubscriptions = true
+            } label: {
+                subscriptionCardContent(
+                    icon: "crown.fill",
+                    title: String(localized: "Pro 会员"),
+                    subtitle: String(localized: "已解锁全部 Pro 权益，点击管理订阅")
+                )
+            }
+            .buttonStyle(.plain)
+        } else {
+            Button {
+                showPaywall = true
+            } label: {
+                subscriptionCardContent(
+                    icon: "crown.fill",
+                    title: String(localized: "升级 Pro"),
+                    subtitle: String(localized: "去除水印、拍照识别不限次")
+                )
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    private func subscriptionCardContent(icon: String, title: String, subtitle: String) -> some View {
+        HStack(spacing: WTSpacing.md - 2) {
+            Image(systemName: icon)
+                .font(.system(size: 20))
+                .foregroundStyle(Color.wtPrimary)
+                .frame(width: 46, height: 46)
+                .background(Color.wtPrimary.opacity(0.14))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14)
+                        .stroke(Color.wtPrimary.opacity(0.3), lineWidth: 1)
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 14))
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text(title)
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundStyle(Color.wtTextPrimary)
+                Text(subtitle)
+                    .font(WTFont.caption)
+                    .foregroundStyle(Color.wtTextSecondary)
+            }
+
+            Spacer()
+
+            Image(systemName: "chevron.right")
+                .font(.system(size: 14, weight: .medium))
+                .foregroundStyle(Color.wtTextDisabled)
+        }
+        .padding(WTSpacing.md + 2)
+        .background(Color.wtSurface)
+        .clipShape(RoundedRectangle(cornerRadius: 18))
     }
 
     // MARK: - 顶部个人卡
