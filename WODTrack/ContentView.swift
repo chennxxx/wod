@@ -260,6 +260,8 @@ private struct RecordHomeView: View {
                         entries: trainingEntries,
                         records: records
                     )
+
+                    ToolsSection()
                 }
                 .padding(WTSpacing.lg)
                 .padding(.bottom, 80)
@@ -591,6 +593,72 @@ private struct RecentActivitySection: View {
                 }
             }
         }
+    }
+}
+
+// MARK: - 小工具
+
+/// 首页「小工具」section：参考苹果「快捷指令」一行两个的瓷砖网格，可扩展。
+private struct ToolsSection: View {
+    private let columns = [
+        GridItem(.flexible(), spacing: WTSpacing.md),
+        GridItem(.flexible(), spacing: WTSpacing.md),
+    ]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: WTSpacing.md) {
+            Text("小工具")
+                .font(WTFont.title)
+                .foregroundStyle(Color.wtTextPrimary)
+
+            LazyVGrid(columns: columns, alignment: .leading, spacing: WTSpacing.md) {
+                ToolEntryCard(
+                    icon: "arrow.left.arrow.right",
+                    title: "重量换算",
+                    subtitle: "LB ⇆ KG 快速互换",
+                    destination: WeightConverterView()
+                )
+                ToolEntryCard(
+                    icon: "dumbbell",
+                    title: "杠铃片统计",
+                    subtitle: "杠铃杆总重计算",
+                    destination: BarbellCalculatorView()
+                )
+            }
+        }
+    }
+}
+
+/// 可复用的工具入口瓷砖：顶部图标 + 底部标题/副标题，点击 push 到对应工具页。
+private struct ToolEntryCard<Destination: View>: View {
+    let icon: String
+    let title: LocalizedStringKey
+    let subtitle: LocalizedStringKey
+    let destination: Destination
+
+    var body: some View {
+        NavigationLink(destination: destination) {
+            VStack(alignment: .leading, spacing: WTSpacing.sm) {
+                Image(systemName: icon)
+                    .font(.system(size: 24, weight: .semibold))
+                    .foregroundStyle(Color.wtPrimary)
+
+                Spacer(minLength: WTSpacing.md)
+
+                Text(title)
+                    .font(WTFont.bodyBold)
+                    .foregroundStyle(Color.wtTextPrimary)
+                Text(subtitle)
+                    .font(WTFont.caption)
+                    .foregroundStyle(Color.wtTextSecondary)
+                    .lineLimit(1)
+            }
+            .frame(maxWidth: .infinity, minHeight: 110, alignment: .leading)
+            .padding(WTSpacing.md)
+            .background(Color.wtSurface)
+            .clipShape(RoundedRectangle(cornerRadius: WTRadius.lg))
+        }
+        .buttonStyle(.plain)
     }
 }
 
