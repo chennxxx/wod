@@ -7,11 +7,13 @@ import AVFoundation
 struct RecordFlowCoordinator: View {
     @Environment(\.dismiss) private var dismiss
     let appState: AppState
+    let subscriptions: SubscriptionManager
     @State private var viewModel = RecordFlowViewModel()
     let onSaved: (WODRecord) -> Void
 
-    init(appState: AppState, onSaved: @escaping (WODRecord) -> Void) {
+    init(appState: AppState, subscriptions: SubscriptionManager, onSaved: @escaping (WODRecord) -> Void) {
         self.appState = appState
+        self.subscriptions = subscriptions
         self.onSaved = onSaved
         let service: OCRServicing = AppConfig.useMockOCR ? PreviewOCRService() : OCRService.shared
         _viewModel = State(initialValue: RecordFlowViewModel(ocrService: service))
@@ -25,15 +27,15 @@ struct RecordFlowCoordinator: View {
             case .checkinPhotos:
                 CheckinPhotosStep(viewModel: viewModel)
             case .ocrResult:
-                OCRResultStep(viewModel: viewModel, dismiss: dismiss.callAsFunction)
+                OCRResultStep(viewModel: viewModel, appState: appState, subscriptions: subscriptions, dismiss: dismiss.callAsFunction)
             case .scoreInput:
                 CheckinPhotosStep(viewModel: viewModel)
             case .cardEditor:
-                CardPreviewStep(viewModel: viewModel, appState: appState, onSaved: {
+                CardPreviewStep(viewModel: viewModel, appState: appState, subscriptions: subscriptions, onSaved: {
                     viewModel.goToSaveSuccess()
                 })
             case .cardPreview:
-                CardPreviewStep(viewModel: viewModel, appState: appState, onSaved: {
+                CardPreviewStep(viewModel: viewModel, appState: appState, subscriptions: subscriptions, onSaved: {
                     viewModel.goToSaveSuccess()
                 })
             case .saveSuccess:
@@ -229,6 +231,8 @@ private struct OCRLoadingView: View {
 
 private struct OCRResultStep: View {
     @Bindable var viewModel: RecordFlowViewModel
+    let appState: AppState
+    let subscriptions: SubscriptionManager
     let dismiss: () -> Void
 
     @State private var pickerItem: PhotosPickerItem?
@@ -236,6 +240,30 @@ private struct OCRResultStep: View {
     @State private var showPhotoPicker = false
     @State private var showCamera = false
     @State private var showCameraUnavailable = false
+    @State private var showTrigger = false
+    @State private var showPaywall = false
+    @State private var ocrTracker = OCRUsageTracker()
+
+    /// 点「自动识别」时先判额度：超额（且非 Pro）立即弹 T2，不再等用户选完照片。
+    private func beginRecognize() {
+        if appState.isPro || ocrTracker.canRecognize() {
+            showSourceDialog = true
+        } else {
+            showTrigger = true
+        }
+    }
+
+    /// 已过额度闸门后发起识别；只在**识别真正成功**时扣次数（onRecognizeSuccess 回调），
+    /// 超时/失败/取消都不扣。
+    private func attemptRecognize(from image: UIImage) {
+        if appState.isPro {
+            viewModel.onRecognizeSuccess = nil
+        } else {
+            let tracker = ocrTracker
+            viewModel.onRecognizeSuccess = { tracker.recordUsage() }
+        }
+        viewModel.recognizeWODContent(from: image)
+    }
 
     /// 是否处于"需要展示内容页"的状态（包括失败、成功、手动输入）
     private var isContentReady: Bool {
@@ -336,7 +364,7 @@ C WOD/任务计时/7轮
         .fullScreenCover(isPresented: $showCamera) {
             CameraPickerView { image in
                 showCamera = false
-                viewModel.recognizeWODContent(from: image)
+                attemptRecognize(from: image)
             } onCancel: {
                 showCamera = false
             }
@@ -352,14 +380,32 @@ C WOD/任务计时/7轮
                   let data = try? await item.loadTransferable(type: Data.self),
                   let image = UIImage(data: data) else { return }
             pickerItem = nil
-            viewModel.recognizeWODContent(from: image)
+            attemptRecognize(from: image)
+        }
+        .sheet(isPresented: $showTrigger) {
+            TriggerSheet(
+                onTrial: {
+                    showTrigger = false
+                    // 等触发卡收起后再弹 Paywall，避免同层 sheet 冲突
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) { showPaywall = true }
+                },
+                onManual: { showTrigger = false }
+            )
+            .presentationDetents([.fraction(0.6)])
+            .presentationDragIndicator(.visible)
+            .presentationBackground(Color(hex: "#161616"))
+            .preferredColorScheme(.dark)
+        }
+        .sheet(isPresented: $showPaywall) {
+            ProPaywallSheet { appState.showToast(String(localized: "已解锁 迹录 Pro")) }
+                .preferredColorScheme(.dark)
         }
     }
 
     /// WOD 内容输入框内部底部的「自动识别」虚线按钮：四周留等距 padding，浮在框内底部
     private var autoRecognizeButton: some View {
         Button {
-            showSourceDialog = true
+            beginRecognize()
         } label: {
             HStack(spacing: 6) {
                 Image(systemName: "camera.fill")
@@ -800,6 +846,7 @@ private struct CardEditorStep: View {
 private struct CardPreviewStep: View {
     @Bindable var viewModel: RecordFlowViewModel
     let appState: AppState
+    let subscriptions: SubscriptionManager
     let onSaved: () -> Void
     @State private var selectedTab: EditorTab = .template
     @State private var showPaywall = false
@@ -819,10 +866,9 @@ private struct CardPreviewStep: View {
             }
             .ignoresSafeArea(.keyboard, edges: .bottom)
         }
-        .alert("订阅后可用", isPresented: $showPaywall) {
-            Button("知道了", role: .cancel) {}
-        } message: {
-            Text("免费用户不可移除水印，Pro 模板需要订阅后解锁。")
+        .sheet(isPresented: $showPaywall) {
+            ProPaywallSheet { appState.showToast(String(localized: "已解锁 迹录 Pro")) }
+                .preferredColorScheme(.dark)
         }
     }
 
@@ -968,9 +1014,8 @@ private struct CardPreviewStep: View {
             HStack(spacing: WTSpacing.sm) {
                 ForEach(CardStyleConfig.all) { style in
                     Button {
-                        if !viewModel.selectStyle(style, isPro: appState.isPro) {
-                            showPaywall = true
-                        }
+                        // 允许免费用户先选中预览 Pro 模板；付费墙在点「生成」时才弹。
+                        viewModel.applyTemplate(style)
                     } label: {
                         let isSelected = style.id == viewModel.selectedStyleId
                         VStack(alignment: .center, spacing: WTSpacing.xs) {
@@ -979,16 +1024,13 @@ private struct CardPreviewStep: View {
                                 .foregroundStyle(isSelected ? Color.wtPrimary : Color.wtTextPrimary)
                                 .frame(width: 62, height: 62)
                                 .selectableChip(isOn: isSelected, cornerRadius: WTRadius.sm)
+                                .overlay(alignment: .topTrailing) {
+                                    if style.isPro && !appState.isPro { proTag.offset(x: 5, y: -5) }
+                                }
 
                             Text(style.name)
                                 .font(.system(size: 12, weight: .semibold))
                                 .lineLimit(1)
-
-                            if style.isPro {
-                                Text("PRO")
-                                    .font(.system(size: 10, weight: .bold))
-                                    .foregroundStyle(Color.wtPrimary)
-                            }
                         }
                         .foregroundStyle(style.id == viewModel.selectedStyleId ? Color.wtPrimary : Color.wtTextPrimary)
                         .frame(width: 78, height: 98, alignment: .top)
@@ -1054,7 +1096,9 @@ private struct CardPreviewStep: View {
             HStack(spacing: WTSpacing.md) {
                 ForEach(CardColorTheme.allCases) { theme in
                     let isSelected = theme.rawValue == currentId
+                    let locked = theme.isPro && !appState.isPro
                     Button {
+                        // 允许先选中预览 Pro 配色；付费墙在点「生成」时才弹。
                         viewModel.applyColorTheme(theme)
                     } label: {
                         VStack(spacing: WTSpacing.xs) {
@@ -1077,6 +1121,8 @@ private struct CardPreviewStep: View {
                                             .font(.system(size: 15, weight: .bold))
                                             .foregroundStyle(Color.wtPrimary, Color.wtBackground)
                                             .offset(x: 5, y: -5)
+                                    } else if locked {
+                                        proTag.offset(x: 5, y: -5)
                                     }
                                 }
 
@@ -1250,8 +1296,31 @@ private struct CardPreviewStep: View {
 
     // MARK: - 辅助
 
+    /// 右上角 Pro 角标（模板/配色统一用）。
+    private var proTag: some View {
+        Text("PRO")
+            .font(.system(size: 9, weight: .heavy))
+            .foregroundStyle(.black)
+            .padding(.horizontal, 5)
+            .padding(.vertical, 1)
+            .background(Color.wtPrimary)
+            .clipShape(Capsule())
+    }
+
+    /// 当前选中的模板或配色是否需要 Pro（免费用户点「生成」时拦截）。
+    private var selectionNeedsPro: Bool {
+        if CardStyleConfig.style(for: viewModel.selectedStyleId).isPro { return true }
+        if let theme = CardColorTheme(rawValue: viewModel.colorThemeId), theme.isPro { return true }
+        return false
+    }
+
     private func saveRecord() {
         guard !isSaving else { return }
+        // 先体验后付费：用了 Pro 模板/配色，到「生成」时才弹付费墙。
+        if !appState.isPro && selectionNeedsPro {
+            showPaywall = true
+            return
+        }
         isSaving = true
         Task { @MainActor in
             await viewModel.buildPreview(isPro: appState.isPro)

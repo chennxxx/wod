@@ -1,5 +1,16 @@
 # 维护更新记录
 
+## 订阅制上线（Pro 会员 · RevenueCat）- 2026-07-02
+
+**接入 RevenueCat 作为订阅基础设施，补齐完整转化流程与三道门控；付费墙与管理订阅采用 RevenueCatUI**
+
+- **基础设施（RevenueCat）**：`WODTrack/Services/SubscriptionManager.swift` 改为 RC 封装——启动 `Purchases.configure`、监听 `customerInfoStream` 推导 `isPro` 与到期日、回写 `AppState.applyEntitlement(isPro:expiresAt:)`，全站既有 `appState.isPro` 读取点零改动生效。权益绑 Apple ID 由 RC 自动跨设备/换机收敛，不经 CloudKit。订阅分析走 RC 后台（不自建埋点）。SDK 经 SPM（`purchases-ios-spm`，`RevenueCat` + `RevenueCatUI`）引入。
+- **付费墙（RevenueCatUI）**：`PaywallView.swift` 改为薄封装 `ProPaywallSheet`，内嵌 `RevenueCatUI.PaywallView`（样式在 RC 后台可视化编辑、远程渲染，改文案不发版）；购买/恢复成功由 `customerInfoStream` 自动解锁。年/月两档，年付含 7 天免费试用。
+- **T2 触发卡**：新增 `WODTrack/Views/Subscription/TriggerSheet.swift`，OCR 额度用尽时半屏弹出（白板→成绩卡视觉钩子、「白板一拍，自动成卡」），CTA「升级到专业版」进 Paywall，保留「先手动记录这条」退路。
+- **三道门控**：① OCR 拍照识别免费每自然日 2 次（`OCRUsageTracker` + `AppConfig.freeOCRDailyLimit`），**识别成功才扣**、超时/失败/取消不扣，超额弹 T2；② 历史记录免费仅最近 30 天（`AppConfig.freeHistoryWindowDays`），更早折叠为毛玻璃窥视 +「你有 N 条更早记录」+ 解锁 CTA；③ 配色主题（胶片/海蓝/高对比为 Pro，浅色/深色/荧光绿免费）与高级卡片模板（大字报/数据仪表盘/胶片复古标 `isPro`）+ 去水印，Pro 项右上角统一角标。先体验后付费：可预览，点「生成」才拦截；启动随机默认模板只从免费模板选。
+- **管理订阅（Customer Center）**：「我的」页订阅卡——未订阅「升级 Pro」进 Paywall；已订阅显示紧凑「Pro 会员」行 + 续期日，点击进 RevenueCatUI Customer Center。
+- 注：上线前 RC 后台需配 entitlement / offering / Paywall 并把 entitlement 挂到 App Store 商品；ASC 年付配 7 天试用、商品元数据补齐 + 付费协议生效。
+
 ## 首页小工具上线 - 2026-06-25
 
 **首页底部新增「小工具」section，落地两个独立工具：重量换算 + 杠铃片统计**

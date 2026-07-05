@@ -1,13 +1,17 @@
 import PhotosUI
+import RevenueCatUI
 import SwiftUI
 
 struct ProfileView: View {
     @Bindable var appState: AppState
     @Bindable var syncManager: CloudSyncManager
+    var subscriptions: SubscriptionManager
 
     @State private var showEditSheet = false
     @State private var showSignOutDialog = false
     @State private var navigateToSyncSettings = false
+    @State private var showPaywall = false
+    @State private var showManageSubscriptions = false
     @State private var legalDocument: LegalDocument?
     /// 从 iCloud 行进登录页的意图：登录成功后直接进同步详情页，不回「我的」根
     @State private var pendingSyncNavigation = false
@@ -20,6 +24,8 @@ struct ProfileView: View {
                 } else {
                     loginEntryCard
                 }
+
+                subscriptionCard
 
                 // 暂时隐藏 iCloud 同步邀请提示框（未来可能恢复）。
                 // if showsInviteBanner {
@@ -112,6 +118,11 @@ struct ProfileView: View {
             LegalDocumentSheet(document: document)
                 .preferredColorScheme(.dark)
         }
+        .sheet(isPresented: $showPaywall) {
+            ProPaywallSheet { appState.showToast(String(localized: "已解锁 迹录 Pro")) }
+                .preferredColorScheme(.dark)
+        }
+        .presentCustomerCenter(isPresented: $showManageSubscriptions)
         .alert("确定退出登录？", isPresented: $showSignOutDialog) {
             Button("退出登录", role: .destructive) {
                 appState.signOut()
@@ -122,6 +133,107 @@ struct ProfileView: View {
                 ? "iCloud 同步将暂停，本机与云端数据都保留，重新登录后可恢复同步。"
                 : "退出后本机的训练数据仍会保留。")
         }
+    }
+
+    // MARK: - 订阅入口
+
+    @ViewBuilder private var subscriptionCard: some View {
+        if appState.isPro {
+            Button {
+                showManageSubscriptions = true
+            } label: {
+                proStatusRow
+            }
+            .buttonStyle(.plain)
+        } else {
+            Button {
+                showPaywall = true
+            } label: {
+                subscriptionCardContent(
+                    icon: "crown.fill",
+                    title: String(localized: "升级 Pro"),
+                    subtitle: String(localized: "去除水印、拍照识别不限次")
+                )
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    /// 已订阅：紧凑单行状态（图标小、矮），点击进 Customer Center。
+    private var proStatusRow: some View {
+        HStack(spacing: WTSpacing.md - 4) {
+            Image(systemName: "crown.fill")
+                .font(.system(size: 14))
+                .foregroundStyle(Color.wtPrimary)
+                .frame(width: 30, height: 30)
+                .background(Color.wtPrimary.opacity(0.14))
+                .clipShape(RoundedRectangle(cornerRadius: 9))
+
+            Text("Pro 会员")
+                .font(WTFont.bodyBold)
+                .foregroundStyle(Color.wtTextPrimary)
+
+            if let renew = proRenewText {
+                Text(renew)
+                    .font(WTFont.caption)
+                    .foregroundStyle(Color.wtTextSecondary)
+                    .lineLimit(1)
+            }
+
+            Spacer()
+
+            Text("管理")
+                .font(WTFont.caption)
+                .foregroundStyle(Color.wtTextSecondary)
+            Image(systemName: "chevron.right")
+                .font(.system(size: 12, weight: .medium))
+                .foregroundStyle(Color.wtTextDisabled)
+        }
+        .padding(.horizontal, WTSpacing.md)
+        .padding(.vertical, WTSpacing.sm + 2)
+        .background(Color.wtSurface)
+        .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
+    }
+
+    /// 续期日文案（无到期日则不显示）。
+    private var proRenewText: String? {
+        guard let expires = appState.profile.subscriptionExpiresAt else { return nil }
+        let f = DateFormatter()
+        f.dateFormat = "yyyy.MM.dd"
+        return String(localized: "续期于 \(f.string(from: expires))")
+    }
+
+    private func subscriptionCardContent(icon: String, title: String, subtitle: String) -> some View {
+        HStack(spacing: WTSpacing.md - 2) {
+            Image(systemName: icon)
+                .font(.system(size: 20))
+                .foregroundStyle(Color.wtPrimary)
+                .frame(width: 46, height: 46)
+                .background(Color.wtPrimary.opacity(0.14))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14)
+                        .stroke(Color.wtPrimary.opacity(0.3), lineWidth: 1)
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 14))
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text(title)
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundStyle(Color.wtTextPrimary)
+                Text(subtitle)
+                    .font(WTFont.caption)
+                    .foregroundStyle(Color.wtTextSecondary)
+            }
+
+            Spacer()
+
+            Image(systemName: "chevron.right")
+                .font(.system(size: 14, weight: .medium))
+                .foregroundStyle(Color.wtTextDisabled)
+        }
+        .padding(WTSpacing.md + 2)
+        .background(Color.wtSurface)
+        .clipShape(RoundedRectangle(cornerRadius: 18))
     }
 
     // MARK: - 顶部个人卡

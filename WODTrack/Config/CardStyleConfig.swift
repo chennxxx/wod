@@ -116,7 +116,7 @@ enum CardStyleConfig {
             summary: String(localized: "超大标题字体，视觉冲击力强"),
             overlay: .dark,
             layout: .heroTitle,
-            isPro: false,
+            isPro: true,
             supportedModules: allModules
         ),
         .init(
@@ -125,7 +125,7 @@ enum CardStyleConfig {
             summary: String(localized: "强调训练数字，数据卡片风格"),
             overlay: .dark,
             layout: .dataDashboard,
-            isPro: false,
+            isPro: true,
             supportedModules: allModules
         ),
         .init(
@@ -134,7 +134,7 @@ enum CardStyleConfig {
             summary: String(localized: "胶片颗粒感，带日期戳，怀旧拍摄风"),
             overlay: .grain,
             layout: .retroFilm,
-            isPro: false,
+            isPro: true,
             supportedModules: [.date, .score, .wodContent]
         )
     ]

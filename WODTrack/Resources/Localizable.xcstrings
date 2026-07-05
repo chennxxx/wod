@@ -1,7 +1,9 @@
 {
   "sourceLanguage": "zh-Hans",
   "strings": {
-    "": {},
+    "": {
+      "localizations": {}
+    },
     " 与 ": {
       "localizations": {
         "en": {
@@ -81,7 +83,9 @@
         }
       }
     },
-    "%lld": {},
+    "%lld": {
+      "localizations": {}
+    },
     "%lld 条": {
       "localizations": {
         "en": {
@@ -92,7 +96,9 @@
         }
       }
     },
-    "%lld%%": {},
+    "%lld%%": {
+      "localizations": {}
+    },
     "%lld/%lld": {
       "localizations": {
         "zh-Hans": {
@@ -103,8 +109,12 @@
         }
       }
     },
-    "(RPE)": {},
-    "+": {},
+    "(RPE)": {
+      "localizations": {}
+    },
+    "+": {
+      "localizations": {}
+    },
     "+ %@ %@": {
       "localizations": {
         "zh-Hans": {
@@ -125,8 +135,12 @@
         }
       }
     },
-    "/%lld": {},
-    "0": {},
+    "/%lld": {
+      "localizations": {}
+    },
+    "0": {
+      "localizations": {}
+    },
     "30 天内你可以发送邮件向我们申请撤回，账号与数据将予以恢复。": {
       "localizations": {
         "en": {
@@ -137,7 +151,9 @@
         }
       }
     },
-    ":": {},
+    ":": {
+      "localizations": {}
+    },
     "= %@ %@": {
       "localizations": {
         "zh-Hans": {
@@ -244,8 +260,12 @@
         }
       }
     },
-    "PRO": {},
-    "WOD": {},
+    "PRO": {
+      "localizations": {}
+    },
+    "WOD": {
+      "localizations": {}
+    },
     "WOD 内容": {
       "localizations": {
         "en": {
@@ -286,10 +306,18 @@
         }
       }
     },
-    "kg": {},
-    "lb": {},
-    "reps": {},
-    "−": {},
+    "kg": {
+      "localizations": {}
+    },
+    "lb": {
+      "localizations": {}
+    },
+    "reps": {
+      "localizations": {}
+    },
+    "−": {
+      "localizations": {}
+    },
     "○ 想学": {
       "localizations": {
         "en": {
@@ -3233,6 +3261,161 @@
           "stringUnit": {
             "state": "translated",
             "value": "High contrast"
+          }
+        }
+      }
+    },
+    "3:48": {},
+    "06.22 · FRAN": {},
+    "Pro 会员": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pro Member"
+          }
+        }
+      }
+    },
+    "RX": {},
+    "仅显示最近 %lld 天训练记录": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Showing only the last %lld days"
+          }
+        }
+      }
+    },
+    "你有 %lld 条更早的记录": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You have %lld earlier records"
+          }
+        }
+      }
+    },
+    "先手动记录这条": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Log this one manually"
+          }
+        }
+      }
+    },
+    "免费版仅显示最近 %lld 天": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Free plan shows only the last %lld days"
+          }
+        }
+      }
+    },
+    "升级 Pro": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Go Pro"
+          }
+        }
+      }
+    },
+    "升级 Pro 享无限次白板拍照识别（免费版每天仅限 %lld 次）": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Go Pro for unlimited whiteboard scans (free plan: %lld/day)"
+          }
+        }
+      }
+    },
+    "升级到专业版": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Upgrade to Pro"
+          }
+        }
+      }
+    },
+    "去除水印、拍照识别不限次": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No watermark · unlimited scans"
+          }
+        }
+      }
+    },
+    "已解锁 迹录 Pro": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WOD Trace Pro unlocked"
+          }
+        }
+      }
+    },
+    "已锁定": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Locked"
+          }
+        }
+      }
+    },
+    "白板一拍，自动成卡": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "One snap, instant card"
+          }
+        }
+      }
+    },
+    "白板照片": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Whiteboard"
+          }
+        }
+      }
+    },
+    "管理": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Manage"
+          }
+        }
+      }
+    },
+    "续期于 %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Renews %@"
           }
         }
       }

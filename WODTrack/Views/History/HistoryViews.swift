@@ -5,25 +5,46 @@ import UIKit
 struct HistoryListView: View {
     @Query(sort: \WODRecord.wodDate, order: .reverse) private var records: [WODRecord]
     @Environment(\.modelContext) private var modelContext
+    var appState: AppState
     var scrollToDate: Date? = nil
     @State private var selectedMonth: String? = nil
     @State private var recordPendingDelete: WODRecord?
     @State private var showDeleteConfirm = false
+    @State private var showPaywall = false
+
+    /// 免费用户可见窗口起点（当天起 -N 天）；Pro 无限制。
+    private var windowStartDay: Date {
+        let day = Calendar.current.date(byAdding: .day, value: -AppConfig.freeHistoryWindowDays, to: .now) ?? .distantPast
+        return Calendar.current.startOfDay(for: day)
+    }
+
+    /// 门控后可见的记录：Pro 全量；免费仅最近 N 天。
+    private var gatedRecords: [WODRecord] {
+        appState.isPro ? records : records.filter { $0.wodDate >= windowStartDay }
+    }
+
+    /// 免费态被锁在窗口外的更早记录数。
+    /// 免费态被锁在窗口外的更早记录（按 wodDate 降序，最靠近 30 天边界的排前，用作窥视）。
+    private var lockedRecords: [WODRecord] {
+        appState.isPro ? [] : records.filter { $0.wodDate < windowStartDay }
+    }
+
+    private var lockedCount: Int { lockedRecords.count }
 
     private var allMonthKeys: [String] {
         let calendar = Calendar.current
-        let keys = Set(records.map { record -> String in
+        let keys = Set(gatedRecords.map { record -> String in
             let comps = calendar.dateComponents([.year, .month], from: record.wodDate)
             return "\(comps.year ?? 0)-\(String(format: "%02d", comps.month ?? 0))"
         })
         return keys.sorted(by: >)
     }
 
-    /// 应用月份筛选后的记录（已按 wodDate 降序，来自 @Query）
+    /// 应用月份筛选后的记录（已按 wodDate 降序，来自 @Query；已过门控）
     private var filteredRecords: [WODRecord] {
-        guard let selectedMonth else { return records }
+        guard let selectedMonth else { return gatedRecords }
         let calendar = Calendar.current
-        return records.filter { record in
+        return gatedRecords.filter { record in
             let comps = calendar.dateComponents([.year, .month], from: record.wodDate)
             let key = "\(comps.year ?? 0)-\(String(format: "%02d", comps.month ?? 0))"
             return key == selectedMonth
@@ -65,6 +86,57 @@ struct HistoryListView: View {
         filteredRecords.count
     }
 
+    /// 免费态：窗口外更早记录露出窥视（真实数据）+ 毛玻璃盖住 + 锁标/条数/升级。
+    private var lockedHistoryTeaser: some View {
+        ZStack {
+            // 背景：真实的更早记录窥视（被上层毛玻璃糊掉，只透出隐约轮廓）
+            VStack(alignment: .leading, spacing: WTSpacing.md) {
+                ForEach(lockedRecords.prefix(3)) { record in
+                    HistoryTimelineRow(record: record)
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: 210, alignment: .top)
+            .padding(WTSpacing.md)
+            .clipped()
+            .allowsHitTesting(false)
+
+            // 毛玻璃 + 锁 + 条数 + 升级
+            VStack(spacing: WTSpacing.sm) {
+                Image(systemName: "lock.fill")
+                    .font(.system(size: 22))
+                    .foregroundStyle(Color.wtPrimary)
+                Text("你有 \(lockedCount) 条更早的记录")
+                    .font(WTFont.bodyBold)
+                    .foregroundStyle(Color.wtTextPrimary)
+                Text("仅显示最近 \(AppConfig.freeHistoryWindowDays) 天训练记录")
+                    .font(WTFont.caption)
+                    .foregroundStyle(Color.wtTextSecondary)
+
+                Button {
+                    showPaywall = true
+                } label: {
+                    Text("升级到专业版")
+                        .font(WTFont.bodyBold)
+                        .foregroundStyle(.black)
+                        .padding(.horizontal, WTSpacing.lg)
+                        .frame(height: 44)
+                        .background(Color.wtPrimary)
+                        .clipShape(Capsule())
+                }
+                .buttonStyle(.plain)
+                .padding(.top, WTSpacing.xs)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(.ultraThinMaterial)
+        }
+        .frame(height: 210)
+        .clipShape(RoundedRectangle(cornerRadius: WTRadius.lg))
+        .overlay(
+            RoundedRectangle(cornerRadius: WTRadius.lg)
+                .stroke(Color.white.opacity(0.06), lineWidth: 1)
+        )
+    }
+
     var body: some View {
         ScrollViewReader { proxy in
             List {
@@ -104,10 +176,21 @@ struct HistoryListView: View {
                         }
                     }
                 }
+
+                if lockedCount > 0 {
+                    lockedHistoryTeaser
+                        .listRowInsets(EdgeInsets(top: WTSpacing.md, leading: WTSpacing.lg, bottom: WTSpacing.md, trailing: WTSpacing.lg))
+                        .listRowSeparator(.hidden)
+                        .listRowBackground(Color.clear)
+                }
             }
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
             .contentMargins(.bottom, 80, for: .scrollContent)
+            .sheet(isPresented: $showPaywall) {
+                ProPaywallSheet { appState.showToast(String(localized: "已解锁 迹录 Pro")) }
+                    .preferredColorScheme(.dark)
+            }
             .onAppear {
                 guard let targetDate = scrollToDate else { return }
                 let calendar = Calendar.current

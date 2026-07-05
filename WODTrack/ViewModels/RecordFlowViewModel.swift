@@ -59,6 +59,9 @@ final class RecordFlowViewModel {
     var isRendering = false
     var entryMode: EntryMode = .manual
 
+    /// OCR 真正识别成功时回调一次（供额度计数：只有成功才扣，超时/失败/取消不触发）。
+    var onRecognizeSuccess: (() -> Void)?
+
     private let ocrService: OCRServicing
     private var hasUserAdjustedFontSize = false
     private var networkRetryCount = 0
@@ -66,13 +69,12 @@ final class RecordFlowViewModel {
     private var ocrTask: Task<Void, Never>?
     private let ocrTimeoutSeconds: Double = 10
 
-    /// 每次进入应用随机选一个初始模板（训练日志 / 边框留白 / 数据仪表盘）。
-    /// 用静态 let：每个进程只求值一次，本次启动内所有录入流程共用同一初始模板。
-    static let launchDefaultStyleId: String = [
-        "style_framed_bottom",
-        "style_mono_overlay",
-        "style_data_dashboard"
-    ].randomElement() ?? "style_mono_overlay"
+    /// 每次进入应用随机选一个初始模板——**只从免费模板里选**，避免新用户随机到 Pro 模板、
+    /// 一点「生成」就撞付费墙。用静态 let：每个进程只求值一次，本次启动内所有录入流程共用同一初始模板。
+    static let launchDefaultStyleId: String = CardStyleConfig.all
+        .filter { !$0.isPro }
+        .map(\.id)
+        .randomElement() ?? "style_mono_overlay"
 
     init(ocrService: OCRServicing = PreviewOCRService()) {
         self.ocrService = ocrService
@@ -164,6 +166,8 @@ final class RecordFlowViewModel {
                 await MainActor.run {
                     ocrState = .success(result)
                     wodContentText = result.wodContent.joined(separator: "\n")
+                    onRecognizeSuccess?()
+                    onRecognizeSuccess = nil   // 一次识别只扣一次
                 }
             } catch {
                 timeoutTask.cancel()
