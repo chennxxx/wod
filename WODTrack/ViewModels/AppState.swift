@@ -64,12 +64,16 @@ final class AppState {
 
     // MARK: - 订阅权益
 
-    /// 由 SubscriptionManager 在算出 StoreKit 权益后调用。纯内存：不持久化、不写 SwiftData/CloudKit，
-    /// 每次启动由 StoreKit（Transaction.currentEntitlements）重算，权益真相源始终在 Apple ID。
-    func applyEntitlement(isPro: Bool) {
+    /// 由 SubscriptionManager 在算出 RevenueCat 权益后调用。纯内存：不持久化、不写 SwiftData/CloudKit，
+    /// 每次启动由 RevenueCat（customerInfo）重算，权益真相源始终在 Apple ID / RC。
+    func applyEntitlement(isPro: Bool, expiresAt: Date?) {
         let status: UserProfile.SubscriptionStatus = isPro ? .pro : .free
-        guard profile.subscriptionStatus != status else { return }
-        profile.subscriptionStatus = status
+        if profile.subscriptionStatus != status {
+            profile.subscriptionStatus = status
+        }
+        if profile.subscriptionExpiresAt != expiresAt {
+            profile.subscriptionExpiresAt = expiresAt
+        }
     }
 
     // MARK: - 合规同意

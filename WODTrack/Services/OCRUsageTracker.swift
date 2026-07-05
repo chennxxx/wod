@@ -5,8 +5,8 @@ import Foundation
 /// 真相源是本机 UserDefaults——额度按设备计，跨自然日自动归零。
 @Observable
 final class OCRUsageTracker {
-    /// 免费用户每自然日可识别次数。
-    static let freeDailyLimit = 2
+    /// 免费用户每自然日可识别次数（来自 AppConfig，可发版调整）。
+    static var freeDailyLimit: Int { AppConfig.freeOCRDailyLimit }
 
     private enum DefaultsKey {
         static let day = "wt.ocr.usageDay"     // yyyy-MM-dd

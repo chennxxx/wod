@@ -1,4 +1,5 @@
 import PhotosUI
+import RevenueCatUI
 import SwiftUI
 
 struct ProfileView: View {
@@ -118,10 +119,10 @@ struct ProfileView: View {
                 .preferredColorScheme(.dark)
         }
         .sheet(isPresented: $showPaywall) {
-            PaywallView(context: .general, subscriptions: subscriptions)
+            ProPaywallSheet { appState.showToast(String(localized: "已解锁 迹录 Pro")) }
                 .preferredColorScheme(.dark)
         }
-        .manageSubscriptionsSheet(isPresented: $showManageSubscriptions)
+        .presentCustomerCenter(isPresented: $showManageSubscriptions)
         .alert("确定退出登录？", isPresented: $showSignOutDialog) {
             Button("退出登录", role: .destructive) {
                 appState.signOut()
@@ -141,11 +142,7 @@ struct ProfileView: View {
             Button {
                 showManageSubscriptions = true
             } label: {
-                subscriptionCardContent(
-                    icon: "crown.fill",
-                    title: String(localized: "Pro 会员"),
-                    subtitle: String(localized: "已解锁全部 Pro 权益，点击管理订阅")
-                )
+                proStatusRow
             }
             .buttonStyle(.plain)
         } else {
@@ -160,6 +157,50 @@ struct ProfileView: View {
             }
             .buttonStyle(.plain)
         }
+    }
+
+    /// 已订阅：紧凑单行状态（图标小、矮），点击进 Customer Center。
+    private var proStatusRow: some View {
+        HStack(spacing: WTSpacing.md - 4) {
+            Image(systemName: "crown.fill")
+                .font(.system(size: 14))
+                .foregroundStyle(Color.wtPrimary)
+                .frame(width: 30, height: 30)
+                .background(Color.wtPrimary.opacity(0.14))
+                .clipShape(RoundedRectangle(cornerRadius: 9))
+
+            Text("Pro 会员")
+                .font(WTFont.bodyBold)
+                .foregroundStyle(Color.wtTextPrimary)
+
+            if let renew = proRenewText {
+                Text(renew)
+                    .font(WTFont.caption)
+                    .foregroundStyle(Color.wtTextSecondary)
+                    .lineLimit(1)
+            }
+
+            Spacer()
+
+            Text("管理")
+                .font(WTFont.caption)
+                .foregroundStyle(Color.wtTextSecondary)
+            Image(systemName: "chevron.right")
+                .font(.system(size: 12, weight: .medium))
+                .foregroundStyle(Color.wtTextDisabled)
+        }
+        .padding(.horizontal, WTSpacing.md)
+        .padding(.vertical, WTSpacing.sm + 2)
+        .background(Color.wtSurface)
+        .clipShape(RoundedRectangle(cornerRadius: WTRadius.md))
+    }
+
+    /// 续期日文案（无到期日则不显示）。
+    private var proRenewText: String? {
+        guard let expires = appState.profile.subscriptionExpiresAt else { return nil }
+        let f = DateFormatter()
+        f.dateFormat = "yyyy.MM.dd"
+        return String(localized: "续期于 \(f.string(from: expires))")
     }
 
     private func subscriptionCardContent(icon: String, title: String, subtitle: String) -> some View {

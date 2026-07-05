@@ -12,6 +12,14 @@ enum CardColorTheme: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
+    /// 免费：浅色 / 深色 / 荧光绿；Pro：胶片 / 海蓝 / 高对比。
+    var isPro: Bool {
+        switch self {
+        case .light, .dark, .neon: false
+        case .film, .ocean, .contrast: true
+        }
+    }
+
     var label: String {
         switch self {
         case .light: String(localized: "浅色")

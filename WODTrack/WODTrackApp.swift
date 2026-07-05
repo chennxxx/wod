@@ -13,10 +13,11 @@ struct WODTrackApp: App {
         let appState = AppState()
         let syncManager = CloudSyncManager()
         let subscriptions = SubscriptionManager()
-        // 订阅态真相源在 StoreKit；管理器建在 App 层并持 appState 弱引用回写权益。
+        // 订阅态真相源在 RevenueCat；管理器建在 App 层并持 appState 弱引用回写权益。
         // 必须建在 App 层：ContentView 因 .id(containerGeneration) 会随 iCloud 开关整树重建，
-        // 管理器若建在视图内会被销毁、丢失 Transaction.updates 长监听。
+        // 管理器若建在视图内会被销毁、丢失 customerInfo 长监听。
         subscriptions.appState = appState
+        subscriptions.configure()
         let syncActive = syncManager.isSyncEnabled && appState.profile.isLoggedIn
         let container = Self.makeContainer(syncEnabled: syncActive)
         appState.modelContainer = container

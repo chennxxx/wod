@@ -1,126 +1,73 @@
 import Foundation
-import StoreKit
+import RevenueCat
 
-/// 订阅态唯一真相源（StoreKit 2）。
-/// 权益绑 Apple ID、由系统自动跨设备同步——**不经 CloudKit**，故不涉及本地 store 清空/Production schema 风险。
+/// 订阅态唯一真相源（RevenueCat）。
+/// 权益绑 Apple ID、由 RC 跨设备/换机自动收敛——不经 CloudKit，不涉及本地 store 风险。
 /// 算出 isSubscribed 后回写 AppState.applyEntitlement，保持全站 `appState.isPro` 读取 API 不变。
+/// 购买 UI 交给 RevenueCatUI 的 PaywallView，本类只负责配置、观察权益、恢复。
 @MainActor
 @Observable
 final class SubscriptionManager {
-    /// 自动续期订阅商品 ID（需与 .storekit 配置 / App Store Connect 完全一致）。
-    enum ProductID {
-        static let yearly = "com.chenxi.WODTrack.pro.yearly"
-        static let monthly = "com.chenxi.WODTrack.pro.monthly"
-        static let all: [String] = [yearly, monthly]
-    }
-
-    /// 可售商品，按价格档展示用（年付优先排在前）。
-    private(set) var products: [Product] = []
-    /// 当前是否有有效订阅。
+    /// 当前是否有有效订阅（任一 active entitlement）。
     private(set) var isSubscribed = false
-    /// 商品是否已成功拉取（用于 Paywall loading 态）。
-    private(set) var isLoadingProducts = false
-    /// 进行中的购买商品 ID（按钮 loading 态）。
-    private(set) var purchasingProductID: String?
+    /// 当前权益到期日（用于 Profile 展示）。
+    private(set) var expiresAt: Date?
 
     /// AppState 弱引用，权益变化时回写。
     @ObservationIgnored weak var appState: AppState?
 
-    @ObservationIgnored private var updatesTask: Task<Void, Never>?
+    @ObservationIgnored private var streamTask: Task<Void, Never>?
+    @ObservationIgnored private var didConfigure = false
 
-    init() {
-        // 全生命周期监听交易更新（续期、退款、家庭共享、其他设备购买）。
-        updatesTask = Task { [weak self] in
-            for await update in Transaction.updates {
-                guard let self else { return }
-                await self.handle(verificationResult: update)
-                await self.refreshEntitlement()
+    /// App 启动时调用一次：配置 RC + 开始监听 customerInfo。
+    func configure() {
+        guard !didConfigure else { return }
+        didConfigure = true
+
+        Purchases.logLevel = .info
+        Purchases.configure(withAPIKey: AppConfig.revenueCatAPIKey)
+
+        // 全生命周期监听权益变化（购买、续期、退款、换机、家庭共享）。
+        streamTask = Task { [weak self] in
+            guard let self else { return }
+            for await info in Purchases.shared.customerInfoStream {
+                self.apply(info)
             }
         }
+
+        // 首次立即拉一次，避免等到 stream 首帧。
+        Task { await refreshEntitlement() }
     }
 
     deinit {
-        updatesTask?.cancel()
+        streamTask?.cancel()
     }
 
-    var yearlyProduct: Product? { products.first { $0.id == ProductID.yearly } }
-    var monthlyProduct: Product? { products.first { $0.id == ProductID.monthly } }
-
-    // MARK: - 商品
-
-    func loadProducts() async {
-        guard products.isEmpty else { return }
-        isLoadingProducts = true
-        defer { isLoadingProducts = false }
-        do {
-            let fetched = try await Product.products(for: ProductID.all)
-            // 年付排前
-            products = fetched.sorted { lhs, _ in lhs.id == ProductID.yearly }
-        } catch {
-            products = []
-        }
-    }
-
-    // MARK: - 权益计算
-
-    /// 重算当前权益（启动、回前台、购买/恢复后调用）。
+    /// 启动 / 回前台重算权益。
     func refreshEntitlement() async {
-        var active = false
-        for await result in Transaction.currentEntitlements {
-            guard case .verified(let transaction) = result else { continue }
-            guard transaction.productType == .autoRenewable,
-                  ProductID.all.contains(transaction.productID) else { continue }
-            // 已撤销或已过期不算
-            if transaction.revocationDate != nil { continue }
-            if let expiration = transaction.expirationDate, expiration < Date() { continue }
-            active = true
+        guard didConfigure else { return }
+        if let info = try? await Purchases.shared.customerInfo() {
+            apply(info)
         }
-        isSubscribed = active
-        appState?.applyEntitlement(isPro: active)
     }
 
-    // MARK: - 购买 / 恢复
-
-    enum PurchaseOutcome {
-        case success
-        case userCancelled
-        case pending
-        case failed(String)
-    }
-
+    /// 恢复购买（Customer Center 也内置，此处留兜底入口）。
     @discardableResult
-    func purchase(_ product: Product) async -> PurchaseOutcome {
-        purchasingProductID = product.id
-        defer { purchasingProductID = nil }
-        do {
-            let result = try await product.purchase()
-            switch result {
-            case .success(let verification):
-                await handle(verificationResult: verification)
-                await refreshEntitlement()
-                return .success
-            case .userCancelled:
-                return .userCancelled
-            case .pending:
-                return .pending
-            @unknown default:
-                return .failed(String(localized: "购买失败，请稍后重试"))
-            }
-        } catch {
-            return .failed(String(localized: "购买失败，请稍后重试"))
-        }
-    }
-
     func restore() async -> Bool {
-        try? await AppStore.sync()
-        await refreshEntitlement()
+        guard didConfigure else { return false }
+        if let info = try? await Purchases.shared.restorePurchases() {
+            apply(info)
+        }
         return isSubscribed
     }
 
-    // MARK: - 交易核销
+    // MARK: - 权益写穿
 
-    private func handle(verificationResult: VerificationResult<Transaction>) async {
-        guard case .verified(let transaction) = verificationResult else { return }
-        await transaction.finish()
+    private func apply(_ info: CustomerInfo) {
+        let active = info.entitlements.active
+        isSubscribed = !active.isEmpty
+        // 取最晚到期日（多档时更稳）；无到期日（如买断）则为 nil。
+        expiresAt = active.values.compactMap(\.expirationDate).max()
+        appState?.applyEntitlement(isPro: isSubscribed, expiresAt: expiresAt)
     }
 }

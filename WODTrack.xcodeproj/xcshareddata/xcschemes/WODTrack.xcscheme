@@ -68,7 +68,7 @@
          </CommandLineArgument>
       </CommandLineArguments>
       <StoreKitConfigurationFileReference
-         identifier = "../../WODTrack/StoreKit/WODTrack.storekit">
+         identifier = "../../../WODTrack/StoreKit/WODTrack.storekit">
       </StoreKitConfigurationFileReference>
    </LaunchAction>
    <ProfileAction

@@ -58,6 +58,7 @@ struct ContentView: View {
             NavigationStack {
                 RecordHomeView(
                     records: records,
+                    appState: appState,
                     openRecordFlow: { isShowingRecordFlow = true }
                 )
             }
@@ -234,6 +235,7 @@ private struct LegalConsentView: View {
 
 private struct RecordHomeView: View {
     let records: [WODRecord]
+    let appState: AppState
     let openRecordFlow: () -> Void
     @State private var historyScrollDate: Date?
     @Query private var skillStatuses: [SkillStatus]
@@ -255,7 +257,7 @@ private struct RecordHomeView: View {
                     if records.isEmpty {
                         EmptyRecordState()
                     } else {
-                        HistoryPreviewSection(records: Array(records.prefix(12)))
+                        HistoryPreviewSection(records: Array(records.prefix(12)), appState: appState)
                     }
 
                     RecentActivitySection(
@@ -287,8 +289,9 @@ private struct RecordHomeView: View {
         }
         .navigationTitle("每一次进步，都有迹可循")
         .navigationDestination(item: $historyScrollDate) { date in
-            HistoryListView(scrollToDate: date)
+            HistoryListView(appState: appState, scrollToDate: date)
         }
+        // appState 透传给历史门控
     }
 
     private var streakDays: Int {
@@ -469,6 +472,7 @@ private struct StatDivider: View {
 
 private struct HistoryPreviewSection: View {
     let records: [WODRecord]
+    let appState: AppState
 
     /// 一屏约露 3.5 张卡片，露边提示可横滑
     private var cardWidth: CGFloat {
@@ -477,7 +481,7 @@ private struct HistoryPreviewSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: WTSpacing.md) {
-            NavigationLink(destination: HistoryListView()) {
+            NavigationLink(destination: HistoryListView(appState: appState)) {
                 HStack {
                     Text("训练时刻")
                         .font(WTFont.title)

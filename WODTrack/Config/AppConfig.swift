@@ -10,6 +10,16 @@ enum AppConfig {
 
     static let useMockOCR = false
 
+    // MARK: - 订阅（RevenueCat）
+    /// RevenueCat 公钥（Apple 平台公钥 `appl_…`）：走真实 App Store（开发/TestFlight 沙盒、上架正式）。
+    static let revenueCatAPIKey = "appl_ZUFeLLliuuUCJULpAMRUwyeVixg"
+
+    // MARK: - 免费额度门控
+    /// 免费用户每自然日 OCR 识别次数上限。
+    static let freeOCRDailyLimit = 2
+    /// 免费用户可见的历史记录天数（更早灰显，需 Pro 解锁）。
+    static let freeHistoryWindowDays = 30
+
     // MARK: - 动作示范视频（腾讯云 COS + CDN）
     /// 视频 CDN 域名。将来换域名只改这一行。
     /// 备用（CDN 异常时可临时切回 COS 源站直连）：
