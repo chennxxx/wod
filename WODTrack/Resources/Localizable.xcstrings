@@ -1,3004 +1,3040 @@
 {
-  "sourceLanguage": "zh-Hans",
-  "strings": {
-    "": {},
-    " 与 ": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": " and "
+  "sourceLanguage" : "zh-Hans",
+  "strings" : {
+    "" : {
+
+    },
+    " 与 " : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " and "
           }
         }
       }
     },
-    ":": {},
-    "(RPE)": {},
-    "《%@》": {
-      "extractionState": "stale",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@"
+    ":" : {
+
+    },
+    "(RPE)" : {
+
+    },
+    "《%@》" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@"
           }
         }
       }
     },
-    "《用户协议》": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "User Agreement"
+    "《用户协议》" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "User Agreement"
           }
         }
       }
     },
-    "《隐私政策》": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Privacy Policy"
+    "《隐私政策》" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Privacy Policy"
           }
         }
       }
     },
-    "@迹录 WOD": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "@WOD Trace"
+    "@迹录 WOD" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "@WOD Trace"
           }
         }
       }
     },
-    "/ %lld 已掌握": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "/ %lld mastered"
+    "/ %lld 已掌握" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "/ %lld mastered"
           }
         }
       }
     },
-    "/%lld": {},
-    "%@ · %lld 条主线": {
-      "extractionState": "stale",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@ · %2$lld paths"
+    "/%lld" : {
+
+    },
+    "%@ · %lld 条主线" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · %2$lld paths"
           }
         },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "new",
-            "value": "%1$@ · %2$lld 条主线"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ · %2$lld 条主线"
           }
         }
       }
     },
-    "%@ %lld": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "new",
-            "value": "%1$@ %2$lld"
+    "%@ %lld" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ %2$lld"
           }
         }
       }
     },
-    "%@ 年": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@"
+    "%@ 年" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@"
           }
         }
       }
     },
-    "%@ 模块": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ module"
+    "%@ 模块" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ module"
           }
         }
       }
     },
-    "%@ 配色": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ theme"
+    "%@ 配色" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ theme"
           }
         }
       }
     },
-    "%lld": {},
-    "%lld 条": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld records"
+    "%lld" : {
+
+    },
+    "%lld 条" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld records"
+          }
+        }
+      }
+    },
+    "%lld/%lld" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld/%2$lld"
           }
         }
       }
+    },
+    "%lld%%" : {
+
+    },
+    "+" : {
+
+    },
+    "−" : {
+
     },
-    "%lld/%lld": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "new",
-            "value": "%1$lld/%2$lld"
+    "○ 想学" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "○ Want to learn"
           }
         }
       }
     },
-    "%lld%%": {},
-    "+": {},
-    "−": {},
-    "○ 想学": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "○ Want to learn"
+    "◐ 进行中" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "◐ In progress"
           }
         }
       }
     },
-    "◐ 进行中": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "◐ In progress"
+    "✓ 已掌握" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "✓ Mastered"
           }
         }
       }
     },
-    "✓ 已掌握": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "✓ Mastered"
+    "0" : {
+
+    },
+    "3:48" : {
+
+    },
+    "06.22 · FRAN" : {
+
+    },
+    "30 天内你可以发送邮件向我们申请撤回，账号与数据将予以恢复。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Within 30 days you can email us to cancel; your account and data will be restored."
           }
         }
       }
     },
-    "0": {},
-    "3:48": {},
-    "06.22 · FRAN": {},
-    "30 天内你可以发送邮件向我们申请撤回，账号与数据将予以恢复。": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Within 30 days you can email us to cancel; your account and data will be restored."
+    "A 热身/完成以下3轮\n10空杆早安式\n20S原地高抬腿\n\nB 12EMOM练习\n25S面墙倒立\n6波比引体\n\nC WOD/任务计时/7轮\n11自重硬拉\n100M" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A Warm-up / 3 rounds:\n10 empty-bar good mornings\n20s high knees in place\n\nB 12-min EMOM:\n25s wall-facing handstand hold\n6 burpee pull-ups\n\nC WOD / For time / 7 rounds:\n11 bodyweight deadlifts\n100m"
           }
         }
       }
     },
-    "A 热身/完成以下3轮\n10空杆早安式\n20S原地高抬腿\n\nB 12EMOM练习\n25S面墙倒立\n6波比引体\n\nC WOD/任务计时/7轮\n11自重硬拉\n100M": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "A Warm-up / 3 rounds:\n10 empty-bar good mornings\n20s high knees in place\n\nB 12-min EMOM:\n25s wall-facing handstand hold\n6 burpee pull-ups\n\nC WOD / For time / 7 rounds:\n11 bodyweight deadlifts\n100m"
+    "iCloud 同步" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iCloud sync"
           }
         }
       }
     },
-    "iCloud 同步": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "iCloud sync"
+    "iCloud 同步将暂停，本机与云端数据都保留，重新登录后可恢复同步。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iCloud sync will pause; data on this device and in the cloud is kept, and sync resumes after you sign in again."
           }
         }
       }
+    },
+    "kg" : {
+
     },
-    "iCloud 同步将暂停，本机与云端数据都保留，重新登录后可恢复同步。": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "iCloud sync will pause; data on this device and in the cloud is kept, and sync resumes after you sign in again."
+    "lb" : {
+
+    },
+    "MM:SS，例如 04:32" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MM:SS, e.g. 04:32"
           }
         }
       }
+    },
+    "PRO" : {
+
     },
-    "kg": {},
-    "lb": {},
-    "MM:SS，例如 04:32": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "MM:SS, e.g. 04:32"
+    "Pro 会员" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pro Member"
           }
         }
       }
+    },
+    "reps" : {
+
+    },
+    "RX" : {
+
+    },
+    "WOD" : {
+
     },
-    "PRO": {},
-    "Pro 会员": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pro Member"
+    "WOD 内容" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WOD content"
           }
         }
       }
     },
-    "reps": {},
-    "RX": {},
-    "WOD": {},
-    "WOD 内容": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "WOD content"
+    "WOD 类型" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WOD type"
           }
         }
       }
     },
-    "WOD 类型": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "WOD type"
+    "上次练" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last"
           }
         }
       }
     },
-    "上次练": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Last"
+    "下一步：生成训练卡片" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next: generate card"
           }
         }
       }
     },
-    "下一步：生成训练卡片": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Next: generate card"
+    "下一步：选择训练照" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next: choose photo"
           }
         }
       }
     },
-    "下一步：选择训练照": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Next: choose photo"
+    "不同意将无法继续使用迹录 WOD" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Without agreeing, you can't continue using WOD Trace"
           }
         }
       }
     },
-    "不同意将无法继续使用迹录 WOD": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Without agreeing, you can't continue using WOD Trace"
+    "个人纪录" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Personal best"
           }
         }
       }
     },
-    "个人纪录": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Personal best"
+    "仅显示最近 %lld 天训练记录" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Showing only the last %lld days"
           }
         }
       }
     },
-    "今天的感受、重量来源等": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Today's feel, where the weight came from, etc."
+    "今天的感受、重量来源等" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Today's feel, where the weight came from, etc."
           }
         }
       }
     },
-    "今天练了什么？": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "What did you train today?"
+    "今天练了什么？" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What did you train today?"
           }
         }
       }
     },
-    "从相册选取": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Choose from library"
+    "从相册选取" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose from library"
           }
         }
       }
     },
-    "以后再说": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Maybe later"
+    "以后再说" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maybe later"
           }
         }
       }
     },
-    "位置": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Position"
+    "位置" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Position"
           }
         }
       }
     },
-    "你有 %lld 条更早的记录": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "You have %lld earlier records"
+    "你有 %lld 条更早的记录" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You have %lld earlier records"
           }
         }
       }
     },
-    "你的账号标识": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Your account ID"
+    "你的账号标识" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your account ID"
           }
         }
       }
     },
-    "使用前请阅读并同意": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Please read and agree before continuing"
+    "使用前请阅读并同意" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Please read and agree before continuing"
           }
         }
       }
     },
-    "使用过程中，你主动拍摄或选择的白板照片可能会发送至识别服务用于提取 WOD 内容；训练记录和个人资料会根据你的操作保存在本机，开启 iCloud 同步后会同步到你的 iCloud。": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Whiteboard photos you take or pick may be sent to a recognition service to extract WOD content. Your workout logs and profile are stored on this device based on your actions, and sync to your iCloud once iCloud sync is on."
+    "使用过程中，你主动拍摄或选择的白板照片可能会发送至识别服务用于提取 WOD 内容；训练记录和个人资料会根据你的操作保存在本机，开启 iCloud 同步后会同步到你的 iCloud。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Whiteboard photos you take or pick may be sent to a recognition service to extract WOD content. Your workout logs and profile are stored on this device based on your actions, and sync to your iCloud once iCloud sync is on."
           }
         }
       }
     },
-    "例如 18 rounds + 7 reps": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "e.g. 18 rounds + 7 reps"
+    "例如 18 rounds + 7 reps" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "e.g. 18 rounds + 7 reps"
           }
         }
       }
     },
-    "例如 100 kg": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "e.g. 100 kg"
+    "例如 100 kg" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "e.g. 100 kg"
           }
         }
       }
     },
-    "保存": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Save"
+    "保存" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save"
           }
         }
       }
     },
-    "保存中…": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Saving…"
+    "保存中…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saving…"
           }
         }
       }
     },
-    "保存图片到相册": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Save image to Photos"
+    "保存图片到相册" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save image to Photos"
           }
         }
       }
     },
-    "保存失败": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Save failed"
+    "保存失败" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save failed"
           }
         }
       }
     },
-    "保存成功": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Saved"
+    "保存成功" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saved"
           }
         }
       }
     },
-    "保存记录": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Save"
+    "保存记录" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save"
           }
         }
       }
     },
-    "先手动记录这条": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Log this one manually"
+    "先手动记录这条" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Log this one manually"
           }
         }
       }
     },
-    "免费版仅显示最近 %lld 天": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Free plan shows only the last %lld days"
+    "免费版仅显示最近 %lld 天" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Free plan shows only the last %lld days"
           }
         }
       }
     },
-    "免费用户不可移除水印，Pro 样式需要订阅后解锁。": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Free users can't remove the watermark; Pro styles unlock with a subscription."
+    "免费用户不可移除水印，Pro 样式需要订阅后解锁。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Free users can't remove the watermark; Pro styles unlock with a subscription."
           }
         }
       }
     },
-    "免费用户不可移除水印，Pro 模板需要订阅后解锁。": {
-      "extractionState": "stale",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Free users can't remove the watermark; Pro templates unlock with a subscription."
+    "免费用户不可移除水印，Pro 模板需要订阅后解锁。" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Free users can't remove the watermark; Pro templates unlock with a subscription."
           }
         }
       }
     },
-    "全部": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "All"
+    "全部" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All"
           }
         }
       }
     },
-    "全部动作": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "All movements"
+    "全部动作" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All movements"
           }
         }
       }
     },
-    "全部难度": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "All levels"
+    "全部难度" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All levels"
           }
         }
       }
     },
-    "共 %lld 个": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld total"
+    "共 %lld 个" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld total"
           }
         }
       }
     },
-    "关于我们": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "About us"
+    "关于我们" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "About us"
           }
         }
       }
     },
-    "关闭 iCloud 同步？": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Turn off iCloud sync?"
+    "关闭 iCloud 同步？" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn off iCloud sync?"
           }
         }
       }
     },
-    "关闭同步": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Turn off sync"
+    "关闭同步" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn off sync"
           }
         }
       }
     },
-    "其他": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Other"
+    "其他" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Other"
           }
         }
       }
     },
-    "内容解析失败，请手动输入训练内容": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Couldn't parse the content — please enter your workout manually"
+    "内容解析失败，请手动输入训练内容" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't parse the content — please enter your workout manually"
           }
         }
       }
     },
-    "最近记录": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Recent entries"
+    "最近记录" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recent entries"
           }
         }
       }
     },
-    "减": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Minus"
+    "减" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Minus"
           }
         }
       }
     },
-    "分": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "min"
+    "分" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "min"
           }
         }
       }
     },
-    "分享到社交媒体": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Share to social media"
+    "分享到社交媒体" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Share to social media"
           }
         }
       }
     },
-    "分类": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Category"
+    "分类" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Category"
           }
         }
       }
     },
-    "删除": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Delete"
+    "删除" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete"
           }
         }
       }
     },
-    "删除你的账号": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Delete your account"
+    "删除你的账号" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete your account"
           }
         }
       }
     },
-    "删除记录": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Delete entry"
+    "删除记录" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete entry"
           }
         }
       }
     },
-    "删除账号": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Delete account"
+    "删除账号" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete account"
           }
         }
       }
     },
-    "删除这条记录": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Delete this entry"
+    "删除这条记录" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete this entry"
           }
         }
       }
     },
-    "前置动作": {
-      "extractionState": "stale",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Prerequisites"
+    "前置动作" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prerequisites"
           }
         }
       }
     },
-    "前置动作练习": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Prerequisite practice"
+    "前置动作练习" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prerequisite practice"
           }
         }
       }
     },
-    "加": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Plus"
+    "加" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plus"
           }
         }
       }
     },
-    "动作": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Movements"
+    "动作" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Movements"
           }
         }
       }
     },
-    "动作步骤": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Steps"
+    "动作步骤" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Steps"
           }
         }
       }
     },
-    "动作简介": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Overview"
+    "动作简介" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Overview"
           }
         }
       }
     },
-    "动作要领": {
-      "extractionState": "stale",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Key points"
+    "动作要领" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Key points"
           }
         }
       }
     },
-    "动作解锁 %@": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Unlocked %@"
+    "动作解锁 %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unlocked %@"
           }
         }
       }
     },
-    "动作训练 %@ %@ %@": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Trained %@ %@ %@"
+    "动作训练 %@ %@ %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trained %@ %@ %@"
           }
         },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "new",
-            "value": "动作训练 %1$@ %2$@ %3$@"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "动作训练 %1$@ %2$@ %3$@"
           }
         }
       }
     },
-    "升级 Pro": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Go Pro"
+    "升级 Pro" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Go Pro"
           }
         }
       }
     },
-    "升级 Pro 享无限次白板拍照识别（免费版每天仅限 %lld 次）": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Go Pro for unlimited whiteboard scans (free plan: %lld/day)"
+    "升级 Pro 享无限次白板拍照识别（免费版每天仅限 %lld 次）" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Go Pro for unlimited whiteboard scans (free plan: %lld/day)"
           }
         }
       }
     },
-    "升级到专业版": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Upgrade to Pro"
+    "升级到专业版" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upgrade to Pro"
           }
         }
       }
     },
-    "占用空间": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Storage used"
+    "占用空间" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Storage used"
           }
         }
       }
     },
-    "卡片样式与排版": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Card style & layout"
+    "卡片样式与排版" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Card style & layout"
           }
         }
       }
     },
-    "卡片生成失败，请重试": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Couldn't generate the card — please try again"
+    "卡片生成失败，请重试" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't generate the card — please try again"
           }
         }
       }
     },
-    "即将上线 · Coming Soon": {
-      "extractionState": "stale",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Coming Soon"
+    "即将上线 · Coming Soon" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coming Soon"
           }
         }
       }
     },
-    "即将推出": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Coming soon"
+    "即将推出" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coming soon"
           }
         }
       }
     },
-    "历史记录": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "History"
+    "历史记录" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "History"
           }
         }
       }
     },
-    "原图比例": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Original ratio"
+    "原图比例" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Original ratio"
           }
         }
       }
     },
-    "去除水印、拍照识别不限次": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No watermark · unlimited scans"
+    "去除水印、拍照识别不限次" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No watermark · unlimited scans"
           }
         }
       }
     },
-    "反馈": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Feedback"
+    "反馈" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Feedback"
           }
         }
       }
     },
-    "取消": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cancel"
+    "取消" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel"
           }
         }
       }
     },
-    "受限": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Restricted"
+    "受限" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restricted"
           }
         }
       }
     },
-    "可选，记录今天的感受或细节": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Optional — note today's feel or details"
+    "可选，记录今天的感受或细节" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Optional — note today's feel or details"
           }
         }
       }
     },
-    "右侧": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Right"
+    "右侧" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Right"
           }
         }
       }
     },
-    "同意并继续": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Agree and continue"
+    "同意并继续" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Agree and continue"
           }
         }
       }
     },
-    "同步在后台自动进行，无需手动操作。数据通过你的私人 iCloud 在多台设备间同步，不经过我们的服务器。iCloud 空间不足时，系统会自动暂停同步。": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sync runs automatically in the background. Data syncs across your devices through your private iCloud, never through our servers. If iCloud storage runs low, the system pauses sync automatically."
+    "同步在后台自动进行，无需手动操作。数据通过你的私人 iCloud 在多台设备间同步，不经过我们的服务器。iCloud 空间不足时，系统会自动暂停同步。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sync runs automatically in the background. Data syncs across your devices through your private iCloud, never through our servers. If iCloud storage runs low, the system pauses sync automatically."
           }
         }
       }
     },
-    "同步状态": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sync status"
+    "同步状态" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sync status"
           }
         }
       }
     },
-    "困难": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hard"
+    "困难" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hard"
           }
         }
       }
     },
-    "图片无效，请重新选择": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Invalid image — please choose another"
+    "图片无效，请重新选择" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invalid image — please choose another"
           }
         }
       }
     },
-    "图片格式有误，请重新拍摄": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Invalid image format — please retake the photo"
+    "图片格式有误，请重新拍摄" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invalid image format — please retake the photo"
           }
         }
       }
     },
-    "圆角": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rounded"
+    "圆角" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rounded"
           }
         }
       }
     },
-    "填充裁切": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fill & crop"
+    "填充裁切" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fill & crop"
           }
         }
       }
     },
-    "备注": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Notes"
+    "备注" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notes"
           }
         }
       }
     },
-    "备注（可选）": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Notes (optional)"
+    "备注（可选）" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notes (optional)"
           }
         }
       }
     },
-    "复制": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Copy"
+    "复制" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copy"
           }
         }
       }
     },
-    "夜训卡片": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Night card"
+    "夜训卡片" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Night card"
           }
         }
       }
     },
-    "大字报": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Big type"
+    "大字报" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Big type"
           }
         }
       }
     },
-    "头像": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Avatar"
+    "头像" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avatar"
           }
         }
       }
     },
-    "头像设置失败，请重试": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Couldn't set the avatar — please try again"
+    "头像设置失败，请重试" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't set the avatar — please try again"
           }
         }
       }
     },
-    "完成": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Done"
+    "完成" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Done"
           }
         }
       }
     },
-    "完成 / 第 X 组未完成": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Completed / failed on round X"
+    "完成 / 第 X 组未完成" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Completed / failed on round X"
           }
         }
       }
     },
-    "完成WOD": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Completed a WOD"
+    "完成WOD" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Completed a WOD"
           }
         }
       }
     },
-    "完成次数": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Reps done"
+    "完成次数" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reps done"
           }
         }
       }
     },
-    "完整保留照片，边缘用模糊填充": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Keeps the whole photo; edges filled with blur"
+    "完整保留照片，边缘用模糊填充" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keeps the whole photo; edges filled with blur"
           }
         }
       }
     },
-    "完整显示": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fit"
+    "完整显示" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fit"
           }
         }
       }
     },
-    "导入方式": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Import method"
+    "导入方式" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Import method"
           }
         }
       }
     },
-    "导入训练照片": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Import a training photo"
+    "导入训练照片" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Import a training photo"
           }
         }
       }
     },
-    "导出全部数据": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Export all data"
+    "导出全部数据" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Export all data"
           }
         }
       }
     },
-    "居中": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Center"
+    "居中" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Center"
           }
         }
       }
     },
-    "左侧": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Left"
+    "左侧" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Left"
           }
         }
       }
     },
-    "已上传到 iCloud 的数据不会删除，本机记录也完整保留。重新开启即可继续同步。": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Data already in iCloud won't be deleted and your local records are kept; turn it back on to resume syncing."
+    "已上传到 iCloud 的数据不会删除，本机记录也完整保留。重新开启即可继续同步。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Data already in iCloud won't be deleted and your local records are kept; turn it back on to resume syncing."
           }
         }
       }
     },
-    "已保存": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Saved"
+    "已保存" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saved"
           }
         }
       }
     },
-    "已保存到相册": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Saved to your photos"
+    "已保存到相册" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saved to your photos"
           }
         }
       }
     },
-    "已复制账号标识": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Account ID copied"
+    "已复制账号标识" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Account ID copied"
           }
         }
       }
     },
-    "已复制账号标识，请在表单中粘贴": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Account ID copied — paste it into the form"
+    "已复制账号标识，请在表单中粘贴" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Account ID copied — paste it into the form"
           }
         }
       }
     },
-    "已开启": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "On"
+    "已开启" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On"
           }
         }
       }
     },
-    "已掌握": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mastered"
+    "已掌握" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mastered"
           }
         }
       }
     },
-    "已登录": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Signed in"
+    "已登录" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Signed in"
           }
         }
       }
     },
-    "已解锁 迹录 Pro": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "WOD Trace Pro unlocked"
+    "已解锁 迹录 Pro" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WOD Trace Pro unlocked"
           }
         }
       }
     },
-    "已选照片": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Selected photo"
+    "已选照片" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selected photo"
           }
         }
       }
     },
-    "已锁定": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Locked"
+    "已锁定" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Locked"
           }
         }
       }
     },
-    "底部": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bottom"
+    "底部" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bottom"
           }
         }
       }
     },
-    "底部信息卡，适合内容多的 WOD": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bottom info card; good for content-heavy WODs"
+    "底部信息卡，适合内容多的 WOD" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bottom info card; good for content-heavy WODs"
           }
         }
       }
     },
-    "开启 iCloud 同步": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Turn on iCloud sync"
+    "开启 iCloud 同步" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn on iCloud sync"
           }
         }
       }
     },
-    "开启后，训练记录通过你的 iCloud 在多台设备间同步、换机不丢。数据存于你的 iCloud 私人空间，不经过我们的服务器。关闭后本机与云端数据均会保留。": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Once on, your workout records sync across devices through your iCloud, so nothing is lost when you switch phones. Data is stored in your private iCloud space, never on our servers. Turning it off keeps both local and cloud data."
+    "开启后，训练记录通过你的 iCloud 在多台设备间同步、换机不丢。数据存于你的 iCloud 私人空间，不经过我们的服务器。关闭后本机与云端数据均会保留。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Once on, your workout records sync across devices through your iCloud, so nothing is lost when you switch phones. Data is stored in your private iCloud space, never on our servers. Turning it off keeps both local and cloud data."
           }
         }
       }
     },
-    "开始记录后，这里会出现你的训练概览和历史记录。": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Once you start logging, your training overview and history appear here."
+    "开始记录后，这里会出现你的训练概览和历史记录。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Once you start logging, your training overview and history appear here."
           }
         }
       }
     },
-    "强度": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Intensity"
+    "强度" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Intensity"
           }
         }
       }
     },
-    "强度 %@": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Intensity %@"
+    "强度 %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Intensity %@"
           }
         }
       }
     },
-    "强调训练数字，数据卡片风格": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Emphasizes your numbers in a data-card style"
+    "强调训练数字，数据卡片风格" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Emphasizes your numbers in a data-card style"
           }
         }
       }
     },
-    "当前设备不支持相机拍摄，请使用相册导入。": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "This device doesn't support the camera — please import from your library."
+    "当前设备不支持相机拍摄，请使用相册导入。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This device doesn't support the camera — please import from your library."
           }
         }
       }
     },
-    "想学": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Want to learn"
+    "想学" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Want to learn"
           }
         }
       }
     },
-    "成绩": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Result"
+    "成绩" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Result"
           }
         }
       }
     },
-    "我们会打开删除申请表单。你的账号标识已复制到剪贴板，请在表单中粘贴提交。": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "We'll open the deletion request form. Your account ID is copied to the clipboard — paste it into the form and submit."
+    "我们会打开删除申请表单。你的账号标识已复制到剪贴板，请在表单中粘贴提交。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "We'll open the deletion request form. Your account ID is copied to the clipboard — paste it into the form and submit."
           }
         }
       }
     },
-    "我们会按照《用户协议》和《隐私政策》为你提供训练记录、拍照识别、历史管理、卡片生成、Apple 登录与 iCloud 同步等服务。": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "We provide workout logging, photo recognition, history management, card generation, Sign in with Apple, and iCloud sync in line with the User Agreement and Privacy Policy."
+    "我们会按照《用户协议》和《隐私政策》为你提供训练记录、拍照识别、历史管理、卡片生成、Apple 登录与 iCloud 同步等服务。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "We provide workout logging, photo recognition, history management, card generation, Sign in with Apple, and iCloud sync in line with the User Agreement and Privacy Policy."
           }
         }
       }
     },
-    "我已阅读并同意 ": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "I have read and agree to "
+    "我已阅读并同意 " : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I have read and agree to "
           }
         }
       }
     },
-    "我的": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Profile"
+    "我的" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Profile"
           }
         }
       }
     },
-    "我的数据": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "My data"
+    "我的数据" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "My data"
           }
         }
       }
     },
-    "我的状态": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "My status"
+    "我的状态" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "My status"
           }
         }
       }
     },
-    "我的状态 · 点击切换": {
-      "extractionState": "stale",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "My status · tap to change"
+    "我的状态 · 点击切换" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "My status · tap to change"
           }
         }
       }
     },
-    "打卡于 %@": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Logged on %@"
+    "打卡于 %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Logged on %@"
           }
         }
       }
     },
-    "技术支持与常见问题": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Support & FAQ"
+    "技术支持与常见问题" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Support & FAQ"
           }
         }
       }
     },
-    "技能树": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Skill Tree"
+    "技能树" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skill Tree"
           }
         }
       }
     },
-    "挑战": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Challenge"
+    "挑战" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Challenge"
           }
         }
       }
     },
-    "提交后我们将在服务端移除你的全部数据。该操作不可逆，请谨慎确认。": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "After you submit, we'll remove all your data from the server. This action is irreversible — please confirm carefully."
+    "提交后我们将在服务端移除你的全部数据。该操作不可逆，请谨慎确认。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "After you submit, we'll remove all your data from the server. This action is irreversible — please confirm carefully."
           }
         }
       }
     },
-    "提交申请后，我们会在服务端移除与该账号关联的全部数据。": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "After you submit, we'll remove all data linked to this account from our servers."
+    "提交申请后，我们会在服务端移除与该账号关联的全部数据。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "After you submit, we'll remove all data linked to this account from our servers."
           }
         }
       }
     },
-    "搜索动作名称": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Search movements"
+    "搜索动作名称" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search movements"
           }
         }
       }
     },
-    "数据": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Data"
+    "数据" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Data"
           }
         }
       }
     },
-    "数据仪表盘": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Data dashboard"
+    "数据仪表盘" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Data dashboard"
           }
         }
       }
     },
-    "文字": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Text"
+    "文字" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Text"
           }
         }
       }
     },
-    "文字位置": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Text position"
+    "文字位置" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Text position"
           }
         }
       }
     },
-    "日期": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Date"
+    "日期" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Date"
           }
         }
       }
     },
-    "时间": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Time"
+    "时间" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Time"
           }
         }
       }
     },
-    "昵称": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nickname"
+    "昵称" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nickname"
           }
         }
       }
     },
-    "暂不可用": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Unavailable"
+    "暂不可用" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unavailable"
           }
         }
       }
     },
-    "暂不同意": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Not now"
+    "暂不同意" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not now"
           }
         }
       }
     },
-    "暂不登录": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Not now"
+    "暂不登录" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not now"
           }
         }
       }
     },
-    "未开启": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Off"
+    "未开启" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Off"
           }
         }
       }
     },
-    "未标记": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Unmarked"
+    "未标记" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unmarked"
           }
         }
       }
     },
-    "未登录": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Not signed in"
+    "未登录" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not signed in"
           }
         }
       }
     },
-    "未知": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Unknown"
+    "未知" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unknown"
           }
         }
       }
     },
-    "未知动作": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Unknown movement"
+    "未知动作" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unknown movement"
           }
         }
       }
     },
-    "未选择训练照片时，点击「下一步」将使用默认照片合成卡片": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "If no photo is selected, tapping \"Next\" uses a default photo for the card"
+    "未选择训练照片时，点击「下一步」将使用默认照片合成卡片" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "If no photo is selected, tapping \"Next\" uses a default photo for the card"
           }
         }
       }
     },
-    "本地数据": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Local data"
+    "本地数据" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Local data"
           }
         }
       }
     },
-    "本地数据备份": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Local data backup"
+    "本地数据备份" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Local data backup"
           }
         }
       }
     },
-    "本设备尚未登录 iCloud。请前往 系统设置 → Apple ID → iCloud 登录后再开启同步。": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "This device isn't signed in to iCloud. Go to Settings → Apple ID → iCloud to sign in, then turn on sync."
+    "本设备尚未登录 iCloud。请前往 系统设置 → Apple ID → iCloud 登录后再开启同步。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This device isn't signed in to iCloud. Go to Settings → Apple ID → iCloud to sign in, then turn on sync."
           }
         }
       }
     },
-    "极简白底": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Minimal white"
+    "极简白底" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Minimal white"
           }
         }
       }
     },
-    "标准": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Standard"
+    "标准" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Standard"
           }
         }
       }
     },
-    "样式": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Style"
+    "样式" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Style"
           }
         }
       }
     },
-    "检查中…": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Checking…"
+    "检查中…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Checking…"
           }
         }
       }
     },
-    "模块": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Modules"
+    "模块" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modules"
           }
         }
       }
     },
-    "模板": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Template"
+    "模板" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Template"
           }
         }
       }
     },
-    "横图保存为横图，竖图保存为竖图": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Landscape saves as landscape, portrait as portrait"
+    "横图保存为横图，竖图保存为竖图" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Landscape saves as landscape, portrait as portrait"
           }
         }
       }
     },
-    "次": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "reps"
+    "次" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "reps"
           }
         }
       }
     },
-    "欢迎使用迹录 WOD": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Welcome to WOD Trace"
+    "欢迎使用迹录 WOD" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Welcome to WOD Trace"
           }
         }
       }
     },
-    "正在处理白板内容": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Processing whiteboard content"
+    "正在处理白板内容" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Processing whiteboard content"
           }
         }
       }
     },
-    "正在将图片转化为文字": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Turning the image into text"
+    "正在将图片转化为文字" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turning the image into text"
           }
         }
       }
     },
-    "正在抓取白板内容": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Capturing whiteboard content"
+    "正在抓取白板内容" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Capturing whiteboard content"
           }
         }
       }
     },
-    "正在识别白板内容…": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Recognizing whiteboard content…"
+    "正在识别白板内容…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recognizing whiteboard content…"
           }
         }
       }
     },
-    "每一次进步，都有迹可循": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Track every workout."
+    "每一次进步，都有迹可循" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Track every workout."
           }
         }
       }
     },
-    "没有匹配“%@”的动作": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No movements match “%@”"
+    "没有匹配“%@”的动作" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No movements match “%@”"
           }
         }
       }
     },
-    "没有符合条件的动作": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No movements match"
+    "没有符合条件的动作" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No movements match"
           }
         }
       }
     },
-    "浅色": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Light"
+    "浅色" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Light"
           }
         }
       }
     },
-    "浅色信息卡，适合日间分享": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Light info card; great for daytime sharing"
+    "浅色信息卡，适合日间分享" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Light info card; great for daytime sharing"
           }
         }
       }
     },
-    "海蓝": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ocean"
+    "海蓝" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ocean"
           }
         }
       }
     },
-    "深色": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dark"
+    "深色" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dark"
           }
         }
       }
     },
-    "照片装进色框、四周留白，数据压在照片上": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Photo in a colored frame with margins; stats overlaid on the photo"
+    "照片装进色框、四周留白，数据压在照片上" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Photo in a colored frame with margins; stats overlaid on the photo"
           }
         }
       }
     },
-    "照片铺满画布，边缘自动裁切": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Photo fills the canvas; edges cropped automatically"
+    "照片铺满画布，边缘自动裁切" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Photo fills the canvas; edges cropped automatically"
           }
         }
       }
     },
-    "版本 %@": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Version %@"
+    "版本 %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Version %@"
           }
         }
       }
     },
-    "生成": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Generate"
+    "生成" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Generate"
           }
         }
       }
     },
-    "生成中": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Generating"
+    "生成中" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Generating"
           }
         }
       }
     },
-    "生成中…": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Generating…"
+    "生成中…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Generating…"
           }
         }
       }
     },
-    "生成卡片": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Generate card"
+    "生成卡片" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Generate card"
           }
         }
       }
     },
-    "生成训练卡片": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Generate workout card"
+    "生成训练卡片" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Generate workout card"
           }
         }
       }
     },
-    "用户协议": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "User Agreement"
+    "用户协议" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "User Agreement"
           }
         }
       }
     },
-    "登录后可显示你的昵称和头像": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sign in to show your nickname and avatar"
+    "登录后可显示你的昵称和头像" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sign in to show your nickname and avatar"
           }
         }
       }
     },
-    "登录失败，请重试": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sign-in failed — please try again"
+    "登录失败，请重试" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sign-in failed — please try again"
           }
         }
       }
     },
-    "登录成功": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Signed in"
+    "登录成功" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Signed in"
           }
         }
       }
     },
-    "登录迹录": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sign in to WOD Trace"
+    "登录迹录" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sign in to WOD Trace"
           }
         }
       }
     },
-    "白板一拍，自动成卡": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "One snap, instant card"
+    "白板一拍，自动成卡" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One snap, instant card"
           }
         }
       }
     },
-    "白板照片": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Whiteboard"
+    "白板照片" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Whiteboard"
           }
         }
       }
     },
-    "直接压字到图片上，参考你发的样式": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Text laid directly over the photo"
+    "直接压字到图片上，参考你发的样式" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Text laid directly over the photo"
           }
         }
       }
     },
-    "相机不可用": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Camera unavailable"
+    "相机不可用" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Camera unavailable"
           }
         }
       }
     },
-    "知道了": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Got it"
+    "知道了" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Got it"
           }
         }
       }
     },
-    "确定删除": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Delete"
+    "确定删除" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete"
           }
         }
       }
     },
-    "确定删除账号？": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Delete account?"
+    "确定删除账号？" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete account?"
           }
         }
       }
     },
-    "确定退出登录？": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sign out?"
+    "确定退出登录？" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sign out?"
           }
         }
       }
     },
-    "视图": {
-      "extractionState": "stale",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "View"
+    "视图" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "View"
           }
         }
       }
     },
-    "视频 · 加载中": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Video · Loading"
+    "视频 · 加载中" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Video · Loading"
           }
         }
       }
     },
-    "视频 · 即将上线": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Video · Coming soon"
+    "视频 · 即将上线" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Video · Coming soon"
           }
         }
       }
     },
-    "秒": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "sec"
+    "秒" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "sec"
           }
         }
       }
     },
-    "立即开启": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Turn on now"
+    "立即开启" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn on now"
           }
         }
       }
     },
-    "立即拍摄": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Take a photo"
+    "立即拍摄" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Take a photo"
           }
         }
       }
     },
-    "等宽": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mono"
+    "等宽" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mono"
           }
         }
       }
     },
-    "管理": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Manage"
+    "管理" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manage"
           }
         }
       }
     },
-    "类型": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Type"
+    "类型" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Type"
           }
         }
       }
     },
-    "系统 iCloud 账户": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "System iCloud account"
+    "系统 iCloud 账户" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "System iCloud account"
           }
         }
       }
     },
-    "累计打卡": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Check-ins"
+    "累计打卡" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Check-ins"
           }
         }
       }
     },
-    "练习次数": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sessions"
+    "练习次数" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sessions"
           }
         }
       }
     },
-    "续期于 %@": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Renews %@"
+    "续期于 %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Renews %@"
           }
         }
       }
     },
-    "编辑资料": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Edit profile"
+    "编辑资料" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit profile"
           }
         }
       }
     },
-    "网络可能较慢，你可以重试或返回上一步": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The network may be slow — retry or go back a step"
+    "网络可能较慢，你可以重试或返回上一步" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The network may be slow — retry or go back a step"
           }
         }
       }
     },
-    "胶片": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Film"
+    "胶片" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Film"
           }
         }
       }
     },
-    "胶片复古": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Retro film"
+    "胶片复古" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retro film"
           }
         }
       }
     },
-    "胶片颗粒感，带日期戳，怀旧拍摄风": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Film grain with a date stamp; nostalgic look"
+    "胶片颗粒感，带日期戳，怀旧拍摄风" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Film grain with a date stamp; nostalgic look"
           }
         }
       }
     },
-    "自动识别 WOD 内容": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Automatically recognize WOD content"
+    "自动识别 WOD 内容" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatically recognize WOD content"
           }
         }
       }
     },
-    "自由填写成绩": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Enter your result"
+    "自由填写成绩" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enter your result"
           }
         }
       }
     },
-    "若 30 天内没有任何撤回操作，账号将被正式注销，且无法再恢复。": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "If no cancellation is made within 30 days, the account is permanently deleted and can't be recovered."
+    "若 30 天内没有任何撤回操作，账号将被正式注销，且无法再恢复。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "If no cancellation is made within 30 days, the account is permanently deleted and can't be recovered."
           }
         }
       }
     },
-    "荧光绿": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Neon"
+    "荧光绿" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neon"
           }
         }
       }
     },
-    "衬线": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Serif"
+    "衬线" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Serif"
           }
         }
       }
     },
-    "要点与注意": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Key points"
+    "要点与注意" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Key points"
           }
         }
       }
     },
-    "订阅后可用": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Available with subscription"
+    "订阅后可用" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Available with subscription"
           }
         }
       }
     },
-    "让记录在你的 iPhone、iPad 间自动同步，换机也不丢。": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Keep your logs in sync across iPhone and iPad, even when you switch devices."
+    "让记录在你的 iPhone、iPad 间自动同步，换机也不丢。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep your logs in sync across iPhone and iPad, even when you switch devices."
           }
         }
       }
     },
-    "训练日志": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Training log"
+    "训练日志" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Training log"
           }
         }
       }
     },
-    "训练时刻": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Training moments"
+    "训练时刻" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Training moments"
           }
         }
       }
     },
-    "训练次数": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Workouts"
+    "训练次数" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Workouts"
           }
         }
       }
     },
-    "训练记录": {
-      "extractionState": "stale",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Workout log"
+    "训练记录" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Workout log"
           }
         }
       }
     },
-    "记录": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Record"
+    "记录" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Record"
           }
         }
       }
     },
-    "记录 WOD": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Log WOD"
+    "记录 WOD" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Log WOD"
           }
         }
       }
     },
-    "记录一次": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Add an entry"
+    "记录一次" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add an entry"
           }
         }
       }
     },
-    "记录删除后，训练记录和图片将从本机删除，不可恢复": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Once deleted, the log and photos are removed from this device and can't be recovered"
+    "记录删除后，训练记录和图片将从本机删除，不可恢复" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Once deleted, the log and photos are removed from this device and can't be recovered"
           }
         }
       }
     },
-    "记录条目": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Records"
+    "记录条目" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Records"
           }
         }
       }
     },
-    "记录详情": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Entry details"
+    "记录详情" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entry details"
           }
         }
       }
     },
-    "识别失败，你可以手动输入今日训练内容": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Recognition failed — you can enter today's workout manually"
+    "识别失败，你可以手动输入今日训练内容" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recognition failed — you can enter today's workout manually"
           }
         }
       }
     },
-    "识别完成，请确认内容": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Recognition complete — please confirm"
+    "识别完成，请确认内容" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recognition complete — please confirm"
           }
         }
       }
     },
-    "识别服务暂不可用": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Recognition service is unavailable"
+    "识别服务暂不可用" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recognition service is unavailable"
           }
         }
       }
     },
-    "识别服务暂时不可用，请稍后重试": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Recognition service is temporarily unavailable — please try again later"
+    "识别服务暂时不可用，请稍后重试" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recognition service is temporarily unavailable — please try again later"
           }
         }
       }
     },
-    "识别结果解析失败": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Failed to parse the result"
+    "识别结果解析失败" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Failed to parse the result"
           }
         }
       }
     },
-    "识别超时，请检查网络连接": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Recognition timed out — check your connection"
+    "识别超时，请检查网络连接" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recognition timed out — check your connection"
           }
         }
       }
     },
-    "识别超时，请重试": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Recognition timed out — please try again"
+    "识别超时，请重试" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recognition timed out — please try again"
           }
         }
       }
     },
-    "请你确认已阅读并同意《用户协议》和《隐私政策》，再继续使用本应用。": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Please confirm you've read and agree to the User Agreement and Privacy Policy before using the app."
+    "请你确认已阅读并同意《用户协议》和《隐私政策》，再继续使用本应用。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Please confirm you've read and agree to the User Agreement and Privacy Policy before using the app."
           }
         }
       }
     },
-    "请先在系统设置中登录 iCloud": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sign in to iCloud in Settings first"
+    "请先在系统设置中登录 iCloud" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sign in to iCloud in Settings first"
           }
         }
       }
     },
-    "请先返回上一步添加训练照片": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Go back and add a training photo first"
+    "请先返回上一步添加训练照片" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Go back and add a training photo first"
           }
         }
       }
     },
-    "请先阅读并同意用户协议与隐私政策": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Please read and agree to the User Agreement and Privacy Policy first"
+    "请先阅读并同意用户协议与隐私政策" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Please read and agree to the User Agreement and Privacy Policy first"
           }
         }
       }
     },
-    "请检查网络后重试": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Please check your connection and try again"
+    "请检查网络后重试" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Please check your connection and try again"
           }
         }
       }
     },
-    "请求超时，请检查网络后重试": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Request timed out — check your connection and try again"
+    "请求超时，请检查网络后重试" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Request timed out — check your connection and try again"
           }
         }
       }
     },
-    "账号注销说明": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Account deletion notice"
+    "账号注销说明" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Account deletion notice"
           }
         }
       }
     },
-    "超大标题字体，视觉冲击力强": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Oversized headline type for high impact"
+    "超大标题字体，视觉冲击力强" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oversized headline type for high impact"
           }
         }
       }
     },
-    "路线解锁": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Path unlock"
+    "路线解锁" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Path unlock"
           }
         }
       }
     },
-    "路线进阶提示": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Path tips"
+    "路线进阶提示" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Path tips"
           }
         }
       }
     },
-    "轮": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "rounds"
+    "轮" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "rounds"
           }
         }
       }
     },
-    "轮次": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rounds"
+    "轮次" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rounds"
           }
         }
       }
     },
-    "轻松": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Easy"
+    "轻松" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Easy"
           }
         }
       }
     },
-    "输入昵称": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Enter a nickname"
+    "输入昵称" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enter a nickname"
           }
         }
       }
     },
-    "边框留白": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Framed"
+    "边框留白" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Framed"
           }
         }
       }
     },
-    "近期活动": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Recent activity"
+    "近期活动" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recent activity"
           }
         }
       }
     },
-    "返回上一步": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Back"
+    "返回上一步" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Back"
           }
         }
       }
     },
-    "进行中": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "In progress"
+    "进行中" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In progress"
           }
         }
       }
     },
-    "进阶路线": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Paths"
+    "进阶路线" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paths"
           }
         }
       }
     },
-    "连续打卡": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Streak"
+    "连续打卡" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Streak"
           }
         }
       }
     },
-    "迹录": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "WOD Trace"
+    "迹录" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WOD Trace"
           }
         }
       }
     },
-    "迹录用户": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "WOD Trace user"
+    "迹录用户" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WOD Trace user"
           }
         }
       }
     },
-    "退出后本机的训练数据仍会保留。": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Your workout data stays on this device after signing out."
+    "退出后本机的训练数据仍会保留。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your workout data stays on this device after signing out."
           }
         }
       }
     },
-    "退出登录": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sign out"
+    "退出登录" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sign out"
           }
         }
       }
     },
-    "适中": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Moderate"
+    "适中" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moderate"
           }
         }
       }
     },
-    "选择一张训练打卡照，将 WOD 内容合成为分享卡片": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pick a check-in photo to turn your WOD into a shareable card"
+    "选择一张训练打卡照，将 WOD 内容合成为分享卡片" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pick a check-in photo to turn your WOD into a shareable card"
           }
         }
       }
     },
-    "选择训练打卡照": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Choose a check-in photo"
+    "选择训练打卡照" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose a check-in photo"
           }
         }
       }
     },
-    "通常需要 5-15 秒": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Usually takes 5–15 seconds"
+    "通常需要 5-15 秒" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usually takes 5–15 seconds"
           }
         }
       }
     },
-    "配色": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Theme"
+    "配色" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Theme"
           }
         }
       }
     },
-    "重试": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Retry"
+    "重试" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retry"
           }
         }
       }
     },
-    "重量": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Weight"
+    "重量" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weight"
           }
         }
       }
     },
-    "降阶替代": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Scaling"
+    "降阶替代" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scaling"
           }
         }
       }
     },
-    "隐私政策": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Privacy Policy"
+    "隐私政策" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Privacy Policy"
           }
         }
       }
     },
-    "难度": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Difficulty"
+    "难度" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Difficulty"
           }
         }
       }
     },
-    "顶部": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Top"
+    "顶部" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Top"
           }
         }
       }
     },
-    "高对比": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "High contrast"
-          }
-        }
-      }
-    },
-    "仅显示最近 %lld 天训练记录": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Showing only the last %lld days"
+    "高对比" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "High contrast"
           }
         }
       }
     }
   },
-  "version": "1.0"
+  "version" : "1.0"
 }

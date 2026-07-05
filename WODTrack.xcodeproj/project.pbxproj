@@ -19,8 +19,6 @@
 		A00000000000000000000A /* CardRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000010A /* CardRenderer.swift */; };
 		A00000000000000000000B /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000010B /* Theme.swift */; };
 		A00000000000000000000C /* CardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000010C /* CardView.swift */; };
-		A000000000000000000701 /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = A000000000000000000801 /* RevenueCat */; };
-		A000000000000000000702 /* RevenueCatUI in Frameworks */ = {isa = PBXBuildFile; productRef = A000000000000000000802 /* RevenueCatUI */; };
 		A00000000000000000000D /* RecordFlowCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000010D /* RecordFlowCoordinator.swift */; };
 		A00000000000000000000E /* HistoryViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000010E /* HistoryViews.swift */; };
 		A00000000000000000000F /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000010F /* ProfileView.swift */; };
@@ -55,6 +53,8 @@
 		A000000000000000000402 /* OCRUsageTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000502 /* OCRUsageTracker.swift */; };
 		A000000000000000000403 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000503 /* PaywallView.swift */; };
 		A000000000000000000404 /* TriggerSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000505 /* TriggerSheet.swift */; };
+		A000000000000000000701 /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = A000000000000000000801 /* RevenueCat */; };
+		A000000000000000000702 /* RevenueCatUI in Frameworks */ = {isa = PBXBuildFile; productRef = A000000000000000000802 /* RevenueCatUI */; };
 		A000000000000000000ADE /* AccountDeletionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000ADF /* AccountDeletionView.swift */; };
 /* End PBXBuildFile section */
 
@@ -118,8 +118,8 @@
 		A000000000000000000501 /* SubscriptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionManager.swift; sourceTree = "<group>"; };
 		A000000000000000000502 /* OCRUsageTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OCRUsageTracker.swift; sourceTree = "<group>"; };
 		A000000000000000000503 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
-		A000000000000000000505 /* TriggerSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerSheet.swift; sourceTree = "<group>"; };
 		A000000000000000000504 /* WODTrack.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = WODTrack.storekit; sourceTree = "<group>"; };
+		A000000000000000000505 /* TriggerSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerSheet.swift; sourceTree = "<group>"; };
 		A000000000000000000ADF /* AccountDeletionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountDeletionView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -421,30 +421,6 @@
 		};
 /* End PBXProject section */
 
-/* Begin XCRemoteSwiftPackageReference section */
-		A000000000000000000901 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/RevenueCat/purchases-ios-spm.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 5.80.1;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		A000000000000000000801 /* RevenueCat */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = A000000000000000000901 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */;
-			productName = RevenueCat;
-		};
-		A000000000000000000802 /* RevenueCatUI */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = A000000000000000000901 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */;
-			productName = RevenueCatUI;
-		};
-/* End XCSwiftPackageProductDependency section */
-
 /* Begin PBXResourcesBuildPhase section */
 		A000000000000000000024 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
@@ -650,7 +626,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.2;
+				MARKETING_VERSION = 1.0.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.chenxi.WODTrack;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -679,7 +655,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.2;
+				MARKETING_VERSION = 1.0.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.chenxi.WODTrack;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -766,6 +742,30 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		A000000000000000000901 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/RevenueCat/purchases-ios-spm.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.80.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		A000000000000000000801 /* RevenueCat */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A000000000000000000901 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */;
+			productName = RevenueCat;
+		};
+		A000000000000000000802 /* RevenueCatUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A000000000000000000901 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */;
+			productName = RevenueCatUI;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = A000000000000000000050 /* Project object */;
 }
